@@ -1,0 +1,103 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 310-define-dummy-fowl-routines.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Define stub functions for routines in fowl that are supposed to be
+## DP: user-defined.  Also, rename START to FSTART to avoid name clash
+## DP: with mathlib.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/phtools/fowl/Imakefile cernlib-2005.05.09.dfsg/src/phtools/fowl/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/phtools/fowl/Imakefile	1996-04-26 07:13:52.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/phtools/fowl/Imakefile	2005-11-28 19:49:52.412989577 +0000
+@@ -1,10 +1,12 @@
+-SRCS_F=	 beamin.F breitw.F chmove.F delsq.F dumpme.F finish.F \ @@\
++SRCS_F=	 beamin.F breitw.F chmove.F delsq.F dumpme.F /* finish.F */ \ @@\
+ 	fmass.F fmassq.F fowl.F fowlmp.F fowlpr.F genev.F histey.F \ @@\
+ 	labsys.F pdk.F qqstrt.F rangnr.F redat2.F redata.F rotes2.F \ @@\
+ 	scout.F teedia.F tranch.F xplsdx.F
+ 
++SRCS_C= dummy.c /*"fake" defn of start, user, finish to avoid undefined syms*/
++
+ #if !defined(CERNLIB_UNIX)
+-SRCS_F := $(SRCS_F) start.F
++SRCS_F := $(SRCS_F) /* start.F */
+ #endif
+ 
+ SubdirLibraryTarget(fowl,NullParameter)
+diff -urNad cernlib-2005.05.09.dfsg~/src/phtools/fowl/dummy.c cernlib-2005.05.09.dfsg/src/phtools/fowl/dummy.c
+--- cernlib-2005.05.09.dfsg~/src/phtools/fowl/dummy.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/phtools/fowl/dummy.c	2005-11-28 19:53:31.287496776 +0000
+@@ -0,0 +1,39 @@
++/* Dummy file to avoid undefined symbols in the library */
++/* Kevin McCarty, 26 Apr 2004 */
++/* Last revised 13 Aug 2004 */
++
++#include <stdio.h>
++#include <stdlib.h>
++
++/* Want the dummy functions to be weakly defined so they may be overridden
++ * without error. */
++
++#define kludge(x)    #x
++#define stringify(x) kludge(x)
++#define underline(x) dummy_ ## x
++
++#define DUMMY(UPPERNAME, fortranname_, returntype) \
++static returntype underline(fortranname_)() { print_dummy(#UPPERNAME); } \
++void fortranname_() \
++	__attribute__ ((weak, alias (stringify(underline(fortranname_))) ))
++
++static void print_dummy(const char *function)
++{
++  fprintf(stderr, "phtools: Now in dummy %s routine.\n", function);
++  fprintf(stderr,
++          "If you see this message, you should define your own such routine.\n"
++	  "For details, see "
++#if defined (CERNLIB_DEBIAN)
++	                   "/usr/share/doc/libphtools2-dev/README.Debian\n"
++	  "and "
++#endif
++	      "the CERN writeup for FOWL (available at the URL\n"
++	  "http://wwwasdoc.web.cern.ch/wwwasdoc/Welcome.html ; scroll down\n"
++	  "to the link for W505 - FOWL.)\n");
++  exit(EXIT_FAILURE);
++}
++
++DUMMY(FSTART, fstart_, void);
++DUMMY(USER,   user_,   void);
++DUMMY(FINISH, finish_, void);
++
+diff -urNad cernlib-2005.05.09.dfsg~/src/phtools/fowl/fowlmp.F cernlib-2005.05.09.dfsg/src/phtools/fowl/fowlmp.F
+--- cernlib-2005.05.09.dfsg~/src/phtools/fowl/fowlmp.F	1996-03-22 16:42:46.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/phtools/fowl/fowlmp.F	2005-11-28 19:49:52.412989577 +0000
+@@ -30,7 +30,7 @@
+       CALL REDATA
+       IF(NEVTOT.LT.NGRP) NGRP = NEVTOT
+       N2 = MIN (NEVTOT/NGRP, 30000)
+-      CALL START
++      CALL FSTART
+       DO  500 I2= 1, N2
+       DO  400  I= 1, NGRP
+       IEVENT = IEVENT + 1
+diff -urNad cernlib-2005.05.09.dfsg~/src/phtools/fowl/qqstrt.F cernlib-2005.05.09.dfsg/src/phtools/fowl/qqstrt.F
+--- cernlib-2005.05.09.dfsg~/src/phtools/fowl/qqstrt.F	1996-03-22 16:42:47.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/phtools/fowl/qqstrt.F	2005-11-28 19:49:52.412989577 +0000
+@@ -38,6 +38,9 @@
+       COMMON
+      +/TAPES / NTPIN     ,NTPOUT   ,NTPNCH   ,NTPBIN   ,KONSOL
+       IF(JEVT.LE.0) RETURN
++#if 0
++C     Comment this section out; "which" is obsolete
++C     -- Kevin McCarty, for Debian, 26 April 2004
+       CALL WHICH(ISIT,VAL)
+       WRITE(6,700)JEVT,VAL
+   700 FORMAT('0RANDOM NUMBER GENERATOR INITIATED TO',I12,
+@@ -46,6 +49,7 @@
+ C--     CDC   60-BIT WORD
+ CDC                             )B10000000000000007171 .RO.  TVEJ( = POL
+       GOTO 200
++#endif
+   100 CONTINUE
+ C         FOR -CDC JUST MAKE SURE IT IS ODD
+       IGLOP = JEVT

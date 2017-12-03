@@ -1,0 +1,191 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 804-workaround-for-comis-mdpool-struct-location.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Hack to workaround COMIS not liking it when code has a negative
+## DP: offset from the mdpool struct (as is the case when using shared
+## DP: libraries on some arches).
+
+@DPATCH@
+diff -urNad paw-2.14.04.dfsg.2~/src/cfortran/Examples/pamain.c paw-2.14.04.dfsg.2/src/cfortran/Examples/pamain.c
+--- paw-2.14.04.dfsg.2~/src/cfortran/Examples/pamain.c	2002-09-12 09:05:18.000000000 -0700
++++ paw-2.14.04.dfsg.2/src/cfortran/Examples/pamain.c	2008-06-25 20:22:43.000000000 -0700
+@@ -2,6 +2,7 @@
+ #include <cfortran.h>
+ #include <paw.h>
+ #include <kuip.h>
++#include <comis/mdpool.h>
+ 
+ #define PAWC_SIZE 9000000
+ 
+diff -urNad paw-2.14.04.dfsg.2~/src/paw_motif/paw/pawsiz.inc paw-2.14.04.dfsg.2/src/paw_motif/paw/pawsiz.inc
+--- paw-2.14.04.dfsg.2~/src/paw_motif/paw/pawsiz.inc	1996-03-01 08:50:06.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/paw_motif/paw/pawsiz.inc	2008-06-25 20:22:43.000000000 -0700
+@@ -28,5 +28,9 @@
+ #include "paw/pawsmall.inc"
+ #endif
+ 
++C      Include this file so that MDPOOL/IQ is present in pawX11 and
++C      paw++ dynamically linked executables.
++C      -- Kevin McCarty, for Debian, 1 Nov 2003
++#include "comis/mdpool.inc"
+ 
+ #endif
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/cspar.inc paw-2.14.04.dfsg.2/src/pawlib/comis/comis/cspar.inc
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/cspar.inc	2000-05-30 06:53:58.000000000 -0700
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/comis/cspar.inc	2008-06-25 20:22:43.000000000 -0700
+@@ -15,7 +15,9 @@
+ *
+ * cspar.inc
+ *
+-        PARAMETER (LHP=50006, KON1=17694720, KON2=KON1
++#include "comis/mdsize.h"
++
++        PARAMETER (LHP=MDSIZE, KON1=17694720, KON2=KON1
+      +, KON3=2**16, LRECU=8,NRECU=5,MLRECU=NRECU*LRECU
+      +, MXRECU=MLRECU-LRECU
+      1,      LASTK=2000,LSSTK=50,KLENID=32
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/mdpool.h paw-2.14.04.dfsg.2/src/pawlib/comis/comis/mdpool.h
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/mdpool.h	1969-12-31 16:00:00.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/comis/mdpool.h	2008-06-25 20:22:43.000000000 -0700
+@@ -0,0 +1,33 @@
++#ifndef _MDPOOL_H
++#define _MDPOOL_H
++
++/* mdpool.h */
++
++/* #include <comis/mdpool.h> or <comis/mdpool.inc> in one source code file of
++ * your executable program dynamically linked against libpaw
++ * so that MDPOOL is defined in your executable.  This is
++ * necessary for proper functioning of the COMIS interpreter when
++ * dynamically linked.
++ */
++
++/* define MDSIZE: */
++#include <comis/mdsize.h>
++
++#include <cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++typedef struct {
++  int iq[MDSIZE];
++} mdpool_def;
++
++#define MDPOOL COMMON_BLOCK(MDPOOL, mdpool)
++COMMON_BLOCK_DEF(mdpool_def, MDPOOL);
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* _MDPOOL_H */
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/mdpool.inc paw-2.14.04.dfsg.2/src/pawlib/comis/comis/mdpool.inc
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/mdpool.inc	1996-02-26 09:16:34.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/comis/mdpool.inc	2008-06-25 20:22:43.000000000 -0700
+@@ -12,6 +12,8 @@
+ *
+ * mdpool.inc
+ *
++#include "comis/cspar.inc"
++
+       COMMON/MDPOOL/IQ(LHP)
+       INTEGER ISEM(LHP),KD(LHP),IDA(LHP),KD1(99),KD2(99),KD3(99)
+       EQUIVALENCE (IQ,ISEM),(IQ,KD),(IQ,IDA)
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/mdsize.h paw-2.14.04.dfsg.2/src/pawlib/comis/comis/mdsize.h
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/comis/mdsize.h	1969-12-31 16:00:00.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/comis/mdsize.h	2008-06-25 20:22:43.000000000 -0700
+@@ -0,0 +1,6 @@
++#ifndef _MDSIZE_H
++#define _MDSIZE_H
++
++#define MDSIZE 50006
++
++#endif
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/deccc/csallo.c paw-2.14.04.dfsg.2/src/pawlib/comis/deccc/csallo.c
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/deccc/csallo.c	1999-11-15 05:36:24.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/deccc/csallo.c	2008-06-25 20:29:44.000000000 -0700
+@@ -39,20 +39,20 @@
+ /*-- Author :*/
+ 
+ #include <cfortran/cfortran.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <limits.h>
++#include "comis/mdsize.h"
+ 
+ typedef struct {
+-    int iq[6];
++    int iq[MDSIZE]; /* instead of int iq[6] */
+ } mdpool_def;
+ 
+ #define MDPOOL COMMON_BLOCK(MDPOOL,mdpool)
+ COMMON_BLOCK_DEF(mdpool_def,MDPOOL);
+ 
+-unsigned long iqpntr = (unsigned long)MDPOOL.iq;
+-
++unsigned long iqpntr = 0;
+ 
+-#ifdef CERNLIB_WINNT
+-# include <stdlib.h>
+-#endif
+ 
+ #if defined(CERNLIB_QX_SC)
+ int type_of_call csallo_(lenb)
+@@ -65,11 +65,38 @@
+ #endif
+  int *lenb;
+ {
+-  long lpntr;
+-  int pntr; 
++  unsigned long lpntr;
++  unsigned int pntr; 
+ 
++  if (! iqpntr)
++    iqpntr = (unsigned long)MDPOOL.iq;
+   lpntr= (long)( malloc(*lenb) );
+-  pntr=lpntr - iqpntr;
++  if (! lpntr) {
++    fprintf(stderr,
++	    "CSALLO: not enough dynamic memory to allocate %d bytes\n", *lenb);
++    exit(EXIT_FAILURE);
++  }
++
++  if (lpntr < iqpntr) {
++    fprintf(stderr, "CSALLO: heap below bss?!");
++#if defined (CERNLIB_DEBIAN)
++    fprintf(stderr, "\n"
++"See the file /usr/share/doc/libpawlib2-dev/README.Debian for more information.\n"
++"If it does not help to solve this problem, please file a bug report against\n"
++"the libpawlib2-dev package, including the source code of your executable.\n");
++#else
++    fprintf(stderr, "  Try linking against pawlib statically.\n");
++#endif
++    exit(EXIT_FAILURE);
++  }
++  else if (lpntr - iqpntr > UINT_MAX) {
++    fprintf(stderr,
++	"CSALLO: pointer difference too large to be represented by integer.\n"
++	"You probably need to link PAW statically on 64-bit systems.\n");
++    exit(EXIT_FAILURE);
++  }
++
++  pntr = lpntr - iqpntr;
+   return pntr;
+ }
+ 
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/paw/paw/pawsiz.inc paw-2.14.04.dfsg.2/src/pawlib/paw/paw/pawsiz.inc
+--- paw-2.14.04.dfsg.2~/src/pawlib/paw/paw/pawsiz.inc	1996-03-01 08:50:06.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/pawlib/paw/paw/pawsiz.inc	2008-06-25 20:22:43.000000000 -0700
+@@ -28,5 +28,9 @@
+ #include "paw/pawsmall.inc"
+ #endif
+ 
++C      Include this file so that MDPOOL/IQ is present in pawX11 and
++C      paw++ dynamically linked executables.
++C      -- Kevin McCarty, for Debian, 1 Nov 2003
++#include "comis/mdpool.inc"
+ 
+ #endif

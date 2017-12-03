@@ -1,0 +1,110 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 102-dont-optimize-some-code.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Don't allow the compiler to optimize several files that cause trouble
+## DP: (either compiler crash or broken code generation).
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/Imakefile cernlib-2006.dfsg.2/src/mathlib/gen/c/Imakefile
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/Imakefile	1999-09-24 07:27:41.000000000 -0700
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/Imakefile	2008-02-22 12:06:26.000000000 -0800
+@@ -117,3 +117,8 @@
+ SpecialFortranLibObjectRule(nzerfz64,nzerfz64,-O,NullParameter)
+ SpecialFortranLibObjectRule(wclbes,wclbes,-O,NullParameter)
+ #endif
++
++#if defined(CERNLIB_GFORTRAN) && ! defined(CERNLIB_IBM)
++/* -O3 optimization causes minor floating point inaccuracies in gfortran 4.2 */
++SpecialFortranLibObjectRule(gamma64,gamma64,-O0,NullParameter)
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/d/Imakefile cernlib-2006.dfsg.2/src/mathlib/gen/d/Imakefile
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/d/Imakefile	1996-06-12 08:25:38.000000000 -0700
++++ cernlib-2006.dfsg.2/src/mathlib/gen/d/Imakefile	2008-02-22 12:06:26.000000000 -0800
+@@ -19,6 +19,11 @@
+ SRCS_F:= $(SRCS_F) cgauss64.F dgquad.F dgset.F gauss64.F minfc64.F \ @@\
+ 	rcauch.F rdeqbs.F rdeqmr.F rderiv.F rfrdh1.F rgmlt.F rkstp64.F \ @@\
+ 	simps64.F triint64.F 
++#if defined(CERNLIB_LINUX)
++/* -O3 optimization breaks in g77 3.2 */
++SpecialFortranLibObjectRule(rderiv,rderiv,-O0,NullParameter)
++SpecialFortranLibObjectRule(rfrdh1,rfrdh1,-O0,NullParameter)
++#endif
+ #else
+ SRCS_F:= $(SRCS_F) cgauss128.F cauchy.F cauchy128.F deqbs128.F deqmr128.F \ @@\
+ 	deriv128.F minfc128.F rfrdh128.F rgmlt128.F rkstp128.F simps128.F \ @@\
+@@ -37,6 +42,16 @@
+ IMAKE_DEFINES=-DFortranDoesCpp=NO
+ #endif
+ 
++#if defined(CERNLIB_LINUX)
++/* -O3 optimization breaks in g77 3.2 */
++SpecialFortranLibObjectRule(rknysd,rknysd,-O0,NullParameter)
++SpecialFortranLibObjectRule(old506,old506,-O0,NullParameter)
++
++/* -O1 -fno-automatic optimization creates wrong code in g77 2.95, 3.3, 3.4
++   due to x86 chip extended precision, cf. http://bugs.debian.org/290438 */
++SpecialFortranLibObjectRule(radmul,radmul,-O0,NullParameter)
++#endif
++
+ FORTRANSAVEOPTION = FortranSaveFlags
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/e/Imakefile cernlib-2006.dfsg.2/src/mathlib/gen/e/Imakefile
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/e/Imakefile	1996-05-01 06:21:54.000000000 -0700
++++ cernlib-2006.dfsg.2/src/mathlib/gen/e/Imakefile	2008-02-22 12:06:26.000000000 -0800
+@@ -12,6 +12,11 @@
+ 
+ #if defined(CERNLIB_DOUBLE)
+ SRCS_F:= $(SRCS_F) chsum.F dchebn.F rchecf.F rcspln.F
++#if defined(CERNLIB_LINUX)
++/* -O3 optimization breaks in g77 3.2 */
++SpecialFortranLibObjectRule(rchecf,rchecf,-O0,NullParameter)
++SpecialFortranLibObjectRule(rcspln,rcspln,-O0,NullParameter)
++#endif
+ #else
+ SRCS_F:= $(SRCS_F) chsum128.F rchebn.F rcspln128.F
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/tcgen/Imakefile cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/tcgen/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/tcgen/Imakefile	1997-02-04 09:36:14.000000000 -0800
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/tcgen/Imakefile	2008-02-22 12:08:44.000000000 -0800
+@@ -63,4 +63,9 @@
+ SRCS_F := $(SRCS_F) chtoi.F itoch.F
+ #endif
+ 
++#if defined(CERNLIB_GFORTRAN)
++/* -O2 optimization causes miscompiled code in gfortran 4.3 on ia64 */
++SpecialFortranLibObjectRule(tlsc,tlsc,-O0,NullParameter)
++#endif
++
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/c204fort/Imakefile cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/c204fort/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/c204fort/Imakefile	1996-06-10 03:20:57.000000000 -0700
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/c204fort/Imakefile	2008-02-22 12:06:26.000000000 -0800
+@@ -14,6 +14,11 @@
+ FDEBUGFLAGS=+O1
+ #endif
+ 
++#if defined(CERNLIB_LINUX)
++/* -O3 optimization breaks in g77 3.2 */
++SpecialFortranLibObjectRule(muller,muller,-O0,NullParameter)
++#endif
++
+ FORTRANSAVEOPTION = FortranSaveFlags
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/g900fort/Imakefile cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/g900fort/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/g900fort/Imakefile	1996-06-12 03:04:36.000000000 -0700
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/g900fort/Imakefile	2008-02-22 12:06:26.000000000 -0800
+@@ -4,6 +4,11 @@
+ FDEBUGFLAGS=NoOpFortranDebugFlags
+ #endif
+ 
++#if defined(CERNLIB_LINUX)
++/* -O3 optimization breaks in g77 3.2 */
++SpecialFortranLibObjectRule(ranget,ranget,-O0,NullParameter)
++#endif
++
+ FORTRANSAVEOPTION=FortranSaveFlags
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)

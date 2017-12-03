@@ -1,0 +1,121 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 705-patch-paw_motif-paw-Imakefiles.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/Imakefile
+--- cernlib-2005.05.09/src/Imakefile	2005-06-13 16:04:27.418461884 -0400
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/Imakefile	2005-06-13 16:04:48.698899728 -0400
+@@ -2,7 +2,7 @@
+ #define PassCDebugFlags
+ 
+ 
+-LIBDIRS= kernlib packlib code_motif pawlib graflib mathlib geant321 mclibs phtools
++LIBDIRS= kernlib packlib code_motif pawlib paw_motif graflib mathlib geant321 mclibs phtools
+ 
+ SUBDIRS= $(LIBDIRS) patchy cfortran
+ 
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/cdf/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/pawlib/paw/cdf/Imakefile
+--- cernlib-2005.05.09/src/pawlib/paw/cdf/Imakefile	1999-08-31 04:47:07.000000000 -0400
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/pawlib/paw/cdf/Imakefile	2005-06-13 16:05:01.263206159 -0400
+@@ -1,6 +1,6 @@
+ #define IHaveCDF
+ 
+-SRCS_CDF= pawcdf.cdf pamcdf.cdf mlpdef.cdf
++SRCS_CDF= pawcdf.cdf            mlpdef.cdf
+ 
+ #ifdef CERNLIB_IBMRT
+ /* Otherwise cc dies with internal compiler error on pawcdf. 
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/code/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/pawlib/paw/code/Imakefile
+--- cernlib-2005.05.09/src/pawlib/paw/code/Imakefile	2005-06-13 16:04:26.689618135 -0400
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/pawlib/paw/code/Imakefile	2005-06-13 16:04:33.962059051 -0400
+@@ -11,8 +11,8 @@
+ 	pautit.F pavect.F paw.F pawbrk.F pawdef.F pawfca.F \ @@\
+ 	pawfitz.F pawfop.F pawfu1.F pawfu2.F \ @@\
+ 	pawfu3.F pawfud.F pawfun.F pawfuy.F pawild.F pawins.F pawint.F \ @@\
+-	pawint1.F pawint2.F pawint3.F pawint4.F pawintm.F \ @@\
+-	pawjoj.F pawloc.F pawork.F pawpp.F pawrit.F pawrop.F \ @@\
++	pawint1.F pawint2.F pawint3.F pawint4.F           \ @@\
++	pawjoj.F pawloc.F pawork.F         pawrit.F pawrop.F \ @@\
+ 	pawsim.F pawusr.F pawuwf.F paxcut.F pazdz.F pazfz.F pazrz.F \ @@\
+ 	pchain.F pchclo.F pchncd.F pchrop.F pcnext.F pfclos.F \ @@\
+ 	pfhigz.F pfindc.F pfindf.F pfindf1.F pfindv.F pfinit.F pflog.F \ @@\
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/pawlib/paw/Imakefile
+--- cernlib-2005.05.09/src/pawlib/paw/Imakefile	2000-06-27 11:27:03.000000000 -0400
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/pawlib/paw/Imakefile	2005-06-13 16:04:33.962059051 -0400
+@@ -9,6 +9,9 @@
+ 
+ LIBDIRS= code cpaw cdf ntuple mlpfit
+ 
++/* Comment out this whole section; Motif code has been moved to
++   paw_motif at top level.  -- Kevin McCarty */
++#if 0
+ #ifndef CERNLIB_WINNT
+ LIBDIRS :=$(LIBDIRS) $(MOTIF_DIRS) $(PAWPP_DIRS)
+ #endif
+@@ -22,6 +25,7 @@
+ MotifDependantMakeVar(PAWPP_DIRS,xbaevms)
+ LIBDIRS := $(LIBDIRS) $(PAWPP_DIRS)
+ #endif
++#endif
+ 
+ SUBDIRS= $(LIBDIRS) programs piafs hbpiaf stagerd paw
+ 
+diff -urNad cernlib-2005.05.09/src/paw_motif/cdf/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/paw_motif/cdf/Imakefile
+--- cernlib-2005.05.09/src/paw_motif/cdf/Imakefile	1969-12-31 19:00:00.000000000 -0500
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/paw_motif/cdf/Imakefile	2005-06-13 16:04:33.963058837 -0400
+@@ -0,0 +1,5 @@
++#define IHaveCDF
++
++SRCS_CDF= pamcdf.cdf
++
++SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2005.05.09/src/paw_motif/code/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/paw_motif/code/Imakefile
+--- cernlib-2005.05.09/src/paw_motif/code/Imakefile	1969-12-31 19:00:00.000000000 -0500
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/paw_motif/code/Imakefile	2005-06-13 16:04:33.963058837 -0400
+@@ -0,0 +1,7 @@
++SRCS_F=	pawintm.F pawpp.F
++
++DoIncludePackage(paw)
++#include "pilot.h"
++
++SubdirLibraryTarget(NullParameter,NullParameter)
++
+diff -urNad cernlib-2005.05.09/src/paw_motif/Imakefile /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/paw_motif/Imakefile
+--- cernlib-2005.05.09/src/paw_motif/Imakefile	2000-06-27 11:27:03.000000000 -0400
++++ /tmp/dpep.Rec1V8/cernlib-2005.05.09/src/paw_motif/Imakefile	2005-06-13 16:04:33.963058837 -0400
+@@ -7,7 +7,7 @@
+ MotifDependantMakeVar(MOTIF_DIRS,cmotif fmotif fpanelsc)
+ MotifDependantMakeVar(PAWPP_DIRS,fpanelsf tree uimx)
+ 
+-LIBDIRS= code cpaw cdf ntuple mlpfit
++LIBDIRS= code cdf
+ 
+ #ifndef CERNLIB_WINNT
+ LIBDIRS :=$(LIBDIRS) $(MOTIF_DIRS) $(PAWPP_DIRS)
+@@ -23,19 +23,11 @@
+ LIBDIRS := $(LIBDIRS) $(PAWPP_DIRS)
+ #endif
+ 
+-SUBDIRS= $(LIBDIRS) programs piafs hbpiaf stagerd paw
+-
+-#if defined CERNLIB_WINNT
+-SUBDIRS := $(LIBDIRS) programs
+-#endif
+-
+-TopOfPackage(paw)
+-
+-SubdirLibraryTarget(paw,$(LIBDIRS))
++SUBDIRS= $(LIBDIRS)
+ 
+-InstallBinSubdirs(programs)
++TopOfPackage(pawlib-lesstif)
+ 
+-TestSubdirs(test)
++SubdirLibraryTarget(pawlib-lesstif,$(LIBDIRS))
+ 
+-InstallIncludeSubdirs(paw)
++InstallLibrary(pawlib-lesstif,$(CERN_LIBDIR))
+ 

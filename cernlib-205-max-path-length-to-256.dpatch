@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 205-max-path-length-to-256.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Set max path length to 256 in Hbook.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/hbook/hbook/hcdire.inc /tmp/dpep.ceXWNa/cernlib-2005.05.09/src/packlib/hbook/hbook/hcdire.inc
+--- cernlib-2005.05.09/src/packlib/hbook/hbook/hcdire.inc	2003-02-07 07:13:37.000000000 -0500
++++ /tmp/dpep.ceXWNa/cernlib-2005.05.09/src/packlib/hbook/hbook/hcdire.inc	2005-06-09 15:20:49.541661646 -0400
+@@ -20,7 +20,7 @@
+ *
+ *CMZ :  4.20/03 28/07/93  09.33.32  by  Rene Brun
+ *-- Author :
+-      PARAMETER (NLPATM=100, MXFILES=50, LENHFN=128)
++      PARAMETER (NLPATM=100, MXFILES=50, LENHFN=256)
+       COMMON /HCDIRN/NLCDIR,NLNDIR,NLPAT,ICDIR,NCHTOP,ICHTOP(MXFILES)
+      +              ,ICHTYP(MXFILES),ICHLUN(MXFILES)
+       CHARACTER*16   CHNDIR,    CHCDIR,    CHPAT    ,CHTOP

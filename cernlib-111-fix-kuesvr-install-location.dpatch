@@ -1,0 +1,16 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 111-fix-kuesvr-install-location.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix install location of kuesvr binary.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/programs/kuesvr/Imakefile /tmp/dpep.ZmakmH/cernlib-2005.05.09/src/packlib/kuip/programs/kuesvr/Imakefile
+--- cernlib-2005.05.09/src/packlib/kuip/programs/kuesvr/Imakefile	1996-03-11 10:43:22.000000000 -0500
++++ /tmp/dpep.ZmakmH/cernlib-2005.05.09/src/packlib/kuip/programs/kuesvr/Imakefile	2005-06-10 12:03:32.706178628 -0400
+@@ -1,4 +1,4 @@
+ 
+ NormalProgramTarget(kuesvr,kuesvr.o,NullParameter,NullParameter,NullParameter)
+ 
+-InstallProgram(kuesvr,$(CERN)/$(CERN_LEVEL)/bin)
++InstallProgram(kuesvr,$(CERN_BINDIR))

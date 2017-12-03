@@ -1,0 +1,92 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 805-expunge-missing-mathlib-kernlib-symbols.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Remove some unreferenced symbols from mathlib and kernlib and add
+## DP: dummy symbols where needed.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/mathlib/gen/d/Imakefile cernlib-2005.05.09.dfsg/src/mathlib/gen/d/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mathlib/gen/d/Imakefile	2006-05-16 10:42:32.921420791 -0400
++++ cernlib-2005.05.09.dfsg/src/mathlib/gen/d/Imakefile	2006-05-16 10:46:11.446026937 -0400
+@@ -2,7 +2,13 @@
+ #include "pilot.h"
+ 
+ /* rgmlt*.F have been moved into packlib/hbook to remove circular dependencies.
++   old506.F is removed since it is equivalent to obsolete code under
++   packlib/minuit.  dummy.c contains dummy callback functions so the code
++   can function when built as a shared library.
+    --Kevin McCarty, for Debian. */
++
++SRCS_C= dummy.c
++
+ SRCS_F=	arithm.F c128.F c256.F c512.F c64.F cauchy64.F cft.F cfstft.F \ @@\
+ 	rfstft.F cgauss.F d107d1.F d107r1.F d501l1.F d501l2.F d501n1.F \ @@\
+         d501n2.F d501p1.F d501p2.F d501sf.F d700su.F d701bd.F \ @@\
+@@ -11,7 +17,7 @@
+         epdchn.F epdcj.F epde1.F epdecc.F epdfix.F epdin.F \ @@\
+         epditr.F epdje.F epdloc.F epdsrt.F epdtab.F errorf.F esolve.F \ @@\
+ 	fcn1.F fftrc.F fumili.F gauss.F i128.F i32.F i64.F linsq.F \ @@\
+-	mconv.F mft.F minfc.F minsq.F monito.F newro.F old506.F radapt.F \ @@\
++	mconv.F mft.F minfc.F minsq.F monito.F newro.F          radapt.F \ @@\
+ 	radmul.F rca.F rfrdh164.F rfrdh264.F rft.F           rgquad.F \ @@\
+ 	rgs56p.F rgset.F riwiad.F riwibd.F rknys64.F rknysd.F rkstp.F \ @@\
+ 	rpa.F rps.F rrkstp.F rsa.F rtriint.F s128.F s256.F s512.F \ @@\
+diff -urNad cernlib-2005.05.09.dfsg~/src/mathlib/gen/d/dummy.c cernlib-2005.05.09.dfsg/src/mathlib/gen/d/dummy.c
+--- cernlib-2005.05.09.dfsg~/src/mathlib/gen/d/dummy.c	1969-12-31 19:00:00.000000000 -0500
++++ cernlib-2005.05.09.dfsg/src/mathlib/gen/d/dummy.c	2006-05-16 11:36:09.331168663 -0400
+@@ -0,0 +1,54 @@
++/* Dummy file to avoid undefined symbols in the library */
++/* Kevin McCarty, 16 May 2006 */
++
++#include <stdio.h>
++#include <stdlib.h>
++
++/* Want the dummy functions to be weakly defined so they may be overridden
++ * without error. */
++
++#define kludge(x)    #x
++#define stringify(x) kludge(x)
++#define underline(x) dummy_ ## x
++
++#define DUMMY(UPPERNAME, fortranname_, returntype, exitcode, docs) \
++static returntype underline(fortranname_)() \
++        { print_dummy(#UPPERNAME, docs, exitcode); } \
++void fortranname_() \
++	__attribute__ ((weak, alias (stringify(underline(fortranname_))) ))
++
++static void print_dummy(const char *function, const char * docs, int exitcode)
++{
++  fprintf(stderr, "mathlib: Now in dummy %s routine.\n", function);
++  fprintf(stderr,
++          "If you see this message, you %s define your own such routine.\n",
++	  exitcode ? "must" : "may wish to");
++  if (docs)
++    fprintf(stderr,
++	  "For details, the CERN writeup that can be found at\n"
++	  "%s\n"
++	  "may be helpful.\n", docs);
++  if (exitcode)
++    exit(exitcode);
++}
++
++static char d151docs[] = "http://preprints.cern.ch/cgi-bin/setlink?base=preprint&categ=cern&id=IT-ASD-D151";
++static char d300docs[] = "http://preprints.cern.ch/cgi-bin/setlink?base=preprint&categ=cern&id=IT-ASD-D300";
++static char d510docs[] = "http://wwwasdoc.web.cern.ch/wwwasdoc/shortwrupsdir/d510/top.html";
++
++/* User-defined callback functions and subroutines */
++
++/* D151: DIVONNE: multidimensional integration */
++DUMMY(DFUN, dfun_, double, EXIT_FAILURE, d151docs);
++
++/* D300: elliptic partial differential equation callbacks */
++DUMMY(GETCO, getco_, void, EXIT_FAILURE, d300docs);
++DUMMY(USER1, user1_, void, 0, d300docs);
++DUMMY(USER2, user2_, void, 0, d300docs);
++
++/* D510: fitting likelihood functions (obsolete; use MINUIT instead!) */
++DUMMY(FUNCT, funct_, double, EXIT_FAILURE, d510docs);
++
++/* No docs for MINSQ / LINSQ?  Not clear what CERN package they come from. */
++DUMMY(FCN, fcn_, void, EXIT_FAILURE, 0);
++

@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 308-use-canonical-cfortran-location.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: All code compiled at CERNLIB build-time should look for cfortran.h
+## DP: at <cfortran/cfortran.h>.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/graflib/higz/higzcc/tkhigz.c /tmp/dpep.d3syqe/cernlib-2005.05.09/src/graflib/higz/higzcc/tkhigz.c
+--- cernlib-2005.05.09/src/graflib/higz/higzcc/tkhigz.c	1996-02-14 08:10:26.000000000 -0500
++++ /tmp/dpep.d3syqe/cernlib-2005.05.09/src/graflib/higz/higzcc/tkhigz.c	2005-06-09 13:13:22.079711057 -0400
+@@ -39,7 +39,7 @@
+  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+  */
+ 
+-#include "higz/cfortran.h"
++#include <cfortran/cfortran.h>
+ #if !defined(VMS) && !defined(_WINDOWS)
+ #include "higz/tkConfig.h"
+ #endif

@@ -1,0 +1,27 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 207-compile-temp-libs-with-fPIC.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Compile temporary COMIS libraries with -fPIC for non-x86 arches.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F /tmp/dpep.srSRmd/cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F
+--- cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F	2000-09-25 10:16:36.000000000 -0400
++++ /tmp/dpep.srSRmd/cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F	2005-06-09 15:47:44.859676286 -0400
+@@ -81,12 +81,12 @@
+       WRITE(LUNOUT,'(A)')CHLINE(:L)
+       IF(FEXT.EQ.'.c')THEN
+         L=LENOCC(CHCC)
+-*                                 'cc -c .... name.c'
+-        CHLINE=CHCC(:L)//' '//NAME(:LN)// '.c'
++*                                 'cc -c .... -fPIC name.c'
++        CHLINE=CHCC(:L)//' -fPIC '//NAME(:LN)// '.c'
+       ELSE
+         L=LENOCC(CHF77)
+-*                                 'f77 -c .... name.f'
+-        CHLINE=CHF77(:L)//' '//NAME(:LN)// '.f'
++*                                 'f77 -c .... -fPIC name.f'
++        CHLINE=CHF77(:L)//' -fPIC '//NAME(:LN)// '.f'
+       ENDIF
+       L=LENOCC(CHLINE)
+       WRITE(LUNOUT,'(A)')CHLINE(:L)

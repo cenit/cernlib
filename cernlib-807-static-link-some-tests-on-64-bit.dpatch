@@ -1,0 +1,85 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 807-static-link-some-tests-on-64-bit.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Statically link certain test programs against CERN libraries on
+## DP: 64-bit systems, since CERNLIB's memory management is hopelessly
+## DP: broken there.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/ffread/test/Imakefile cernlib-2006.dfsg.2/src/packlib/ffread/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/ffread/test/Imakefile	2007-12-17 17:53:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/ffread/test/Imakefile	2007-12-17 17:53:50.000000000 +0000
+@@ -2,7 +2,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(ffread,$(OBJS),NullParameter,NullParameter,kernlib packlib)
++#else
+ CernlibFortranProgramTarget(ffread,$(OBJS),NullParameter,NullParameter,kernlib packlib)
++#endif
+ 
+ TestTarget(ffread,NullParameter,test.input)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/examples/Imakefile cernlib-2006.dfsg.2/src/packlib/hbook/examples/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/examples/Imakefile	2007-12-17 17:53:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/examples/Imakefile	2007-12-17 17:55:51.000000000 +0000
+@@ -5,6 +5,12 @@
+ 
+ DefinePackageLibrary(hbtlib)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++#undef CernlibFortranProgramTarget
++#define CernlibFortranProgramTarget(a,b,c,d,e) \
++	CernlibFortranStaticTarget(a,b,c,d,e)
++#endif
++
+ CernlibFortranProgramTarget(hbtest,hexam.o,libhbtlib.a,libhbtlib.a,packlib)
+ 
+ CernlibFortranProgramTarget(hbdiff,htdiffb.o,libhbtlib.a,libhbtlib.a,mathlib)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/examples/Imakefile cernlib-2006.dfsg.2/src/packlib/kuip/examples/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/examples/Imakefile	2007-12-17 17:53:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/examples/Imakefile	2007-12-17 17:53:50.000000000 +0000
+@@ -5,7 +5,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(ktest,$(OBJS),NullParameter,NullParameter,graflib packlib kernlib)
++#else
+ CernlibFortranProgramTarget(ktest,$(OBJS),NullParameter,NullParameter,graflib packlib kernlib)
++#endif
+ 
+ TestTarget(ktest,NullParameter,ktest.inp)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zbook/test/Imakefile cernlib-2006.dfsg.2/src/packlib/zbook/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/zbook/test/Imakefile	2007-12-17 17:53:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zbook/test/Imakefile	2007-12-17 17:53:50.000000000 +0000
+@@ -5,6 +5,10 @@
+ 
+ SubdirLibraryTarget(zbookt,NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(zexam,zexam.o,libzbookt.a,libzbookt.a,packlib)
++#else
+ CernlibFortranProgramTarget(zexam,zexam.o,libzbookt.a,libzbookt.a,packlib)
++#endif
+ 
+ TestTarget(zexam,NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zebra/test/Imakefile cernlib-2006.dfsg.2/src/packlib/zebra/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/zebra/test/Imakefile	2007-12-17 17:53:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zebra/test/Imakefile	2007-12-17 17:53:50.000000000 +0000
+@@ -41,6 +41,12 @@
+ 
+ testrz: zebrz1 zebrz2 zebrz3
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++#undef CernlibFortranProgramTarget
++#define CernlibFortranProgramTarget(a,b,c,d,e) \
++	CernlibFortranStaticTarget(a,b,c,d,e)
++#endif
++
+ CernlibFortranProgramTarget(zebmz1,zebmz1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
+ 
+ CernlibFortranProgramTarget(zebfz1,zebfz1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)

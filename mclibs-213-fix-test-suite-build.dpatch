@@ -1,0 +1,99 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 213-fix-test-suite-build.dpatch by Patrice Dumas <pertusus@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix build of test-suite for tests during package build.
+
+@DPATCH@
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/cojets/test/Imakefile mclibs-2006.dfsg.2/src/mclibs/cojets/test/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/cojets/test/Imakefile	1996-03-27 09:32:16.000000000 +0000
++++ mclibs-2006.dfsg.2/src/mclibs/cojets/test/Imakefile	2008-01-04 18:57:55.000000000 +0000
+@@ -3,7 +3,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(cojetst,test.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib kernlib)
++CernlibFortranProgramTarget(cojetst,test.o,NullParameter,NullParameter,mathlib kernlib cojets)
+ 
+ CopyFile(test.input,test.in)
+ 
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/eurodec/eudtest/Imakefile mclibs-2006.dfsg.2/src/mclibs/eurodec/eudtest/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/eurodec/eudtest/Imakefile	1997-03-14 17:32:14.000000000 +0000
++++ mclibs-2006.dfsg.2/src/mclibs/eurodec/eudtest/Imakefile	2008-01-04 18:57:55.000000000 +0000
+@@ -4,11 +4,10 @@
+ 
+ FORTRANSAVEOPTION = FortranSaveFlags
+ 
+-CernlibFortranProgramTarget(eudtest,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(eudtest,$(OBJS),NullParameter,NullParameter,eurodec packlib)
+ 
+ TestTarget(eudtest,eurodec.dat,eutitle.dat)
+ 
+ CopyFile(eutitle.data,eutitle.dat)
+ 
+ LinkFileFromDir($(TOP)$(PACKAGETOP),eurodec.dat)
+-
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/herwig/test/Imakefile mclibs-2006.dfsg.2/src/mclibs/herwig/test/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/herwig/test/Imakefile	1997-01-06 17:06:42.000000000 +0000
++++ mclibs-2006.dfsg.2/src/mclibs/herwig/test/Imakefile	2008-01-04 18:57:55.000000000 +0000
+@@ -4,6 +4,6 @@
+ DefinePackageLibrary(NullParameter)
+ 
+ 
+-CernlibFortranProgramTarget(herwigt,test.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(herwigt,test.o,NullParameter,NullParameter,kernlib herwig)
+ 
+ TestTarget(herwigt,NullParameter,NullParameter)
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/isajet/test/Imakefile mclibs-2006.dfsg.2/src/mclibs/isajet/test/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/isajet/test/Imakefile	2000-07-25 16:21:34.000000000 +0000
++++ mclibs-2006.dfsg.2/src/mclibs/isajet/test/Imakefile	2008-01-04 18:59:02.000000000 +0000
+@@ -6,6 +6,6 @@
+ 
+ LinkFileFromDir($(TOP)$(PACKAGETOP),isajet.dat)
+ 
+-CernlibFortranProgramTarget(isajett,isajett.o,$(PACKAGE_LIB),$(PACKAGE_LIB),pdflib804 mathlib kernlib)
++CernlibFortranProgramTarget(isajett,isajett.o,NullParameter,NullParameter,pdflib804 mathlib kernlib isajet)
+ 
+ TestTarget(isajett,isajet.dat,test.input)
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/pdf/tpdf/Imakefile mclibs-2006.dfsg.2/src/mclibs/pdf/tpdf/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/pdf/tpdf/Imakefile	2000-04-19 13:52:13.000000000 +0000
++++ mclibs-2006.dfsg.2/src/mclibs/pdf/tpdf/Imakefile	2008-01-04 18:57:55.000000000 +0000
+@@ -13,13 +13,13 @@
+ DefinePackageLibrary(NullParameter)
+ 
+ 
+-CernlibFortranProgramTarget(testpdf,testpdf.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib)
++CernlibFortranProgramTarget(testpdf,testpdf.o,NullParameter,NullParameter,mathlib pdflib)
+ 
+-CernlibFortranProgramTarget(testpdg,testpdg.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib)
++CernlibFortranProgramTarget(testpdg,testpdg.o,NullParameter,NullParameter,mathlib pdflib)
+ 
+-CernlibFortranProgramTarget(testgam,testgam.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib)
++CernlibFortranProgramTarget(testgam,testgam.o,NullParameter,NullParameter,mathlib pdflib)
+ 
+-CernlibFortranProgramTarget(test_npdf,test_npdf.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib)
++CernlibFortranProgramTarget(test_npdf,test_npdf.o,NullParameter,NullParameter,mathlib pdflib)
+ 
+ TestTarget(testpdf,NullParameter,NullParameter)
+ TestTarget(testpdg,NullParameter,NullParameter)
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/photos/test/Imakefile mclibs-2006.dfsg.2/src/mclibs/photos/test/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/photos/test/Imakefile	1999-03-26 10:53:26.000000000 +0000
++++ mclibs-2006.dfsg.2/src/mclibs/photos/test/Imakefile	2008-01-04 18:57:55.000000000 +0000
+@@ -2,6 +2,6 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(photost,phodem.o pseudo_jetset.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(photost,phodem.o pseudo_jetset.o,NullParameter,NullParameter,kernlib photos)
+ 
+ TestTarget(photost,NullParameter,NullParameter)
+diff -urNad mclibs-2006.dfsg.2~/src/phtools/wicoexam/Imakefile mclibs-2006.dfsg.2/src/phtools/wicoexam/Imakefile
+--- mclibs-2006.dfsg.2~/src/phtools/wicoexam/Imakefile	1996-03-22 16:42:50.000000000 +0000
++++ mclibs-2006.dfsg.2/src/phtools/wicoexam/Imakefile	2008-01-04 18:57:55.000000000 +0000
+@@ -1,5 +1,5 @@
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(wicot,wicoex.o,$(PACKAGE_LIB),$(PACKAGE_LIB),NullParameter)
++CernlibFortranProgramTarget(wicot,wicoex.o,NullParameter,NullParameter,packlib phtools)
+ 
+ TestTarget(wicot,NullParameter,NullParameter)

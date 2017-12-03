@@ -1,0 +1,178 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 216-use-cernlib-gamma-not-intrinsic.dpatch by Kevin B. McCarty <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Force use of mathlib gamma function in mathlib tests.
+## DP: Built-in libc gamma function may not be sufficiently precise,
+## DP: see, e.g., http://gcc.gnu.org/ml/fortran/2007-10/msg00096.html etc.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/algama.F cernlib-2006.dfsg.2/src/mathlib/gen/c/algama.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/algama.F	1996-04-01 07:01:54.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/algama.F	2008-01-29 10:02:41.000000000 -0800
+@@ -10,6 +10,7 @@
+ #if (defined(CERNLIB_DOUBLE))&&(!defined(CERNLIB_IBM))
+       FUNCTION ALGAMA(X)
+       DOUBLE PRECISION DLGAMA,D
++      EXTERNAL DLGAMA
+ 
+       ENTRY ALOGAM(X)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/alogam.F cernlib-2006.dfsg.2/src/mathlib/gen/c/alogam.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/alogam.F	1996-04-01 07:01:54.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/alogam.F	2008-01-29 10:03:54.000000000 -0800
+@@ -9,6 +9,7 @@
+ #include "gen/pilot.h"
+ #if (defined(CERNLIB_DOUBLE))&&(defined(CERNLIB_IBM))
+       FUNCTION ALOGAM(X)
++      EXTERNAL ALGAMA
+       ALOGAM = ALGAMA(X)
+       END
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/bsja64.F cernlib-2006.dfsg.2/src/mathlib/gen/c/bsja64.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/bsja64.F	1996-04-01 07:02:08.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/bsja64.F	2008-01-29 10:00:11.000000000 -0800
+@@ -21,9 +21,11 @@
+ #if defined(CERNLIB_DOUBLE)
+       PARAMETER (NAMEJ = 'BSJA/DBSJA',
+      1           NAMEI = 'BSIA/DBSIA')
++      EXTERNAL DGAMMA
+ #endif
+ #if !defined(CERNLIB_DOUBLE)
+       PARAMETER (NAMEJ = 'BSJA', NAMEI = 'BSIA')
++      EXTERNAL GAMMA
+ #endif
+       LOGICAL LJA,LIA,LEV,LER
+       DIMENSION B(0:*),BA(0:100),RR(0:100)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/cbsja64.F cernlib-2006.dfsg.2/src/mathlib/gen/c/cbsja64.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/cbsja64.F	1996-04-01 07:02:09.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/cbsja64.F	2008-01-29 10:00:11.000000000 -0800
+@@ -21,9 +21,11 @@
+       CHARACTER NAME*(*)
+ #if defined(CERNLIB_DOUBLE)
+       PARAMETER (NAME = 'CBSJA/WBSJA')
++      EXTERNAL DGAMMA
+ #endif
+ #if !defined(CERNLIB_DOUBLE)
+       PARAMETER (NAME = 'CBSJA')
++      EXTERNAL GAMMA
+ #endif
+       LOGICAL LER
+       DIMENSION CB(0:*),CBA(0:100),RR(0:100)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/dlogam.F cernlib-2006.dfsg.2/src/mathlib/gen/c/dlogam.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/dlogam.F	1996-04-01 07:01:55.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/dlogam.F	2008-01-29 10:04:25.000000000 -0800
+@@ -9,6 +9,7 @@
+ #include "gen/pilot.h"
+ #if defined(CERNLIB_IBM)
+       FUNCTION DLOGAM(X)
++      EXTERNAL DLGAMA
+ #include "gen/imp64.inc"
+       DLOGAM = DLGAMA(X)
+       END
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/gagnc64.F cernlib-2006.dfsg.2/src/mathlib/gen/c/gagnc64.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/gagnc64.F	1996-04-01 07:02:05.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/gagnc64.F	2008-01-29 10:04:48.000000000 -0800
+@@ -25,9 +25,11 @@
+       CHARACTER NAME*(*)
+       CHARACTER*80 ERRTXT
+ #if !defined(CERNLIB_DOUBLE)
++      EXTERNAL ALGAMA
+       PARAMETER (NAME = 'RGAGNC')
+ #endif
+ #if defined(CERNLIB_DOUBLE)
++      EXTERNAL DLGAMA
+       PARAMETER (NAME = 'RGAGNC/DGAGNC')
+ #endif
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/gapnc64.F cernlib-2006.dfsg.2/src/mathlib/gen/c/gapnc64.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/gapnc64.F	1996-04-01 07:02:05.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/gapnc64.F	2008-01-29 10:03:35.000000000 -0800
+@@ -24,9 +24,11 @@
+       CHARACTER NAME*(*)
+       CHARACTER*80 ERRTXT
+ #if !defined(CERNLIB_DOUBLE)
++      EXTERNAL ALGAMA
+       PARAMETER (NAME = 'RGAPNC')
+ #endif
+ #if defined(CERNLIB_DOUBLE)
++      EXTERNAL DLGAMA
+       PARAMETER (NAME = 'RGAPNC/DGAPNC')
+ #endif
+       PARAMETER (EPS = 5D-14)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/rrizet64.F cernlib-2006.dfsg.2/src/mathlib/gen/c/rrizet64.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/rrizet64.F	1996-04-01 07:02:00.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/rrizet64.F	2008-01-29 10:00:11.000000000 -0800
+@@ -14,12 +14,14 @@
+ C
+       CHARACTER*(*) NAME
+       PARAMETER(NAME='RRIZET/DRIZET')
++      EXTERNAL DGAMMA
+ #endif
+ #if !defined(CERNLIB_DOUBLE)
+       FUNCTION RRIZET(X)
+ C
+       CHARACTER*(*) NAME
+       PARAMETER(NAME='RRIZET')
++      EXTERNAL GAMMA
+ #endif
+ C
+       DIMENSION P1(0:8),P2(0:8),P3(0:9),P4(0:8)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/g/gamdis.F cernlib-2006.dfsg.2/src/mathlib/gen/g/gamdis.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/g/gamdis.F	1996-04-01 07:02:43.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/g/gamdis.F	2008-01-29 10:00:11.000000000 -0800
+@@ -28,6 +28,8 @@
+       PARAMETER (Z1 = 1, HALF = Z1/2, QUAR = Z1/4)
+       PARAMETER (C1 = 3*Z1/2, KMAX = 300)
+ 
++      EXTERNAL GAMMA
++
+       DATA C
+      1/ 0.5772157,-0.6558781,-0.0420026, 0.1665386,-0.0421977,
+      2 -0.0096220, 0.0072189,-0.0011652,-0.0002152, 0.0001281,
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/tests/c302m.F cernlib-2006.dfsg.2/src/mathlib/gen/tests/c302m.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/tests/c302m.F	1996-04-01 07:01:13.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/tests/c302m.F	2008-01-29 10:00:11.000000000 -0800
+@@ -36,6 +36,7 @@
+ #include "gen/imp64.inc"
+ 
+       REAL GAMMA
++      EXTERNAL GAMMA, DGAMMA
+       CHARACTER*6 TFUNC(2)
+ #include "iorc.inc"
+ C
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/tests/c310m.F cernlib-2006.dfsg.2/src/mathlib/gen/tests/c310m.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/tests/c310m.F	1996-04-01 07:01:14.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/tests/c310m.F	2008-01-29 10:02:19.000000000 -0800
+@@ -36,6 +36,7 @@
+ 
+ #include "imp64r.inc"
+       REAL  ALGAMA
++      EXTERNAL ALGAMA
+ C     Set maximum error allowed for test to be considered successful
+       DIMENSION TOL(2),TOLIBM(2)
+ 
+@@ -50,6 +51,7 @@
+ #if defined(CERNLIB_DOUBLE)
+       DIMENSION  Y(7),T(7)
+       REAL            RT(7)
++      EXTERNAL DLGAMA
+ #endif
+ #if !defined(CERNLIB_DOUBLE)
+       REAL       Y(7),T(7)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/tests/e408m.F cernlib-2006.dfsg.2/src/mathlib/gen/tests/e408m.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/tests/e408m.F	1998-11-05 02:41:34.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/tests/e408m.F	2008-01-29 10:00:11.000000000 -0800
+@@ -44,6 +44,12 @@
+       DATA TXT(2) /'EXP(-X**2)  (-1 <= X <= 1)  LUKE 3.2.2(8)'/
+       DATA TXT(3) /'J_1(X)      (-1 <= X <= 1)  LUKE 9.7(7)'/
+ 
++#if defined(CERNLIB_DOUBLE)
++      EXTERNAL DGAMMA
++#else
++      EXTERNAL GAMMA
++#endif
++
+ #if !defined(CERNLIB_WINNT) && !defined(CERNLIB_LINUX)
+ # if defined(CERNLIB_DOUBLE)
+       GVSUM(N,B,C) = DVSUM(N,B,C)

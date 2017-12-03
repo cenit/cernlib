@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 701-patch-hbook-comis-Imakefiles.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix up makefiles after moving hkfill.F and hkf1q.F in the other
+## DP: 701 dpatch (a shell script).
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/pawlib/comis/code/Imakefile cernlib-2005.05.09.dfsg/src/pawlib/comis/code/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/pawlib/comis/code/Imakefile	2005-12-07 14:59:22.782783593 -0500
++++ cernlib-2005.05.09.dfsg/src/pawlib/comis/code/Imakefile	2005-12-07 14:59:31.519940694 -0500
+@@ -37,7 +37,8 @@
+ 	csspar.F cssubr.F cssvpt.F cstadv.F cstarr.F csterr.F cstext.F \ @@\
+ 	cstfrf.F cstinf.F cstlgb.F cstlog.F cstpar.F cstran.F cstrer.F \ @@\
+ 	cstypar.F cstype.F csubad.F csunam.F csundf.F csxpar.F \ @@\
+-	mcline.F mcsident.F
++	mcline.F mcsident.F \ @@\
++	hkfill.F hkf1q.F /* moved here from src/packlib/hbook/code */
+ 
+ #if defined(CERNLIB_PAW)
+ SRCS_F := $(SRCS_F) cspawi.F cskuix.F cktoiv.F cspawv.F csmkvd.F \ @@\

@@ -1,0 +1,103 @@
+--- patchy/p4comp.fca.orig	2006-04-08 12:46:17.000000000 +0200
++++ patchy/p4comp.fca	2006-04-08 12:47:34.000000000 +0200
+@@ -11458,7 +11458,7 @@
+       IF (JCARD.GE.NTOTCC)   RETURN
+       LE = LTK + KDNWT1 - 1
+       DO 12 L=LTK,LE
+-      IF (AND(IQ(L),'FF000000'X).EQ.0)    GO TO 14
++      IF (AND(IQ(L),X'FF000000').EQ.0)    GO TO 14
+    12 CONTINUE
+       NWTK = KDNWT
+       NCH  = 80
+@@ -12383,7 +12383,7 @@
+       IF (JCARD.GE.NTOTCC)   RETURN
+       LE = LTK + KDNWT1 - 1
+       DO 13 L=LTK,LE
+-      IF (AND(IQ(L),'FF000000'X).EQ.0)    GO TO 14
++      IF (AND(IQ(L),X'FF000000').EQ.0)    GO TO 14
+    13 CONTINUE
+       NWTK   = KDNWT
+       NCHCCT = 80
+@@ -14260,7 +14260,7 @@
+ C--------------    END CDE                             --------------
+ C     DIMENSION    MM(10), ITP(9)                                        A8M
+       DIMENSION    MM(6),  ITP(9)                                       -A8M
+-      PARAMETER   ( NBLANK = '20202000'X )
++      PARAMETER   ( NBLANK = X'20202000' )
+  
+       IT     = ITP(1)
+       JARTPX = 0
+@@ -14430,7 +14430,7 @@
+  
+    24 JLOW = JCH
+  
+-      MV(JCH) = AND (MV(JCH), 'FFFFFFDF'X)
++      MV(JCH) = AND (MV(JCH), X'FFFFFFDF')
+  
+    49 CONTINUE
+       JCCLOW = MAX  (JCCLOW,JLOW)
+@@ -14465,8 +14465,8 @@
+  
+  
+  
+-      DATA ACTION/'HOLD  ','RESUME','EOF   ','REWIND','ATTACH','DETACH'
+-     +,           'EOFREW','CLOSE ' /
++      DATA ACTION/6HHOLD  ,6HRESUME,6HEOF   ,6HREWIND,6HATTACH,6HDETACH
++     +,           6HEOFREW,6HCLOSE  /
+  
+ C------    CODE BITS IN  IOTALL, IOTOFF, IOTON, IOTYP
+  
+@@ -14801,7 +14801,7 @@
+       DO 31 JC=1,NCD
+       J = J+1
+       DO 19 JJ=1,KDNWT1
+-      IF (AND(MV(J),'FF000000'X).EQ.0)   GO TO 31
++      IF (AND(MV(J),X'FF000000').EQ.0)   GO TO 31
+    19 J = J+1
+    31 CONTINUE
+  
+@@ -14825,7 +14825,7 @@
+  
+       DO 16 J=1,KDNWT1
+       KIMA(J)= MV(J)
+-      IF (AND(KIMA(J),'FF000000'X).EQ.0)    GO TO 31
++      IF (AND(KIMA(J),X'FF000000').EQ.0)    GO TO 31
+    16 CONTINUE
+       J = KDNWT
+       KIMA(J)= MV(J)
+@@ -14855,7 +14855,7 @@
+  
+       DO 16 J=1,KDNWT1
+       KIMA(J)= MV(J)
+-      IF (AND(KIMA(J),'FF000000'X).EQ.0)    GO TO 31
++      IF (AND(KIMA(J),X'FF000000').EQ.0)    GO TO 31
+    16 CONTINUE
+       J = KDNWT
+       KIMA(J)= MV(J)
+@@ -17316,6 +17316,8 @@
+ /*>    ROUTINE ABEND
+   CERN PROGLIB# Z035    ABEND           .VERSION KERNFOR  4.31  911111
+ */
++#include <stdlib.h>
++
+ void abend_()
+ {
+     exit(7);
+@@ -17430,7 +17432,7 @@
+       char *fname;
+       int  *lgname;
+ {
+-      char *malloc();
++      void *malloc();
+       char *ptalc, *pttext;
+       int  fchput();
+       int  nalc;
+@@ -17664,7 +17666,7 @@
+       char *ftext;
+       int  lgtext;
+ {
+-      char *malloc();
++      void *malloc();
+       char *ptalc, *ptuse;
+       char *utext;
+       int  nalc;

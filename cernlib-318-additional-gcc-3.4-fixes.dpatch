@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 318-additional-gcc-3.4-fixes.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Additional fixes for gcc 3.4, courtesy of Andreas Jochens.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_motif/iconwidget.c /tmp/dpep.f5SU0N/cernlib-2005.05.09/src/packlib/kuip/code_motif/iconwidget.c
+--- cernlib-2005.05.09/src/packlib/kuip/code_motif/iconwidget.c	1996-03-08 10:33:10.000000000 -0500
++++ /tmp/dpep.f5SU0N/cernlib-2005.05.09/src/packlib/kuip/code_motif/iconwidget.c	2005-06-14 12:33:43.511482468 -0400
+@@ -35,7 +35,7 @@
+ void    _XmHighlightBorder ();
+ void   _XmUnhighlightBorder ();
+ #ifndef __APPLE__
+-void   _XmDrawShadow ();
++/* void   _XmDrawShadow (); */
+ #endif
+ 
+ /* Motif1.1 ( except apollo, hpux has _XmPrimitive... with two args only

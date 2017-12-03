@@ -1,0 +1,28 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 104-fix-undefined-insertchar-warning.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Correct Lesstif warning about undefined InsertChar.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/kuipio.c /tmp/dpep.XJ5w0K/cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/kuipio.c
+--- cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/kuipio.c	1996-03-08 10:33:04.000000000 -0500
++++ /tmp/dpep.XJ5w0K/cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/kuipio.c	2005-06-09 14:36:52.509109480 -0400
+@@ -573,7 +573,7 @@
+                         EditMenu,
+                         RES_CONVERT( XmNlabelString, "Copy" ),
+                         RES_CONVERT( XmNmnemonic, "C" ),
+-                        XmNaccelerator, "Ctrl<Key>InsertChar",
++                        XmNaccelerator, "Ctrl<Key>Insert",
+                         RES_CONVERT( XmNacceleratorText, "Ctrl+Ins" ),
+                         NULL );
+         UxPutContext( copyButton, (char *) UxKuipIoContext );
+@@ -585,7 +585,7 @@
+                         EditMenu,
+                         RES_CONVERT( XmNlabelString, "Paste" ),
+                         RES_CONVERT( XmNmnemonic, "P" ),
+-                        XmNaccelerator, "Shift<Key>InsertChar",
++                        XmNaccelerator, "Shift<Key>Insert",
+                         RES_CONVERT( XmNacceleratorText, "Shift+Ins" ),
+                         NULL );
+         UxPutContext( pasteButton, (char *) UxKuipIoContext );

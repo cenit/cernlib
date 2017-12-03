@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 202-fix-includes-in-minuit-example.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: minuit-main example should have <> instead of "" around include files.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/cfortran/Examples/minuit-main.c /tmp/dpep.SuauEf/cernlib-2005.05.09/src/cfortran/Examples/minuit-main.c
+--- cernlib-2005.05.09/src/cfortran/Examples/minuit-main.c	2001-04-18 04:56:22.000000000 -0400
++++ /tmp/dpep.SuauEf/cernlib-2005.05.09/src/cfortran/Examples/minuit-main.c	2005-06-09 13:22:59.567224997 -0400
+@@ -15,8 +15,8 @@
+  *          Gunter Folger <Gunter.Folger@cern.ch>
+  */
+ 
+-#include "cfortran.h"
+-#include "minuit.h"
++#include <cfortran.h>
++#include <minuit.h>
+ #define Ncont 20
+ int main()
+ {

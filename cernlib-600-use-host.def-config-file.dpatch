@@ -1,0 +1,22 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 600-use-host.def-config-file.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Use host.def for Debian-specific CERNLIB build options.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/config/site.def cernlib-2005.05.09.dfsg/src/config/site.def
+--- cernlib-2005.05.09.dfsg~/src/config/site.def	2002-04-26 10:46:04.000000000 -0400
++++ cernlib-2005.05.09.dfsg/src/config/site.def	2006-07-05 10:25:00.691451379 -0400
+@@ -71,9 +71,9 @@
+ 
+ #define HasFortran YES
+ 
+-/*
++
+ #include <host.def>
+-*/
++
+ 
+ /*
+ #ifndef HasGcc2

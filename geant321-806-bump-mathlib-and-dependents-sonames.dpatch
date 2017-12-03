@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 806-bump-mathlib-and-dependents-sonames.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Bump so versions of mathlib and dependents since it is now compiled
+## DP: against liblapack3 instead of liblapack2.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/geant321/Imakefile cernlib-2005.05.09.dfsg/src/geant321/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/geant321/Imakefile	2005-11-23 15:49:19.722162373 +0000
++++ cernlib-2005.05.09.dfsg/src/geant321/Imakefile	2005-11-23 15:49:27.431512287 +0000
+@@ -2,6 +2,8 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
++export LIB_SONAME := 2
++
+ AllTarget(geant321)
+ 
+ /* FLUKA removed from Debian source package for copyright reasons. */

@@ -1,0 +1,34 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 320-support-ifort.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Support compilation with Intel's ifort compiler.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/config/linux.cf cernlib-2005.05.09.dfsg/src/config/linux.cf
+--- cernlib-2005.05.09.dfsg~/src/config/linux.cf	2006-07-05 14:40:47.890234094 -0400
++++ cernlib-2005.05.09.dfsg/src/config/linux.cf	2006-07-05 14:41:49.656893427 -0400
+@@ -446,8 +446,8 @@
+ #  define OptimisedFortranFlags  -O -mp1 -fp_port
+ #  define NoOpFortranDebugFlags  -O0
+ #  define DefaultFCOptions       
+-#  define CernlibSystem          CernlibDefaultDefines
+- 
++#  define CernlibSystem          CernlibDefaultDefines -DCERNLIB_INTELIFC
++#  define CERNLIB_INTELIFC 
+ #else
+ 
+ # ifdef HasIntelefc
+diff -urNad cernlib-2005.05.09.dfsg~/src/packlib/kuip/programs/kxterm/Imakefile cernlib-2005.05.09.dfsg/src/packlib/kuip/programs/kxterm/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/packlib/kuip/programs/kxterm/Imakefile	2006-07-05 14:40:47.633289557 -0400
++++ cernlib-2005.05.09.dfsg/src/packlib/kuip/programs/kxterm/Imakefile	2006-07-05 14:42:42.088557013 -0400
+@@ -14,6 +14,9 @@
+ 
+ #if defined(CERNLIB_UNIX)
+ CLIBS= -G Motif kernlib
++# if defined(CERNLIB_INTELIFC)
++CLIBS= $(CLIBS) -nofor_main
++# endif
+ #endif
+ 
+ #if defined(CERNLIB_VAXVMS)

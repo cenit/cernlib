@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 204-compile-isajet-with-isasrt.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Include isasrt in the Isajet library, by request (cf.
+## DP: http://bugs.debian.org/260469 )
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile /tmp/dpep.PM12lm/cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile
+--- cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile	2001-10-08 09:06:49.000000000 -0400
++++ /tmp/dpep.PM12lm/cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile	2005-06-09 14:25:29.621215677 -0400
+@@ -9,7 +9,7 @@
+ 	 fortop.F frgjet.F frgmnt.F gamma.F getpt.F gettot.F heavyx.F \ @@\
+ 	 hevolv.F higgs.F idanti.F idgen.F iframs.F inisap.F ipartns.F \ @@\
+ 	 ipjset.F iprtns.F irmov0.F isabeg.F isaend.F isaevt.F isaini.F \ @@\
+-	 isajet.F ispjet.F istrad.F iswdky.F jetgen.F \ @@\
++	 isajet.F isasrt.F ispjet.F istrad.F iswdky.F jetgen.F \ @@\
+ 	 label.F lboost.F logerr.F \ @@\
+ 	 logic.F logp.F logphi.F logphw.F logpt.F logqm.F logqt.F logthw.F \ @@\
+ 	 logx.F logxw.F logyth.F logyw.F lstsq.F mbias.F mbset.F nogood.F \ @@\

@@ -1,0 +1,13 @@
+--- patchy/rceta.sh.orig	1995-05-04 21:23:45.000000000 +0200
++++ patchy/rceta.sh	2006-04-08 12:20:26.000000000 +0200
+@@ -225,8 +225,8 @@
+       RETURN
+       END
+ \\
+- fort77 -o rceta rceta.f
+- rceta    <<\\
++ f77 -g -O2 -o rceta rceta.f
++ ./rceta    <<\\
+ CODE  INTERNAL A1 REPRESENTATION OF THE CETA SET / LNX
+ CODE  CARD    1  IN HOLLERITH FOR CETA VALUES  1 - 47
+ CODE  CARD    2  IN HOLLERITH FOR CETA VALUES 65 - 90

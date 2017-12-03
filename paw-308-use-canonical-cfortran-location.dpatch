@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 308-use-canonical-cfortran-location.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: All code compiled at CERNLIB build-time should look for cfortran.h
+## DP: at <cfortran/cfortran.h>.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/testsuite/tuple/tuple.c /tmp/dpep.d3syqe/cernlib-2005.05.09/src/pawlib/paw/testsuite/tuple/tuple.c
+--- cernlib-2005.05.09/src/pawlib/paw/testsuite/tuple/tuple.c	1996-04-17 10:46:29.000000000 -0400
++++ /tmp/dpep.d3syqe/cernlib-2005.05.09/src/pawlib/paw/testsuite/tuple/tuple.c	2005-06-09 13:14:58.654908060 -0400
+@@ -16,7 +16,7 @@
+ #include	<float.h>
+ 
+ 
+-#include	"cfortran.h"
++#include	<cfortran/cfortran.h>
+ 
+ /* #include	"packlib.h" */
+ #include	"hbook_interface.h"

@@ -1,0 +1,33 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 305-use-POWERPC-not-PPC-as-test.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Since patch 304 changed the meaning of CERNLIB_PPC to a mere endianness
+## DP: test, we now use CERNLIB_POWERPC to mean actually checking for a PowerPC
+## DP: processor; fix the three occurences of this in Imakefiles.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/code/Imakefile /tmp/dpep.fQy2EP/cernlib-2005.05.09/src/pawlib/paw/code/Imakefile
+--- cernlib-2005.05.09/src/pawlib/paw/code/Imakefile	1998-09-25 05:33:51.000000000 -0400
++++ /tmp/dpep.fQy2EP/cernlib-2005.05.09/src/pawlib/paw/code/Imakefile	2005-06-09 10:50:47.068482917 -0400
+@@ -56,7 +56,7 @@
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+ 
+-#if defined(CERNLIB_LINUX) && defined(CERNLIB_PPC)
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_POWERPC)
+ SpecialFortranLibObjectRule(pawins,pawins,-O0,NullParameter)
+ #endif
+ 
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile /tmp/dpep.fQy2EP/cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile
+--- cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile	1999-09-14 05:20:08.000000000 -0400
++++ /tmp/dpep.fQy2EP/cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile	2005-06-09 10:51:15.807396176 -0400
+@@ -46,7 +46,7 @@
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+ 
+-#if defined(CERNLIB_LINUX) && defined(CERNLIB_PPC)
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_POWERPC)
+ SpecialObjectRule(archive/qp_execute.o,qp_execute.c archive/qp_execute.d,-O0 -o $@)
+ SpecialObjectRule(debug/qp_execute.o,qp_execute.c debug/qp_execute.d,-O0 -o $@)
+ SpecialObjectRule(shared/qp_execute.o,qp_execute.c shared/qp_execute.d,-O0 -o $@)

@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 127-yexpand-makes-tmpfiles-in-pwd.dpatch by Patrice Dumas <pertusus@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Have yexpand create temp files in $PWD rather than $HOME.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/patchy/yexpand.script cernlib-2006.dfsg.2/src/patchy/yexpand.script
+--- cernlib-2006.dfsg.2~/src/patchy/yexpand.script	2005-04-18 08:41:03.000000000 -0700
++++ cernlib-2006.dfsg.2/src/patchy/yexpand.script	2008-02-26 13:18:35.000000000 -0800
+@@ -26,8 +26,8 @@
+ # CERN_ROOT=":$CERN_ROOT" ; export CERN_ROOT 
+   CERN_ROOT=":$CERN/$CERN_LEVEL" ; export CERN_ROOT 
+ 
+-  tfile="$HOME/$tfile.yexp"
+-  echo "#!/bin/sh"    >$tfile
++  tfile="./$tfile.yexp"
++  echo "#! /bin/sh"    >$tfile
+   echo "  cat <<EOI" >>$tfile
+   cat <$ifile        >>$tfile
+   cc=$?

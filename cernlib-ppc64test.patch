@@ -1,0 +1,11 @@
+--- cernlib-2006/2006/src/packlib/Imakefile.ppc64test	2007-05-14 10:26:14.000000000 +0200
++++ cernlib-2006/2006/src/packlib/Imakefile	2007-05-14 12:08:52.000000000 +0200
+@@ -16,7 +16,7 @@ InstallLibrary(packlib,$(CERN_LIBDIR))
+ InstallLibraryAlias(packlib,packlib-shift,$(CERN_LIBDIR))
+ InstallSharedLibrary(packlib,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+-TestSubdirs($(LIBDIRS))
++TestSubdirs(cspack epio fatmen hepdb kapack kuip minuit zbook zebra)
+ 
+ #ifdef CERNLIB_VAXVMS
+ 

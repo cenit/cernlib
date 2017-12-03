@@ -1,0 +1,96 @@
+# This file lists all the files that were removed from the Cernlib source
+# for copyright reasons.  Given is the file or directory to delete
+# relative to $CERN_ROOT/src/.
+
+# --Kevin McCarty, 23 Nov 2005
+
+# Authors of Pythia/Jetset did NOT give permission to release
+# their code under GPL.  CERN should have checked this more carefully!!!
+car/jetset74.car
+cmz/jetset74.cmz
+mclibs/jetset/
+mclibs/pythia/
+
+# Removal of Pythia/Jetset also necessitates removal of Fritiof, Lepto, Ariadne
+mclibs/fritiof/
+mclibs/ariadne/
+mclibs/ariadne_407/
+mclibs/lepto63/
+
+# The same applies to GEANT-FLUKA; see for instance the comments at
+# the web site http://www.fluka.org/Faq.html
+car/geanf.car
+car/geanf321.car
+cmz/geanf.cmz
+cmz/geanf321.cmz
+geant321/data/flukaaf.dat
+geant321/block/
+geant321/fiface/
+geant321/fluka/
+geant321/miface/gfmfin.F
+geant321/miface/gfmdis.F
+geant321/peanut/
+geant321/geant321/aadat.inc
+geant321/geant321/auxpar.inc
+geant321/geant321/balanc.inc
+geant321/geant321/bamjcm.inc
+geant321/geant321/cmsres.inc
+geant321/geant321/comcon.inc
+geant321/geant321/corinc.inc
+geant321/geant321/dblprc.inc
+geant321/geant321/decayc.inc
+geant321/geant321/decayc2.inc
+geant321/geant321/depnuc.inc
+geant321/geant321/dimpar.inc
+geant321/geant321/eva0.inc
+geant321/geant321/eva1.inc
+geant321/geant321/fheavy.inc
+geant321/geant321/finlsp.inc
+geant321/geant321/finlsp2.inc
+geant321/geant321/finlsp3.inc
+geant321/geant321/finpar.inc
+geant321/geant321/finpar2.inc
+geant321/geant321/finuc.inc
+geant321/geant321/finuc2.inc
+geant321/geant321/finuct.inc
+geant321/geant321/hadflg.inc
+geant321/geant321/hadpar.inc
+geant321/geant321/higfis.inc
+geant321/geant321/inpdat.inc
+geant321/geant321/inpdat2.inc
+geant321/geant321/inpflg.inc
+geant321/geant321/iounit.inc
+geant321/geant321/isotop.inc
+geant321/geant321/labcos.inc
+geant321/geant321/mapa.inc
+geant321/geant321/metlsp.inc
+geant321/geant321/nucdat.inc
+geant321/geant321/nucgeo.inc
+geant321/geant321/nuclev.inc
+geant321/geant321/nucpar.inc
+geant321/geant321/nucstf.inc
+geant321/geant321/paprop.inc
+geant321/geant321/parevt.inc
+geant321/geant321/parnuc.inc
+geant321/geant321/part.inc
+geant321/geant321/part2.inc
+geant321/geant321/part3.inc
+geant321/geant321/qquark.inc
+geant321/geant321/reac.inc
+geant321/geant321/redver.inc
+geant321/geant321/resnuc.inc
+geant321/geant321/split.inc
+geant321/geant321/xsepar.inc
+
+# Other problematic files (mostly on VMS or obsolete archs)
+graflib/higz/igold/golini.F
+packlib/cspack/sysreq/pwd_vms.h
+packlib/cspack/sysreq/sgtty.h
+packlib/cspack/vmsc/
+packlib/fatmen/scripts/unix/ctab_root.dat
+packlib/kernlib/kernbit/z037/astdoc.F
+packlib/kernlib/kernbit/z037/fiopat.s
+pawlib/comis/comis/dlfcn.inc
+pawlib/comis/deccc/dlfcn.c
+pawlib/comis/obsolete/rsibm/
+pawlib/paw/stagerd/bftp.c

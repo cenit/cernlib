@@ -1,0 +1,38 @@
+--- 2005/src/patchy/patchy.car.orig	1996-07-15 13:46:22.000000000 +0200
++++ 2005/src/patchy/patchy.car	2006-04-09 02:18:17.000000000 +0200
+@@ -3708,7 +3708,7 @@
+ 
+    38 WRITE (IQTYPE,9038) CHLIFI(1:NN)
+ +SELF, IF=QS_UNIX.
+-      IF (LUNOLD.NE.0)  CALL PERRORF (' System msg')
++      IF (LUNOLD.NE.0)  CALL PERROR (' System msg')
+ +SELF.
+       IF (NQINIT.EQ.0)  THEN
+           IF (IQPRNT.NE.IQTYPE)  WRITE (IQPRNT,9038) CHLIFI(1:NN)
+@@ -4399,7 +4399,7 @@
+       CHARACTER    MSG*(*)
+ 
+ +SELF, IF=QS_UNIX.
+-      CALL PERRORF (' Perror has')
++      CALL PERROR (' Perror has')
+ +SELF.
+       CALL P_KILL (MSG)
+       END
+@@ -4446,7 +4446,7 @@
+       CHARACTER    MSG*(*)
+ 
+ +SELF, IF=QS_UNIX.
+-      CALL PERRORF ('Perror has')
++      CALL PERROR ('Perror has')
+ +SELF.
+       CALL P_FATAL (MSG)
+       END
+@@ -15112,7 +15112,7 @@
+ +DECK, SEGVIOL, T=JOIN, IF=QDIAG, IF=QS_UNIX.
+       SUBROUTINE SEGVIOL
+ 
+-      CALL PERRORF ('perrorf has')
++      CALL PERROR ('perror has')
+       CALL P_KILL ('SEGVIOL reached')
+ 
+       END

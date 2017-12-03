@@ -1,0 +1,211 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 213-fix-test-suite-build.dpatch by Patrice Dumas <pertusus@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix build of test-suite for tests during package build.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/bvsl/test/Imakefile cernlib-2006.dfsg.2/src/mathlib/bvsl/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/mathlib/bvsl/test/Imakefile	1996-03-21 17:19:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/mathlib/bvsl/test/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -6,7 +6,7 @@
+ 
+ DefinePackageLibrary(bvsltst)
+ 
+-CernlibFortranProgramTarget(bvslt,tsbvsl.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib kernlib)
++CernlibFortranProgramTarget(bvslt,tsbvsl.o,libbvsltst.a,libbvsltst.a,mathlib kernlib)
+ 
+ TestTarget(bvslt,NullParameter,NullParameter)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/tests/Imakefile cernlib-2006.dfsg.2/src/mathlib/gen/tests/Imakefile
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/tests/Imakefile	2005-03-24 16:40:10.000000000 +0000
++++ cernlib-2006.dfsg.2/src/mathlib/gen/tests/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -63,7 +63,7 @@
+ 
+ DefinePackageLibrary(gentest)
+ 
+-CernlibFortranProgramTarget(gent,main.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(gent,main.o,libgentest.a,libgentest.a,packlib mathlib)
+ 
+ 
+ TestTarget(gent,NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/epio/tests/ptest1/Imakefile cernlib-2006.dfsg.2/src/packlib/epio/tests/ptest1/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/epio/tests/ptest1/Imakefile	1996-03-08 15:21:45.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/epio/tests/ptest1/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -11,9 +11,9 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(ptest1_16,$(OBJS_16) $(OBJS_CO),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ptest1_16,$(OBJS_16) $(OBJS_CO),NullParameter,NullParameter,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(ptest1_32,$(OBJS_32) $(OBJS_CO),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ptest1_32,$(OBJS_32) $(OBJS_CO),NullParameter,NullParameter,kernlib packlib)
+ 
+ TestTarget(ptest1_32,NullParameter,NullParameter)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/epio/tests/ptest2/Imakefile cernlib-2006.dfsg.2/src/packlib/epio/tests/ptest2/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/epio/tests/ptest2/Imakefile	1996-03-08 15:21:45.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/epio/tests/ptest2/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -10,9 +10,9 @@
+ SpecialFortranObjectRule(main_32,main,NullParameter,-DCERNLIB_PH32BIT)
+ SpecialFortranObjectRule(test2_32,test2,NullParameter,-DCERNLIB_PH32BIT)
+ 
+-CernlibFortranProgramTarget(ptest2_16,$(OBJS_16) $(OBJS_CO),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ptest2_16,$(OBJS_16) $(OBJS_CO),NullParameter,NullParameter,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(ptest2_32,$(OBJS_32) $(OBJS_CO),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ptest2_32,$(OBJS_32) $(OBJS_CO),NullParameter,NullParameter,kernlib packlib)
+ 
+ TestTarget(ptest2_32,NullParameter,NullParameter)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/epio/tests/ptest3/Imakefile cernlib-2006.dfsg.2/src/packlib/epio/tests/ptest3/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/epio/tests/ptest3/Imakefile	1996-03-08 15:21:46.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/epio/tests/ptest3/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -12,9 +12,9 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(ptest3_16,$(OBJS_16) $(OBJS_CO),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ptest3_16,$(OBJS_16) $(OBJS_CO),NullParameter,NullParameter,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(ptest3_32,$(OBJS_32) $(OBJS_CO),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ptest3_32,$(OBJS_32) $(OBJS_CO),NullParameter,NullParameter,kernlib packlib)
+ 
+ TestTarget(ptest3_32,NullParameter,NullParameter)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/ffread/test/Imakefile cernlib-2006.dfsg.2/src/packlib/ffread/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/ffread/test/Imakefile	1996-10-02 15:36:27.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/ffread/test/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -2,7 +2,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(ffread,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(ffread,$(OBJS),NullParameter,NullParameter,kernlib packlib)
+ 
+ TestTarget(ffread,NullParameter,test.input)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/examples/Imakefile cernlib-2006.dfsg.2/src/packlib/hbook/examples/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/examples/Imakefile	1996-02-20 15:46:21.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/examples/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -5,11 +5,11 @@
+ 
+ DefinePackageLibrary(hbtlib)
+ 
+-CernlibFortranProgramTarget(hbtest,hexam.o,$(PACKAGE_LIB),$(PACKAGE_LIB),NullParameter)
++CernlibFortranProgramTarget(hbtest,hexam.o,libhbtlib.a,libhbtlib.a,packlib)
+ 
+-CernlibFortranProgramTarget(hbdiff,htdiffb.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib)
++CernlibFortranProgramTarget(hbdiff,htdiffb.o,libhbtlib.a,libhbtlib.a,mathlib)
+ 
+-CernlibFortranProgramTarget(hmerge,hmerg.o hmergin.o,$(PACKAGE_LIB),$(PACKAGE_LIB),mathlib)
++CernlibFortranProgramTarget(hmerge,hmerg.o hmergin.o,libhbtlib.a,libhbtlib.a,mathlib)
+ 
+ TestTarget(hbtest,NullParameter,NullParameter)
+ TestTarget(hbdiff,NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/tests/Imakefile cernlib-2006.dfsg.2/src/packlib/hbook/tests/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/tests/Imakefile	1996-02-20 15:46:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/tests/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -1,6 +1,6 @@
+ #if 0
+ /* this is not yet understood */
+-CernlibFortranProgramTarget(hbtest,test_fp.o,$(PACKAGE_LIB),$(PACKAGE_LIB),NullParameter)
++CernlibFortranProgramTarget(hbtest,test_fp.o,NullParameter,NullParameter,packlib)
+ 
+ 
+ TestTarget(hbtest)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kapack/test/Imakefile cernlib-2006.dfsg.2/src/packlib/kapack/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kapack/test/Imakefile	1996-12-02 15:29:51.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kapack/test/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -1,7 +1,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(kapack,test1.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(kapack,test1.o,NullParameter,NullParameter,kernlib packlib)
+ 
+ /* the kapack test, or better kamake asks for a file name only in unix.
+  *  on VMS, the file is opened on unit 11, resulting in for011.dat
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/examples/Imakefile cernlib-2006.dfsg.2/src/packlib/kuip/examples/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/examples/Imakefile	1996-10-02 15:37:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/examples/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -5,7 +5,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(ktest,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),graflib packlib kernlib)
++CernlibFortranProgramTarget(ktest,$(OBJS),NullParameter,NullParameter,graflib packlib kernlib)
+ 
+ TestTarget(ktest,NullParameter,ktest.inp)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/minuit/examples/Imakefile cernlib-2006.dfsg.2/src/packlib/minuit/examples/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/minuit/examples/Imakefile	1997-10-23 17:04:15.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/minuit/examples/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -9,6 +9,6 @@
+ FDEBUGFLAGS=NoOpFortranDebugFlags
+ #endif
+ 
+-CernlibFortranProgramTarget(minuit,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),NullParameter)
++CernlibFortranProgramTarget(minuit,$(OBJS),NullParameter,NullParameter,packlib)
+ 
+ TestTarget(minuit,NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zbook/test/Imakefile cernlib-2006.dfsg.2/src/packlib/zbook/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/zbook/test/Imakefile	1996-03-12 08:13:30.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zbook/test/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -5,6 +5,6 @@
+ 
+ SubdirLibraryTarget(zbookt,NullParameter)
+ 
+-CernlibFortranProgramTarget(zexam,zexam.o,$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(zexam,zexam.o,libzbookt.a,libzbookt.a,packlib)
+ 
+ TestTarget(zexam,NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zebra/test/Imakefile cernlib-2006.dfsg.2/src/packlib/zebra/test/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/zebra/test/Imakefile	1997-08-29 13:33:57.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zebra/test/Imakefile	2007-12-14 00:14:11.000000000 +0000
+@@ -41,27 +41,27 @@
+ 
+ testrz: zebrz1 zebrz2 zebrz3
+ 
+-CernlibFortranProgramTarget(zebmz1,zebmz1.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(zebmz1,zebmz1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(zebfz1,zebfz1.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz2,zebfz2.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz3,zebfz3.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz4,zebfz4.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz5,zebfz5.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz6,zebfz6.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz7,zebfz7.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz8,zebfz8.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfz9,zebfz9.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(zebfz1,zebfz1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz2,zebfz2.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz3,zebfz3.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz4,zebfz4.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz5,zebfz5.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz6,zebfz6.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz7,zebfz7.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz8,zebfz8.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfz9,zebfz9.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(zebfc1,zebfc1.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfc2,zebfc2.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebfc3,zebfc3.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(zebfc1,zebfc1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfc2,zebfc2.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebfc3,zebfc3.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(zebjz1,zebjz1.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(zebjz1,zebjz1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
+ 
+-CernlibFortranProgramTarget(zebrz1,zebrz1.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebrz2,zebrz2.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
+-CernlibFortranProgramTarget(zebrz3,zebrz3.o,$(PACKAGE_LIB),$(PACKAGE_LIB),kernlib)
++CernlibFortranProgramTarget(zebrz1,zebrz1.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebrz2,zebrz2.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
++CernlibFortranProgramTarget(zebrz3,zebrz3.o,libzebtlib.a,libzebtlib.a,kernlib packlib)
+ 
+ TestTarget(zebmz1,zxtest.dat,NullParameter)
+ 

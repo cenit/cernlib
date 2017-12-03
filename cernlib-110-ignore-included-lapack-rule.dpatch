@@ -1,0 +1,23 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 110-ignore-included-lapack-rule.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Comment out rule requiring liblapack in a subdirectory of mathlib code.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mathlib/Imakefile /tmp/dpep.Ib8j9x/cernlib-2005.05.09/src/mathlib/Imakefile
+--- cernlib-2005.05.09/src/mathlib/Imakefile	1999-11-09 12:07:49.000000000 -0500
++++ /tmp/dpep.Ib8j9x/cernlib-2005.05.09/src/mathlib/Imakefile	2005-06-10 11:24:47.771309475 -0400
+@@ -5,9 +5,12 @@
+ 
+ LIBDIRS= gen bvsl
+ 
++/* Lapack is independent of Cernlib and should be installed as one of
++   the build dependencies.
+ #ifndef WIN32
+  LIBDIRS := $(LIBDIRS) lapack
+ #endif
++*/
+ 
+ SUBDIRS= $(LIBDIRS)
+ 

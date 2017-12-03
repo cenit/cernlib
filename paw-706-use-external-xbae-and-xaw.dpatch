@@ -1,0 +1,63 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 706-use-external-xbae-and-xaw.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Do not compile embedded old Xbae and Xaw code.
+
+@DPATCH@
+diff -urNad paw-2.14.04.dfsg~/src/paw_motif/Imakefile paw-2.14.04.dfsg/src/paw_motif/Imakefile
+--- paw-2.14.04.dfsg~/src/paw_motif/Imakefile	2007-01-11 16:35:03.203039255 -0500
++++ paw-2.14.04.dfsg/src/paw_motif/Imakefile	2007-01-11 16:35:55.436956428 -0500
+@@ -5,7 +5,7 @@
+ #define PassCDebugFlags
+ 
+ MotifDependantMakeVar(MOTIF_DIRS,cmotif fmotif fpanelsc)
+-MotifDependantMakeVar(PAWPP_DIRS,fpanelsf tree uimx)
++MotifDependantMakeVar(PAWPP_DIRS,fpanelsf      uimx)
+ 
+ LIBDIRS= code cdf
+ 
+@@ -13,6 +13,7 @@
+ LIBDIRS :=$(LIBDIRS) $(MOTIF_DIRS) $(PAWPP_DIRS)
+ #endif
+ 
++#if 0 /* we want to use external libXbae */
+ #if defined(CERNLIB_UNIX) && !defined(CERNLIB_WINNT)
+ MotifDependantMakeVar(PAWPP_DIRS,xbae)
+ LIBDIRS := $(LIBDIRS) $(PAWPP_DIRS)
+@@ -22,6 +23,7 @@
+ MotifDependantMakeVar(PAWPP_DIRS,xbaevms)
+ LIBDIRS := $(LIBDIRS) $(PAWPP_DIRS)
+ #endif
++#endif
+ 
+ SUBDIRS= $(LIBDIRS)
+ 
+diff -urNad paw-2.14.04.dfsg~/src/paw_motif/cmotif/chain_tree.c paw-2.14.04.dfsg/src/paw_motif/cmotif/chain_tree.c
+--- paw-2.14.04.dfsg~/src/paw_motif/cmotif/chain_tree.c	1996-03-01 06:38:54.000000000 -0500
++++ paw-2.14.04.dfsg/src/paw_motif/cmotif/chain_tree.c	2007-01-11 16:37:01.447950095 -0500
+@@ -19,7 +19,7 @@
+ 
+ #include "hmotif/pawm.h"
+ #include "hpaw/chain.h"
+-#include "paw/tree.h"
++#include <X11/Xaw/Tree.h>
+ 
+ #if defined(CERNLIB_QX_SC)
+ #define  show_chain_tree     show_chain_tree_
+diff -urNad paw-2.14.04.dfsg~/src/paw_motif/hmotif/scan.h paw-2.14.04.dfsg/src/paw_motif/hmotif/scan.h
+--- paw-2.14.04.dfsg~/src/paw_motif/hmotif/scan.h	1996-09-09 11:21:28.000000000 -0400
++++ paw-2.14.04.dfsg/src/paw_motif/hmotif/scan.h	2007-01-11 16:36:26.990261436 -0500
+@@ -20,10 +20,10 @@
+ #define _scan_h
+ 
+ #include "ntuplescan.h"
+-#ifdef CERNLIB_VAXVMS
++#if 0
+ #include "xbaevms/matrix.h"
+ #else
+-#include "xbae/matrix.h"
++#include <Xbae/Matrix.h>
+ #endif
+ 
+ 

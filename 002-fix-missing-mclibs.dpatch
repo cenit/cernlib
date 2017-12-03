@@ -1,0 +1,36 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 002-fix-missing-mclibs.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Deal with several of the MC libs having to be purged from source.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mclibs/Imakefile /tmp/dpep.pmIy0R/cernlib-2005.05.09/src/mclibs/Imakefile
+--- cernlib-2005.05.09/src/mclibs/Imakefile	1999-05-20 09:30:20.000000000 -0400
++++ /tmp/dpep.pmIy0R/cernlib-2005.05.09/src/mclibs/Imakefile	2005-06-08 15:39:37.783591646 -0400
+@@ -2,9 +2,11 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
+-
+-LIBDIRS= ariadne cojets eurodec herwig fritiof \ @@\
+-	 isajet jetset lepto63 pdf photos pythia
++/* Pythia and Jetset are not under GPL, so we must remove references
++   to them and their dependents.  They have already been purged from
++   Debianized source code.  Also, re-order libs so that dependent ones
++   come after dependees. */
++LIBDIRS= cojets eurodec pdf photos herwig isajet
+ 
+ SUBDIRS = $(LIBDIRS)
+ 
+@@ -12,8 +14,8 @@
+ 
+ InstallLibSubdirs($(LIBDIRS))
+ 
+-INCLUDEDIRS= ariadne cojets eurodec herwig fritiof \ @@\
+-	 isajet jetset lepto63 pdf pythia
++/* Again, purge Pythia, Jetset and dependents. */
++INCLUDEDIRS= cojets eurodec herwig isajet pdf
+ 
+ InstallIncludeSubdirs($(INCLUDEDIRS))
+ 

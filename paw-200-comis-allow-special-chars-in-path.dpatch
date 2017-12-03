@@ -1,0 +1,31 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 200-comis-allow-special-chars-in-path.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Allow certain additional characters in paths to COMIS macros.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/code/pawfca.F /tmp/dpep.gkT1Y2/cernlib-2005.05.09/src/pawlib/paw/code/pawfca.F
+--- cernlib-2005.05.09/src/pawlib/paw/code/pawfca.F	1997-05-20 05:37:58.000000000 -0400
++++ /tmp/dpep.gkT1Y2/cernlib-2005.05.09/src/pawlib/paw/code/pawfca.F	2005-06-08 19:34:43.101436210 -0400
+@@ -29,6 +29,7 @@
+ C.    *        CHFUNC may be the name of a COMIS function              *
+ C.    *        or a file name. A file cannot contain one of            *
+ C.    *        the following characters: +*=-()<>                      *
++C.    *        [n.b. patched to work around this. --Kevin McCarty]     *
+ C.    *                                                                *
+ C.    ******************************************************************
+ #include "paw/pawcfu.inc"
+@@ -60,7 +61,11 @@
+       IF(NCH.LE.0)GO TO 99
+       IFILE=0
+       TFILE=' '
+-      IF(INDEX(CHFUNC,']').EQ.0.AND.INDEX(CHFUNC,':').EQ.0)THEN
++* Added '/' as a character symbolizing a filename; otherwise Unix paths
++* containing +, *, =, -, etc. return a bogus "Unknown routine" error
++* (Fix by Kevin McCarty)
++      IF(INDEX(CHFUNC,']').EQ.0.AND.INDEX(CHFUNC,':').EQ.0.AND.
++     +   INDEX(CHFUNC,'/').EQ.0)THEN
+          IF(INDEX(CHFUNC,'+').NE.0.OR.
+      +      INDEX(CHFUNC,'*').NE.0.OR.
+      +      INDEX(CHFUNC,'=').NE.0.OR.

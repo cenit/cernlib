@@ -1,0 +1,22 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 701-patch-hbook-comis-Imakefiles.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix up makefiles after moving hkfill.F and hkf1q.F in the other
+## DP: 701 dpatch (a shell script).
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/packlib/hbook/code/Imakefile cernlib-2005.05.09.dfsg/src/packlib/hbook/code/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/packlib/hbook/code/Imakefile	1997-09-02 09:09:01.000000000 -0400
++++ cernlib-2005.05.09.dfsg/src/packlib/hbook/code/Imakefile	2005-12-07 14:59:31.519940694 -0500
+@@ -19,8 +19,8 @@
+ 	hgn.F hgnf.F hgnpar.F hgstat.F hhipar.F hhxye.F hi.F \ @@\
+ 	hictoi.F hid1.F hid2.F hidall.F hidopt.F hidpos.F hie.F  \ @@\
+ 	hif.F hij.F hije.F hijxy.F hindex.F hinprx.F hinteg.F  \ @@\
+-	hipak1.F histdo.F histgo.F hix.F hkf1.F hkf1q.F hkf2.F  \ @@\
+-	hkff1.F hkff2.F hkffi1.F hkfi1.F hkfil2.F hkfill.F hkfilpf.F \ @@\
++	hipak1.F histdo.F histgo.F hix.F hkf1.F         hkf2.F  \ @@\
++	hkff1.F hkff2.F hkffi1.F hkfi1.F hkfil2.F          hkfilpf.F \ @@\
+ 	hkind.F hknul1.F hknuli.F hlabel.F hlabeq.F hlabnb.F \ @@\
+ 	hlattr.F hlccmp.F hldir.F hldir1.F hldir2.F hldirt.F \ @@\
+ 	hlgnxt.F hlhcmp.F hlimit.F hllsq.F hlnext.F hlocat.F \ @@\

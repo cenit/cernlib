@@ -1,0 +1,81 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 001-fix-missing-fluka.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Deal with FLUKA code having been purged from Debian's CERNLIB source.
+
+@DPATCH@
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/Imakefile geant321-3.21.14.dfsg/src/geant321/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/Imakefile	1998-03-05 03:20:07.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/Imakefile	2008-01-04 17:00:47.000000000 -0800
+@@ -4,10 +4,11 @@
+ 
+ AllTarget(geant321)
+ 
+-LIBDIRS= block cdf cgpack fiface fluka gbase gcons gdraw \ @@\
++/* FLUKA removed from Debian source package for copyright reasons. */
++LIBDIRS=       cdf cgpack              gbase gcons gdraw \ @@\
+          geocad ggeom gheisha ghits ghrout ghutils giface \ @@\
+ 	 giopa gkine gphys gscan gstrag gtrak guser gxint \ @@\
+-	 miface miguti neutron peanut
++	 miface miguti neutron
+ 
+ 
+ SUBDIRS= $(LIBDIRS) data examples gxuser geant321
+@@ -25,9 +26,12 @@
+ InstallLibrary(geant321,$(CERN_LIBDIR))
+ InstallLibraryAlias(geant321,geant,$(CERN_LIBDIR))
+ 
++/* FLUKA removed from Debian source package for copyright reasons. */
++/*
+ SubdirDataFile($(LIBRARY),flukaaf.dat,data)
+ 
+ InstallNonExecFileTarget(install.lib,flukaaf.dat,$(CERN_LIBDIR))
++*/
+ 
+ /* This will install the correct link for xsneut95.dat at CERN;
+  * If you want a local copy of the file, just copy it there
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/Imakefile	1996-03-06 09:31:38.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/examples/Imakefile	2008-01-04 17:01:20.000000000 -0800
+@@ -1,7 +1,10 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)' /* for NamedMakeSubdirs */
+ 
++/* gexam4 needs fluka
+ SUBDIRS= gexam1 gexam2 gexam3 gexam4 gexam5
++*/
++SUBDIRS= gexam1 gexam2 gexam3 gexam5
+ 
+ TestSubdirs($(SUBDIRS))
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/geant321/gcnmec.inc geant321-3.21.14.dfsg/src/geant321/geant321/gcnmec.inc
+--- geant321-3.21.14.dfsg~/src/geant321/geant321/gcnmec.inc	1995-10-24 03:20:31.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/geant321/gcnmec.inc	2008-01-04 17:00:47.000000000 -0800
+@@ -16,13 +16,14 @@
+       PARAMETER(NMECA=45,IBLOWN=23)
+       CHARACTER*4 CHNMEC(NMECA)
+ *
+-* *** Two blank spaces for FISF and CAPF which do not exist
++* *** Null out all FLUKA mechanisms since we've removed FLUKA code
++* *** for DFSG reasons.  -- Kevin McCarty, for Debian
+ *
+ * *** The low-neutron cross-sections have to be at the end for the
+ * *** logics of the routine to work, and they have to start at
+ * *** IBLOWN
+       DATA CHNMEC /
+-     +     'HADF',  'INEF',  'ELAF',  'NULL',  'NULL',
++     +     'NULL',  'NULL',  'NULL',  'NULL',  'NULL',
+      +     'HADG',  'INEG',  'ELAG',  'FISG',  'CAPG',
+      +     'LOSS',  'PHOT',  'ANNI',  'COMP',  'BREM',
+      +     'PAIR',  'DRAY',  'PFIS',  'RAYL',  'MUNU',
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/miface/Imakefile geant321-3.21.14.dfsg/src/geant321/miface/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/miface/Imakefile	1995-10-24 03:21:53.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/miface/Imakefile	2008-01-04 17:00:47.000000000 -0800
+@@ -1,5 +1,5 @@
+ SRCS_F= \ @@\
+-	 gfmdis.F gfmfin.F gmicap.F gmiset.F gmorin.F gmplxs.F gmxsec.F
++	                   gmicap.F gmiset.F gmorin.F gmplxs.F gmxsec.F
+ 
+ #ifdef CERNLIB_QMVAOS
+  FORTRANSAVEOPTION=FortranSaveFlags

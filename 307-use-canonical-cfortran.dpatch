@@ -1,0 +1,496 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 307-use-canonical-cfortran.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Use the most recent version of cfortran.h and cfortran.doc from
+## DP: Debian package of cfortran, version 4.4-12.
+
+@DPATCH@
+diff -urNad paw-2.14.04.dfsg.2~/src/cfortran/cfortran.doc paw-2.14.04.dfsg.2/src/cfortran/cfortran.doc
+--- paw-2.14.04.dfsg.2~/src/cfortran/cfortran.doc	1998-12-11 09:17:09.000000000 -0800
++++ paw-2.14.04.dfsg.2/src/cfortran/cfortran.doc	2006-11-27 06:14:13.000000000 -0800
+@@ -195,13 +195,13 @@
+ HP9000> f77 -c cfortex.f
+ HP9000> CC -o cfortest cfortest.c cfortex.o -lI77 -lF77 && cfortest
+ 
+-HP0000> # If old-style f77 +800 compiled objects are required:
++HP9000> # If old-style f77 +800 compiled objects are required:
+ HP9000> # #define hpuxFortran800
+ HP9000> cc -c -Aa -DhpuxFortran800 cfortest.c
+ HP9000> f77 +800 -o cfortest cfortest.o cfortex.f
+ 
+ f2c> # In the following, 'CC' is any C compiler.
+-f2c> f2c -R cfortex.f
++f2c> f2c cfortex.f
+ f2c> CC -o cfortest -Df2cFortran cfortest.c cfortex.c -lf2c  &&  cfortest
+ 
+ Portland Group $ # Presumably other C compilers also work.
+@@ -533,9 +533,10 @@
+ FORTRAN_REAL thus corresponds to FORTRAN's REAL on all machines, including t3e.
+ 
+ 
+-o f2c
+-  f2c, by default promotes REAL functions to double. cfortran.h does not (yet)
+-support this, so the f2c -R option must be used to turn this promotion off.
++o f2c / g77
++  f2c and g77 by default promote REAL functions to double.  As of December 9,
++2005, the Debian package of cfortran supports this behavior, so the f2c -R
++option must *NOT* be used to turn this promotion off.
+ 
+ o f2c
+ [Thanks to Dario Autiero for pointing out the following.]
+@@ -573,6 +574,11 @@
+ #endif
+ /* Last three lines are a work-around for the strange f2c naming feature. */
+ 
++o gfortran
++  gfortran behaves similarly to f2c and g77, EXCEPT that it does NOT by default
++promote REAL functions to double.  Therefore you should use -DgFortran instead
++of -Dg77Fortran or -Df2cFortran to let cfortran.h know about this difference.
++
+ o NAG f90
+   The Fortran 77 subset of Fortran 90 is supported. Extending cfortran.h to 
+ interface C with all of Fortran 90 has not yet been examined.
+@@ -643,7 +649,7 @@
+    [For an ancient math.h on a 386 or sparc, get similar from a new math.h.]
+    #ifdef mc68000     /* 5 lines Copyright (c) 1988 by Sun Microsystems, Inc. */
+    #define FLOATFUNCTIONTYPE	int
+-   #define RETURNFLOAT(x) 		return (*(int *)(&(x)))
++   #define RETURNFLOAT(x) 	return (*(int *)(&(x)))
+    #define ASSIGNFLOAT(x,y)	*(int *)(&x) = y
+    #endif
+ 
+@@ -874,7 +880,7 @@
+ works everywhere and would seem to be an obvious choice.
+ 
+ 
+-3. <BYTE|DOUBLE|BYTE|DOUBLE|FLOAT|INT|LOGICAL|LONG|SHORT><V|VV|VVV|...>
++3. <BYTE|DOUBLE|FLOAT|INT|LOGICAL|LONG|SHORT><V|VV|VVV|...>
+ 
+ cfortran.h encourages the exact specification of the type and dimension of
+ array parameters because it allows the C compiler to detect errors in the
+@@ -1835,7 +1841,7 @@
+ 
+ Unlike all other C compilers supported by cfortran.h,
+ 'gcc -traditional' promotes to double all functions returning float
+-as demonstrated bu the following example.
++as demonstrated by the following example.
+ 
+ /* m.c */
+ #include <stdio.h>
+@@ -2017,8 +2023,9 @@
+ 
+ THIS PACKAGE, I.E. CFORTRAN.H, THIS DOCUMENT, AND THE CFORTRAN.H EXAMPLE
+ PROGRAMS ARE PROPERTY OF THE AUTHOR WHO RESERVES ALL RIGHTS. THIS PACKAGE AND
+-THE CODE IT PRODUCES MAY BE FREELY DISTRIBUTED WITHOUT FEES, SUBJECT TO THE
+-FOLLOWING RESTRICTIONS:
++THE CODE IT PRODUCES MAY BE FREELY DISTRIBUTED WITHOUT FEES, SUBJECT
++(AT YOUR CHOICE) EITHER TO THE GNU LIBRARY GENERAL PUBLIC LICENSE
++AT http://www.gnu.org/licenses/lgpl.html OR TO THE FOLLOWING RESTRICTIONS:
+ - YOU MUST ACCOMPANY ANY COPIES OR DISTRIBUTION WITH THIS (UNALTERED) NOTICE.
+ - YOU MAY NOT RECEIVE MONEY FOR THE DISTRIBUTION OR FOR ITS MEDIA 
+   (E.G. TAPE, DISK, COMPUTER, PAPER.)
+diff -urNad paw-2.14.04.dfsg.2~/src/cfortran/cfortran.h paw-2.14.04.dfsg.2/src/cfortran/cfortran.h
+--- paw-2.14.04.dfsg.2~/src/cfortran/cfortran.h	2002-09-11 10:05:51.000000000 -0700
++++ paw-2.14.04.dfsg.2/src/cfortran/cfortran.h	2008-05-14 09:07:05.000000000 -0700
+@@ -1,4 +1,4 @@
+-/* cfortran.h  4.4_cernlib2002 */
++/* cfortran.h  4.4 */
+ /* http://www-zeus.desy.de/~burow/cfortran/                   */
+ /* Burkhard Burow  burow@desy.de                 1990 - 2002. */
+ 
+@@ -11,11 +11,75 @@
+    MODIFYING, COPYING AND DISTRIBUTING THE CFORTRAN.H PACKAGE.
+ */
+ 
++/* The following modifications were made by the authors of CFITSIO or by me. 
++ * They are flagged below with CFITSIO, the author's initials, or KMCCARTY.
++ * PDW = Peter Wilson
++ * DM  = Doug Mink
++ * LEB = Lee E Brotzman
++ * MR  = Martin Reinecke
++ * WDP = William D Pence
++ * -- Kevin McCarty, for Debian (19 Dec. 2005) */
++
++/*******
++   Modifications:
++      Oct 1997: Changed symbol name extname to appendus (PDW/HSTX)
++                (Conflicted with a common variable name in FTOOLS)
++      Nov 1997: If g77Fortran defined, also define f2cFortran (PDW/HSTX)
++      Feb 1998: Let VMS see the NUM_ELEMS code. Lets programs treat
++                single strings as vectors with single elements
++      Nov 1999: If macintoxh defined, also define f2cfortran (for Mac OS-X)
++      Apr 2000: If WIN32 defined, also define PowerStationFortran and
++                VISUAL_CPLUSPLUS (Visual C++)
++      Jun 2000: If __GNUC__ and linux defined, also define f2cFortran
++                (linux/gcc environment detection)
++      Apr 2002: If __CYGWIN__ is defined, also define f2cFortran
++      Nov 2002: If __APPLE__ defined, also define f2cfortran (for Mac OS-X)
++
++      Nov 2003: If __INTEL_COMPILER or INTEL_COMPILER defined, also define
++                f2cFortran (KMCCARTY)
++      Dec 2005: If f2cFortran is defined, enforce REAL functions in FORTRAN
++                returning "double" in C.  This was one of the items on
++		Burkhard's TODO list. (KMCCARTY)
++      Dec 2005: Modifications to support 8-byte integers. (MR)
++		USE AT YOUR OWN RISK!
++      Feb 2006  Added logic to typedef the symbol 'LONGLONG' to an appropriate
++                intrinsic 8-byte integer datatype  (WDP)
++      Apr 2006: Modifications to support gfortran (and g77 with -fno-f2c flag)
++                since by default it returns "float" for FORTRAN REAL function.
++                (KMCCARTY)
++      May 2008: Revert commenting out of "extern" in COMMON_BLOCK_DEF macro.
++		Add braces around do-nothing ";" in 3 empty while blocks to
++		get rid of compiler warnings.  Thanks to ROOT developers
++		Jacek Holeczek and Rene Brun for these suggestions. (KMCCARTY)
++ *******/
++
+ /* 
+   Avoid symbols already used by compilers and system *.h:
+   __ - OSF1 zukal06 V3.0 347 alpha, cc -c -std1 cfortest.c
+ 
+- */
++*/
++
++/* 
++   Determine what 8-byte integer data type is available.
++  'long long' is now supported by most compilers, but older
++  MS Visual C++ compilers before V7.0 use '__int64' instead. (WDP)
++*/
++
++#ifndef LONGLONG_TYPE   /* this may have been previously defined */
++#if defined(_MSC_VER)   /* Microsoft Visual C++ */
++
++#if (_MSC_VER < 1300)   /* versions earlier than V7.0 do not have 'long long' */
++    typedef __int64 LONGLONG;
++#else                   /* newer versions do support 'long long' */
++    typedef long long LONGLONG; 
++#endif
++
++#else
++    typedef long long LONGLONG; 
++#endif
++
++#define LONGLONG_TYPE
++#endif  
+ 
+ 
+ /* First prepare for the C compiler. */
+@@ -75,7 +139,9 @@
+ 
+ /* Remainder of cfortran.h depends on the Fortran compiler. */
+ 
+-#if defined(CLIPPERFortran) || defined(pgiFortran)
++/* 11/29/2003 (KMCCARTY): add *INTEL_COMPILER symbols here */
++/* 04/05/2006 (KMCCARTY): add gFortran symbol here */
++#if defined(CLIPPERFortran) || defined(pgiFortran) || defined(__INTEL_COMPILER) || defined(INTEL_COMPILER) || defined(gFortran)
+ #define f2cFortran
+ #endif
+ 
+@@ -90,6 +156,27 @@
+                            Support f2c or f77 with gcc, vcc with f2c. 
+                            f77 with vcc works, missing link magic for f77 I/O.*/
+ #endif
++/* 04/13/00 DM (CFITSIO): Add these lines for NT */
++/*   with PowerStationFortran and and Visual C++ */
++#if defined(WIN32) && !defined(__CYGWIN__)
++#define PowerStationFortran   
++#define VISUAL_CPLUSPLUS
++#endif
++#if defined(g77Fortran)                        /* 11/03/97 PDW (CFITSIO) */
++#define f2cFortran
++#endif
++#if        defined(__CYGWIN__)                 /* 04/11/02 LEB (CFITSIO) */
++#define       f2cFortran 
++#endif
++#if        defined(__GNUC__) && defined(linux) /* 06/21/00 PDW (CFITSIO) */
++#define       f2cFortran 
++#endif
++#if defined(macintosh)                         /* 11/1999 (CFITSIO) */
++#define f2cFortran
++#endif
++#if defined(__APPLE__)                         /* 11/2002 (CFITSIO) */
++#define f2cFortran
++#endif
+ #if defined(__hpux)             /* 921107: Use __hpux instead of __hp9000s300 */
+ #define       hpuxFortran       /*         Should also allow hp9000s7/800 use.*/
+ #endif
+@@ -131,6 +218,7 @@
+ #if !(defined(mipsFortran)||defined(DECFortran)||defined(vmsFortran)||defined(CONVEXFortran)||defined(PowerStationFortran)||defined(AbsoftUNIXFortran)||defined(AbsoftProFortran)||defined(SXFortran))
+ /* If your compiler barfs on ' #error', replace # with the trigraph for #     */
+  #error "cfortran.h:  Can't find your environment among:\
++    - GNU gcc (g77) on Linux.                                            \
+     - MIPS cc and f77 2.0. (e.g. Silicon Graphics, DECstations, ...)     \
+     - IBM AIX XL C and FORTRAN Compiler/6000 Version 01.01.0000.0000     \
+     - VAX   VMS CC 3.1 and FORTRAN 5.4.                                  \
+@@ -147,11 +235,14 @@
+     - VAXUltrix: vcc,cc or gcc with f2c. gcc or cc with f77.             \
+     -            f77 with vcc works; but missing link magic for f77 I/O. \
+     -            NO fort. None of gcc, cc or vcc generate required names.\
+-    - f2c    : Use #define    f2cFortran, or cc -Df2cFortran             \
++    - f2c/g77:   Use #define    f2cFortran, or cc -Df2cFortran           \
++    - gfortran:  Use #define    gFortran,   or cc -DgFortran             \
++                 (also necessary for g77 with -fno-f2c option)           \
+     - NAG f90: Use #define NAGf90Fortran, or cc -DNAGf90Fortran          \
+     - Absoft UNIX F77: Use #define AbsoftUNIXFortran or cc -DAbsoftUNIXFortran \
+     - Absoft Pro Fortran: Use #define AbsoftProFortran \
+-    - Portland Group Fortran: Use #define pgiFortran"
++    - Portland Group Fortran: Use #define pgiFortran \
++    - Intel Fortran: Use #define INTEL_COMPILER"
+ /* Compiler must throw us out at this point! */
+ #endif
+ #endif
+@@ -164,7 +255,8 @@
+ 
+ /* Throughout cfortran.h we use: UN = Uppercase Name.  LN = Lowercase Name.   */
+ 
+-#if defined(f2cFortran) || defined(NAGf90Fortran) || defined(DECFortran) || defined(mipsFortran) || defined(apolloFortran) || defined(sunFortran) || defined(CONVEXFortran) || defined(SXFortran) || defined(extname)
++/* "extname" changed to "appendus" below (CFITSIO) */
++#if defined(f2cFortran) || defined(NAGf90Fortran) || defined(DECFortran) || defined(mipsFortran) || defined(apolloFortran) || defined(sunFortran) || defined(CONVEXFortran) || defined(SXFortran) || defined(appendus)
+ #define CFC_(UN,LN)            _(LN,_)      /* Lowercase FORTRAN symbols.     */
+ #define orig_fcallsc(UN,LN)    CFC_(UN,LN)
+ #else 
+@@ -268,7 +360,7 @@
+ #endif
+ 
+ #ifndef apolloFortran
+-#define COMMON_BLOCK_DEF(DEFINITION, NAME) DEFINITION NAME
++#define COMMON_BLOCK_DEF(DEFINITION, NAME) extern DEFINITION NAME
+ #define CF_NULL_PROTO
+ #else                                         /* HP doesn't understand #elif. */
+ /* Without ANSI prototyping, Apollo promotes float functions to double.    */
+@@ -453,7 +545,7 @@
+ {char *e; 
+ e = s + strlen(s);
+ if (e>s) {                           /* Need this to handle NULL string.*/
+-  while (e>s && *--e==t);            /* Don't follow t's past beginning. */
++  while (e>s && *--e==t) {;}         /* Don't follow t's past beginning. */
+   e[*e==t?0:1] = '\0';               /* Handle s[0]=t correctly.       */
+ } return s; }
+ 
+@@ -469,7 +561,7 @@
+ { 
+ if (e==s) *e = '\0';                 /* Kill the string makes sense here.*/
+ else if (e>s) {                      /* Watch out for neg. length string.*/
+-  while (e>s && *--e==t);            /* Don't follow t's past beginning. */
++  while (e>s && *--e==t){;}          /* Don't follow t's past beginning. */
+   e[*e==t?0:1] = '\0';               /* Handle s[0]=t correctly.       */
+ } return s; }
+ 
+@@ -512,7 +604,7 @@
+                     *( (F).dsc$l_m[0]=(F).dsc$bounds[0].dsc$l_u=(ELEMNO)  ),   \
+   (F).dsc$a_a0    =  ( (F).dsc$a_pointer=(C) ) - (F).dsc$w_length          ,(F))
+ 
+-#else
++#endif      /* PDW: 2/10/98 (CFITSIO) -- Let VMS see NUM_ELEMS definitions */
+ #define _NUM_ELEMS      -1
+ #define _NUM_ELEM_ARG   -2
+ #define NUM_ELEMS(A)    A,_NUM_ELEMS
+@@ -534,13 +626,18 @@
+   return term_char;
+ if (num_term <=0) num_term = (int)elem_len;
+ for (num=0; ; num++) {
+-  for (i=0; i<(unsigned)num_term && *strv==term_char; i++,strv++);
++  for (i=0; i<(unsigned)num_term && *strv==term_char; i++,strv++){;}
+   if (i==(unsigned)num_term) break;
+   else strv += elem_len-i;
+ }
++if (0) {  /* to prevent not used warnings in gcc (added by ROOT) */
++   c2fstrv(0, 0, 0, 0); f2cstrv(0, 0, 0, 0); kill_trailing(0, 0);
++   vkill_trailing(0, 0, 0, 0); num_elem(0, 0, 0, 0);
++}
+ return (int)num;
+ }
+-#endif
++/* #endif removed 2/10/98 (CFITSIO) */
++
+ /*-------------------------------------------------------------------------*/
+ 
+ /*           UTILITIES FOR C TO USE STRINGS IN FORTRAN COMMON BLOCKS       */
+@@ -1318,6 +1415,7 @@
+ #define     INTVVVVVVV_cfTYPE int
+ #define LOGICALVVVVVVV_cfTYPE int
+ #define    LONGVVVVVVV_cfTYPE long
++#define LONGLONGVVVVVVV_cfTYPE LONGLONG   /* added by MR December 2005 */
+ #define   SHORTVVVVVVV_cfTYPE short
+ #define          PBYTE_cfTYPE INTEGER_BYTE
+ #define        PDOUBLE_cfTYPE DOUBLE_PRECISION 
+@@ -1325,6 +1423,7 @@
+ #define           PINT_cfTYPE int
+ #define       PLOGICAL_cfTYPE int
+ #define          PLONG_cfTYPE long
++#define      PLONGLONG_cfTYPE LONGLONG  /* added by MR December 2005 */
+ #define         PSHORT_cfTYPE short
+ 
+ #define CFARGS0(A,T,V,W,X,Y,Z) _3(T,_cf,A)
+@@ -1342,6 +1441,7 @@
+ #define            INT_cfINT(N,A,B,X,Y,Z)        DOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define        LOGICAL_cfINT(N,A,B,X,Y,Z)        DOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define           LONG_cfINT(N,A,B,X,Y,Z)        DOUBLE_cfINT(N,A,B,X,Y,Z)
++#define       LONGLONG_cfINT(N,A,B,X,Y,Z)        DOUBLE_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
+ #define          SHORT_cfINT(N,A,B,X,Y,Z)        DOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define          PBYTE_cfINT(N,A,B,X,Y,Z)       PDOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define        PDOUBLE_cfINT(N,A,B,X,Y,Z) _(CFARGS,N)(A,PINT,B,X,Y,Z,0)
+@@ -1349,6 +1449,7 @@
+ #define           PINT_cfINT(N,A,B,X,Y,Z)       PDOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define       PLOGICAL_cfINT(N,A,B,X,Y,Z)       PDOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define          PLONG_cfINT(N,A,B,X,Y,Z)       PDOUBLE_cfINT(N,A,B,X,Y,Z)
++#define      PLONGLONG_cfINT(N,A,B,X,Y,Z)       PDOUBLE_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
+ #define         PSHORT_cfINT(N,A,B,X,Y,Z)       PDOUBLE_cfINT(N,A,B,X,Y,Z)
+ #define          BYTEV_cfINT(N,A,B,X,Y,Z)       DOUBLEV_cfINT(N,A,B,X,Y,Z)
+ #define         BYTEVV_cfINT(N,A,B,X,Y,Z)      DOUBLEVV_cfINT(N,A,B,X,Y,Z)
+@@ -1392,6 +1493,13 @@
+ #define      LONGVVVVV_cfINT(N,A,B,X,Y,Z)   DOUBLEVVVVV_cfINT(N,A,B,X,Y,Z)
+ #define     LONGVVVVVV_cfINT(N,A,B,X,Y,Z)  DOUBLEVVVVVV_cfINT(N,A,B,X,Y,Z)
+ #define    LONGVVVVVVV_cfINT(N,A,B,X,Y,Z) DOUBLEVVVVVVV_cfINT(N,A,B,X,Y,Z)
++#define      LONGLONGV_cfINT(N,A,B,X,Y,Z)       DOUBLEV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
++#define     LONGLONGVV_cfINT(N,A,B,X,Y,Z)      DOUBLEVV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
++#define    LONGLONGVVV_cfINT(N,A,B,X,Y,Z)     DOUBLEVVV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
++#define   LONGLONGVVVV_cfINT(N,A,B,X,Y,Z)    DOUBLEVVVV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
++#define  LONGLONGVVVVV_cfINT(N,A,B,X,Y,Z)   DOUBLEVVVVV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
++#define LONGLONGVVVVVV_cfINT(N,A,B,X,Y,Z)  DOUBLEVVVVVV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
++#define LONGLONGVVVVVVV_cfINT(N,A,B,X,Y,Z) DOUBLEVVVVVVV_cfINT(N,A,B,X,Y,Z) /* added by MR December 2005 */
+ #define         SHORTV_cfINT(N,A,B,X,Y,Z)       DOUBLEV_cfINT(N,A,B,X,Y,Z)
+ #define        SHORTVV_cfINT(N,A,B,X,Y,Z)      DOUBLEVV_cfINT(N,A,B,X,Y,Z)
+ #define       SHORTVVV_cfINT(N,A,B,X,Y,Z)     DOUBLEVVV_cfINT(N,A,B,X,Y,Z)
+@@ -1451,7 +1559,12 @@
+ #define      BYTE_cfPU(A)   CFextern INTEGER_BYTE      FCALLSC_QUALIFIER A
+ #define    DOUBLE_cfPU(A)   CFextern DOUBLE_PRECISION  FCALLSC_QUALIFIER A
+ #if ! (defined(FLOATFUNCTIONTYPE)&&defined(ASSIGNFLOAT)&&defined(RETURNFLOAT))
++#if defined (f2cFortran) && ! defined (gFortran)
++/* f2c/g77 return double from FORTRAN REAL functions. (KMCCARTY, 2005/12/09) */
++#define     FLOAT_cfPU(A)   CFextern DOUBLE_PRECISION  FCALLSC_QUALIFIER A
++#else
+ #define     FLOAT_cfPU(A)   CFextern FORTRAN_REAL      FCALLSC_QUALIFIER A
++#endif
+ #else				   	                   
+ #define     FLOAT_cfPU(A)   CFextern FLOATFUNCTIONTYPE FCALLSC_QUALIFIER A
+ #endif				   	                   
+@@ -1589,6 +1702,7 @@
+ #define            INT_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define        LOGICAL_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,LOGICAL,A,B,C,D,E)
+ #define           LONG_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
++#define       LONGLONG_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
+ #define          SHORT_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define          BYTEV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define         BYTEVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+@@ -1632,6 +1746,13 @@
+ #define      LONGVVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define     LONGVVVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define    LONGVVVVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
++#define      LONGLONGV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
++#define     LONGLONGVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
++#define    LONGLONGVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
++#define   LONGLONGVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
++#define  LONGLONGVVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
++#define LONGLONGVVVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
++#define LONGLONGVVVVVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
+ #define         SHORTV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define        SHORTVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define       SHORTVVV_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+@@ -1645,6 +1766,7 @@
+ #define           PINT_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define       PLOGICAL_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,PLOGICAL,A,B,C,D,E)
+ #define          PLONG_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
++#define      PLONGLONG_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E) /* added by MR December 2005 */
+ #define         PSHORT_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,DEFAULT,A,B,C,D,E)
+ #define         STRING_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,STRING,A,B,C,D,E)
+ #define        PSTRING_cfSTR(N,T,A,B,C,D,E) _(CFARGS,N)(T,PSTRING,A,B,C,D,E)
+@@ -1957,6 +2079,7 @@
+ #define            INT_cfT(M,I,A,B,D) *A
+ #define        LOGICAL_cfT(M,I,A,B,D)  F2CLOGICAL(*A)
+ #define           LONG_cfT(M,I,A,B,D) *A
++#define       LONGLONG_cfT(M,I,A,B,D) *A /* added by MR December 2005 */
+ #define          SHORT_cfT(M,I,A,B,D) *A
+ #define          BYTEV_cfT(M,I,A,B,D)  A
+ #define        DOUBLEV_cfT(M,I,A,B,D)  A
+@@ -1964,6 +2087,7 @@
+ #define           INTV_cfT(M,I,A,B,D)  A
+ #define       LOGICALV_cfT(M,I,A,B,D)  A
+ #define          LONGV_cfT(M,I,A,B,D)  A
++#define      LONGLONGV_cfT(M,I,A,B,D)  A /* added by MR December 2005 */
+ #define         SHORTV_cfT(M,I,A,B,D)  A
+ #define         BYTEVV_cfT(M,I,A,B,D)  (void *)A /* We have to cast to void *,*/
+ #define        BYTEVVV_cfT(M,I,A,B,D)  (void *)A /* since we don't know the   */
+@@ -2001,6 +2125,12 @@
+ #define      LONGVVVVV_cfT(M,I,A,B,D)  (void *)A
+ #define     LONGVVVVVV_cfT(M,I,A,B,D)  (void *)A
+ #define    LONGVVVVVVV_cfT(M,I,A,B,D)  (void *)A
++#define     LONGLONGVV_cfT(M,I,A,B,D)  (void *)A /* added by MR December 2005 */
++#define    LONGLONGVVV_cfT(M,I,A,B,D)  (void *)A /* added by MR December 2005 */
++#define   LONGLONGVVVV_cfT(M,I,A,B,D)  (void *)A /* added by MR December 2005 */
++#define  LONGLONGVVVVV_cfT(M,I,A,B,D)  (void *)A /* added by MR December 2005 */
++#define LONGLONGVVVVVV_cfT(M,I,A,B,D)  (void *)A /* added by MR December 2005 */
++#define LONGLONGVVVVVVV_cfT(M,I,A,B,D)  (void *)A /* added by MR December 2005 */
+ #define        SHORTVV_cfT(M,I,A,B,D)  (void *)A
+ #define       SHORTVVV_cfT(M,I,A,B,D)  (void *)A
+ #define      SHORTVVVV_cfT(M,I,A,B,D)  (void *)A
+@@ -2013,6 +2143,7 @@
+ #define           PINT_cfT(M,I,A,B,D)  A
+ #define       PLOGICAL_cfT(M,I,A,B,D)  ((*A=F2CLOGICAL(*A)),A)
+ #define          PLONG_cfT(M,I,A,B,D)  A
++#define      PLONGLONG_cfT(M,I,A,B,D)  A /* added by MR December 2005 */
+ #define         PSHORT_cfT(M,I,A,B,D)  A
+ #define          PVOID_cfT(M,I,A,B,D)  A
+ #if defined(apolloFortran) || defined(hpuxFortran800) || defined(AbsoftUNIXFortran)
+@@ -2083,12 +2214,18 @@
+ #define     INT_cfFZ(UN,LN) int   FCALLSC_QUALIFIER fcallsc(UN,LN)(
+ #define LOGICAL_cfFZ(UN,LN) int   FCALLSC_QUALIFIER fcallsc(UN,LN)(
+ #define    LONG_cfFZ(UN,LN) long  FCALLSC_QUALIFIER fcallsc(UN,LN)(
++#define LONGLONG_cfFZ(UN,LN) LONGLONG FCALLSC_QUALIFIER fcallsc(UN,LN)( /* added by MR December 2005 */
+ #define   SHORT_cfFZ(UN,LN) short FCALLSC_QUALIFIER fcallsc(UN,LN)(
+ #define    VOID_cfFZ(UN,LN) void  FCALLSC_QUALIFIER fcallsc(UN,LN)(
+ #ifndef __CF__KnR
+ /* The void is req'd by the Apollo, to make this an ANSI function declaration.
+    The Apollo promotes K&R float functions to double. */
+-#define   FLOAT_cfFZ(UN,LN) FORTRAN_REAL FCALLSC_QUALIFIER fcallsc(UN,LN)(void
++#if defined (f2cFortran) && ! defined (gFortran)
++/* f2c/g77 return double from FORTRAN REAL functions. (KMCCARTY, 2005/12/09) */
++#define FLOAT_cfFZ(UN,LN) DOUBLE_PRECISION FCALLSC_QUALIFIER fcallsc(UN,LN)(void
++#else
++#define FLOAT_cfFZ(UN,LN) FORTRAN_REAL FCALLSC_QUALIFIER fcallsc(UN,LN)(void
++#endif
+ #ifdef vmsFortran
+ #define  STRING_cfFZ(UN,LN) void  FCALLSC_QUALIFIER fcallsc(UN,LN)(fstring *AS
+ #else
+@@ -2104,7 +2241,12 @@
+ #endif
+ #else
+ #if ! (defined(FLOATFUNCTIONTYPE)&&defined(ASSIGNFLOAT)&&defined(RETURNFLOAT))
++#if defined (f2cFortran) && ! defined (gFortran)
++/* f2c/g77 return double from FORTRAN REAL functions. (KMCCARTY, 2005/12/09) */
++#define   FLOAT_cfFZ(UN,LN) DOUBLE_PRECISION  FCALLSC_QUALIFIER fcallsc(UN,LN)(
++#else
+ #define   FLOAT_cfFZ(UN,LN) FORTRAN_REAL      FCALLSC_QUALIFIER fcallsc(UN,LN)(
++#endif
+ #else
+ #define   FLOAT_cfFZ(UN,LN) FLOATFUNCTIONTYPE FCALLSC_QUALIFIER fcallsc(UN,LN)(
+ #endif
+@@ -2118,13 +2260,19 @@
+ #define    BYTE_cfF(UN,LN)     BYTE_cfFZ(UN,LN)
+ #define  DOUBLE_cfF(UN,LN)   DOUBLE_cfFZ(UN,LN)
+ #ifndef __CF_KnR
++#if defined (f2cFortran) && ! defined (gFortran)
++/* f2c/g77 return double from FORTRAN REAL functions. (KMCCARTY, 2005/12/09) */
++#define   FLOAT_cfF(UN,LN)  DOUBLE_PRECISION FCALLSC_QUALIFIER fcallsc(UN,LN)(
++#else
+ #define   FLOAT_cfF(UN,LN)  FORTRAN_REAL FCALLSC_QUALIFIER fcallsc(UN,LN)(
++#endif
+ #else
+ #define   FLOAT_cfF(UN,LN)    FLOAT_cfFZ(UN,LN)
+ #endif
+ #define     INT_cfF(UN,LN)      INT_cfFZ(UN,LN)
+ #define LOGICAL_cfF(UN,LN)  LOGICAL_cfFZ(UN,LN)
+ #define    LONG_cfF(UN,LN)     LONG_cfFZ(UN,LN)
++#define LONGLONG_cfF(UN,LN) LONGLONG_cfFZ(UN,LN) /* added by MR December 2005 */
+ #define   SHORT_cfF(UN,LN)    SHORT_cfFZ(UN,LN)
+ #define    VOID_cfF(UN,LN)     VOID_cfFZ(UN,LN)
+ #define  STRING_cfF(UN,LN)   STRING_cfFZ(UN,LN),
+@@ -2187,6 +2335,7 @@
+ #define LOGICAL_cfI  return C2FLOGICAL(A0);
+ #endif
+ #define    LONG_cfI  return A0;
++#define LONGLONG_cfI  return A0; /* added by MR December 2005 */
+ #define   SHORT_cfI  return A0;
+ #define  STRING_cfI  return   ;
+ #define    VOID_cfI  return   ;

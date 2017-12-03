@@ -1,0 +1,79 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 208-fix-redundant-packlib-dependencies.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Remove some redundancy in the libraries listed to be linked against.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/graflib/dzdoc/dzedit/Imakefile /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/graflib/dzdoc/dzedit/Imakefile
+--- cernlib-2005.05.09/src/graflib/dzdoc/dzedit/Imakefile	1996-05-09 10:32:43.000000000 -0400
++++ /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/graflib/dzdoc/dzedit/Imakefile	2005-06-10 11:54:49.270360036 -0400
+@@ -20,7 +20,7 @@
+ NeedTcpipLib
+ #endif
+ 
+-CernlibFortranProgramTarget(dzeX11,dzedit.o,$(PACKAGE_LIB),$(PACKAGE_LIB),graflib/X11 packlib)
++CernlibFortranProgramTarget(dzeX11,dzedit.o,libdzdoc.a,libdzdoc.a,graflib/X11 packlib)
+ 
+ InstallProgram(dzeX11,$(CERN_BINDIR))
+ InstallScript(dzedit,$(CERN_BINDIR))
+diff -urNad cernlib-2005.05.09/src/packlib/cspack/programs/zftp/Imakefile /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/cspack/programs/zftp/Imakefile
+--- cernlib-2005.05.09/src/packlib/cspack/programs/zftp/Imakefile	1996-04-16 04:09:49.000000000 -0400
++++ /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/cspack/programs/zftp/Imakefile	2005-06-10 11:55:33.872780414 -0400
+@@ -14,6 +14,6 @@
+ 
+ NeedTcpipLib
+ 
+-CernlibFortranProgramTarget(zftp,zftp.o,$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(zftp,zftp.o,libzftplib.a,libzftplib.a,packlib)
+ 
+ InstallProgram(zftp,$(CERN_BINDIR))
+diff -urNad cernlib-2005.05.09/src/packlib/cspack/programs/zs/Imakefile /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/cspack/programs/zs/Imakefile
+--- cernlib-2005.05.09/src/packlib/cspack/programs/zs/Imakefile	1996-05-05 05:40:20.000000000 -0400
++++ /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/cspack/programs/zs/Imakefile	2005-06-10 11:56:23.109221943 -0400
+@@ -31,10 +31,10 @@
+ 
+ DefinePackageLibrary(zservlib)
+ 
+-CernlibFortranProgramTarget(zserv,zs.o,$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(zserv,zs.o,libzservlib.a,libzservlib.a,packlib)
+ 
+ InstallProgram(zserv,$(CERN_BINDIR))
+ 
+-CernlibFortranProgramTarget(pawserv,zs.o,$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(pawserv,zs.o,libzservlib.a,libzservlib.a,packlib)
+ 
+ InstallProgram(pawserv,$(CERN_BINDIR))
+diff -urNad cernlib-2005.05.09/src/packlib/fatmen/programs/fmkuip/Imakefile /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/fatmen/programs/fmkuip/Imakefile
+--- cernlib-2005.05.09/src/packlib/fatmen/programs/fmkuip/Imakefile	1996-11-05 04:32:29.000000000 -0500
++++ /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/fatmen/programs/fmkuip/Imakefile	2005-06-10 11:56:54.779438847 -0400
+@@ -28,6 +28,6 @@
+ NeedSysexe
+ #endif
+ 
+-CernlibFortranProgramTarget(fatmen,fatmen.o,$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(fatmen,fatmen.o,libfmkuip.a,libfmkuip.a,packlib)
+ 
+ InstallProgram(fatmen,$(CERN_BINDIR))
+diff -urNad cernlib-2005.05.09/src/packlib/hepdb/programs/hepdb/Imakefile /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/hepdb/programs/hepdb/Imakefile
+--- cernlib-2005.05.09/src/packlib/hepdb/programs/hepdb/Imakefile	1996-04-02 05:03:43.000000000 -0500
++++ /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/hepdb/programs/hepdb/Imakefile	2005-06-10 11:57:39.794807919 -0400
+@@ -17,6 +17,6 @@
+ SpecialFortranObjectRule(hepdb,hepdb,'-WF,-P',NullParameter)
+ #endif
+ 
+-CernlibFortranProgramTarget(hepdb,hepdb.o,$(PACKAGE_LIB),$(PACKAGE_LIB),packlib)
++CernlibFortranProgramTarget(hepdb,hepdb.o,libdbmodule.a,libdbmodule.a,packlib)
+ 
+ InstallProgram(hepdb,$(CERN_BINDIR))
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/Imakefile /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/Imakefile
+--- cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/Imakefile	1996-04-18 12:33:08.000000000 -0400
++++ /tmp/dpep.ZL6s2h/cernlib-2005.05.09/src/packlib/kuip/programs/kxterm/Imakefile	2005-06-10 12:00:35.355791756 -0400
+@@ -21,6 +21,6 @@
+ #endif
+ 
+ 
+-CernlibCcProgramTarget(kxterm,kxterm.o,$(PACKAGE_LIB),$(PACKAGE_LIB),$(CLIBS))
++CernlibCcProgramTarget(kxterm,kxterm.o,libkxtlib.a,libkxtlib.a,$(CLIBS))
+ 
+ InstallProgram(kxterm,$(CERN_BINDIR))

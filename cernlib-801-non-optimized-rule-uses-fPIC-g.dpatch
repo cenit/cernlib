@@ -1,0 +1,24 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 801-non-optimized-rule-uses-fPIC-g.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Ensure that special rules for creating non-optimized object files
+## DP: use -fPIC for files that go into shared libs, and -g for all files.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/config/fortran.rules /tmp/dpep.gResDB/cernlib-2005.05.09/src/config/fortran.rules
+--- cernlib-2005.05.09/src/config/fortran.rules	1997-05-30 12:25:18.000000000 -0400
++++ /tmp/dpep.gResDB/cernlib-2005.05.09/src/config/fortran.rules	2005-06-09 10:37:19.092244331 -0400
+@@ -345,9 +345,9 @@
+ 
+ #ifndef SpecialFortranLibObjectRule
+ #define SpecialFortranLibObjectRule(baseobj,basedep,options,cppoptions)	@@\
+-SpecialFortranArchiveObjectRule(baseobj,basedep,options,cppoptions)	@@\
+-SpecialFortranSharedObjectRule(baseobj,basedep,options,cppoptions)	@@\
+-SpecialFortranDebugObjectRule(baseobj,basedep,options,cppoptions)
++SpecialFortranArchiveObjectRule(baseobj,basedep,options -g,cppoptions)	    @@\
++SpecialFortranSharedObjectRule(baseobj,basedep,options -g -fPIC,cppoptions) @@\
++SpecialFortranDebugObjectRule(baseobj,basedep,options -g,cppoptions)
+ #endif
+ 
+ #ifndef SpecialFortranArchiveObjectRule

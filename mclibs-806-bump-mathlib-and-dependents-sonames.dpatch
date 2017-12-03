@@ -1,0 +1,68 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 806-bump-mathlib-and-dependents-sonames.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Bump so versions of mathlib and dependents since it is now compiled
+## DP: against liblapack3 instead of liblapack2.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/cojets/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/cojets/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/cojets/Imakefile	2005-11-23 15:49:19.723162159 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/cojets/Imakefile	2005-11-23 15:49:27.431512287 +0000
+@@ -2,6 +2,8 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
++export LIB_SONAME := 2
++
+ AllTarget(cojets)
+ 
+ LIBDIRS= code cojdata cojtapew
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/herwig/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/herwig/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/herwig/Imakefile	2005-11-23 15:49:19.724161945 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/herwig/Imakefile	2005-11-23 15:49:27.432512073 +0000
+@@ -2,6 +2,8 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
++export LIB_SONAME := 2
++
+ SUBDIRS= code doc test herwig59
+ 
+ TopOfPackage(herwig59)
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/isajet/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/isajet/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/isajet/Imakefile	2005-11-23 15:49:19.724161945 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/isajet/Imakefile	2005-11-23 15:49:27.432512073 +0000
+@@ -3,6 +3,8 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
++export LIB_SONAME := 3
++
+ LIBDIRS= code isadata isasusy isarun isatape
+ 
+ SUBDIRS= $(LIBDIRS) test data isajet
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/pdf/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/pdf/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/pdf/Imakefile	2005-11-23 15:49:19.724161945 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/pdf/Imakefile	2005-11-23 15:49:27.432512073 +0000
+@@ -6,6 +6,8 @@
+ IMAKE_DEFINES=-DFortranDoesCpp=NO
+ #endif
+ 
++export LIB_SONAME := 2
++
+ AllTarget(pdflib804)
+ 
+ SUBDIRS= spdf npdf tpdf pdf
+diff -urNad cernlib-2005.05.09.dfsg~/src/phtools/Imakefile cernlib-2005.05.09.dfsg/src/phtools/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/phtools/Imakefile	2005-11-23 15:49:19.725161731 +0000
++++ cernlib-2005.05.09.dfsg/src/phtools/Imakefile	2005-11-23 15:49:27.432512073 +0000
+@@ -2,6 +2,8 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
++export LIB_SONAME := 2
++
+ LIBDIRS= genbod fowl wico
+ 
+ SUBDIRS= $(LIBDIRS) wicoexam

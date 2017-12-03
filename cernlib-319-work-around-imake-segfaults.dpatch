@@ -1,0 +1,51 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 319-work-around-imake-segfaults.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: If at first Imake doesn't succeed, try, try again.
+## DP: (Hideous workaround for non-deterministic imake segfaults on hppa.)
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/config/Imake.rules cernlib-2005.05.09.dfsg/src/config/Imake.rules
+--- cernlib-2005.05.09.dfsg~/src/config/Imake.rules	2006-01-02 10:35:09.050384887 -0500
++++ cernlib-2005.05.09.dfsg/src/config/Imake.rules	2006-01-02 10:38:18.693611381 -0500
+@@ -1296,7 +1296,11 @@
+ 	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) \		@@\
+ 	             -DPackageTop=$(PACKAGETOP)	\			@@\
+ 		     -DPackageName=$(PACKAGE_NAME) \			@@\
+-		     imakeflags -f $<
++		     imakeflags -f $< || \				@@\
++		$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) \	@@\
++	             -DPackageTop=$(PACKAGETOP)	\			@@\
++		     -DPackageName=$(PACKAGE_NAME) \			@@\
++		     imakeflags -f $< || exit 1
+ 
+ #endif /* BuildMakefileTarget */
+ 
+@@ -2127,7 +2131,11 @@
+ 			ImakeSubCmdHelper -DTOPDIR=$$imaketop \		@@\
+ 			-DCURDIR=$$curdir$$i \				@@\
+ 			-DPackageTop=$(PACKAGETOP) \			@@\
+-			-DPackageName=$(PACKAGE_NAME); \		@@\
++			-DPackageName=$(PACKAGE_NAME) || \		@@\
++			ImakeSubCmdHelper -DTOPDIR=$$imaketop \		@@\
++			-DCURDIR=$$curdir$$i \				@@\
++			-DPackageTop=$(PACKAGETOP) \			@@\
++			-DPackageName=$(PACKAGE_NAME) || exit 1; \	@@\
+ 		fi; \							@@\
+ 		$(MAKE) $(MFLAGS) Makefiles; \				@@\
+ 		cd $$newtop; \						@@\
+@@ -2322,7 +2330,12 @@
+ 			-DCURDIR=$$curdir$$i \				@@\
+ 			-DPackageTop=$(PACKAGETOP) \			@@\
+ 			-DPackageName=$(PACKAGE_NAME) \			@@\
+-			-f $$imakefile; \				@@\
++			-f $$imakefile || \				@@\
++			ImakeSubCmdHelper -DTOPDIR=$$imaketop \		@@\
++			-DCURDIR=$$curdir$$i \				@@\
++			-DPackageTop=$(PACKAGETOP) \			@@\
++			-DPackageName=$(PACKAGE_NAME) \			@@\
++			-f $$imakefile || exit 1; \			@@\
+ 		fi; \							@@\
+ 	fi;
+ #endif

@@ -1,0 +1,25 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 203-compile-geant-with-ertrak.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Ertrak code added to library in Debian since I saw no reason to exclude.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/geant321/Imakefile cernlib-2005.05.09.dfsg/src/geant321/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/geant321/Imakefile	2005-11-23 15:41:44.798536817 +0000
++++ cernlib-2005.05.09.dfsg/src/geant321/Imakefile	2005-11-23 15:43:39.618959247 +0000
+@@ -5,11 +5,12 @@
+ AllTarget(geant321)
+ 
+ /* FLUKA removed from Debian source package for copyright reasons. */
++/* Ertrak added to Debian since I saw no reason to leave it out. */
+ LIBDIRS=       cdf cgpack              gbase gcons gdraw \ @@\
+          geocad ggeom gheisha ghits ghrout ghutils giface \ @@\
+ 	 giopa gkine gphys gscan gstrag gtrak guser gxint \ @@\
+-	 miface miguti neutron
+-
++	 miface miguti neutron        \ @@\
++	 erdecks erpremc matx55
+ 
+ SUBDIRS= $(LIBDIRS) data examples gxuser geant321
+ 

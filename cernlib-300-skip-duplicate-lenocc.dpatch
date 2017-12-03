@@ -1,0 +1,30 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 300-skip-duplicate-lenocc.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Only compile one of the two "lenocc()" functions.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/packlib/kernlib/kerngen/ccgen/Imakefile cernlib-2005.05.09.dfsg/src/packlib/kernlib/kerngen/ccgen/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/packlib/kernlib/kerngen/ccgen/Imakefile	2002-09-19 16:44:52.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/packlib/kernlib/kerngen/ccgen/Imakefile	2005-11-28 19:59:28.690293288 +0000
+@@ -19,7 +19,9 @@
+ SRCS_C += apofsz.c
+ #endif
+ 
+-#if defined(CERNLIB_WINNT)
++#if defined(CERNLIB_WINNT) || defined(CERNLIB_LINUX)
++/* Do not use lenocc.c in Linux; favor packlib/kernlib/kerngen/tcgen/lenocc.F
++ * instead.  --Kevin McCarty, for Debian */
+ SRCS_C += lnblnk.c
+ #endif
+ 
+@@ -29,7 +31,7 @@
+ 
+ #if defined(CERNLIB_DECS) || defined(CERNLIB_QMVAOS) \
+  || defined(CERNLIB_HPUX) || defined(CERNLIB_IBMRT) || defined(CERNLIB_IBMRTD) \
+- || defined(CERNLIB_OS9)  || defined(CERNLIB_LINUX)
++ || defined(CERNLIB_OS9)
+ SRCS_C += lenocc.c lnblnk.c
+ #endif
+ 

@@ -1,0 +1,27 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 209-ignore-unneeded-headers-in-kmutil.c.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Comment out header files not actually needed in kmutil.c.
+## DP: (This will be helpful when we move this file elsewhere to be part of
+## DP: the Lesstif-dependent library split out from packlib.)
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_motif/kmutil.c /tmp/dpep.BncUU7/cernlib-2005.05.09/src/packlib/kuip/code_motif/kmutil.c
+--- cernlib-2005.05.09/src/packlib/kuip/code_motif/kmutil.c	1996-03-08 10:33:09.000000000 -0500
++++ /tmp/dpep.BncUU7/cernlib-2005.05.09/src/packlib/kuip/code_motif/kmutil.c	2005-06-10 12:06:07.198547576 -0400
+@@ -20,12 +20,13 @@
+ /******************************************************************************/
+ 
+ #include "kuip/kuip.h"
++/* commented out, since this file doesn't need these includes. --Kevin McCarty
+ #include "kuip/kfor.h"
+ #include "kuip/kmenu.h"
+ 
+ #include "mkutda.h"
+ #include "kuip/mkutfu.h"
+-
++*/
+ 
+ /***********************************************************************
+  *                                                                     *

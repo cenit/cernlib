@@ -1,0 +1,18 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 120-fix-mlp-cdf-file.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: add missing >Guidance keyword in CDF file before help text.
+
+@DPATCH@
+diff -urNad paw-2.14.04.dfsg~/src/pawlib/paw/cdf/mlpdef.cdf paw-2.14.04.dfsg/src/pawlib/paw/cdf/mlpdef.cdf
+--- paw-2.14.04.dfsg~/src/pawlib/paw/cdf/mlpdef.cdf	2001-05-21 05:12:35.000000000 -0400
++++ paw-2.14.04.dfsg/src/pawlib/paw/cdf/mlpdef.cdf	2007-01-17 14:26:43.199756845 -0500
+@@ -260,6 +260,7 @@
+ >Action mlppawc%c
+ 
+ >Menu ../TPAT
++>Guidance
+ Operations on the test patterns
+ .
+ Whereas it is obviously necessary to define learning

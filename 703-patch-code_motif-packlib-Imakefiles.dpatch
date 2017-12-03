@@ -1,0 +1,79 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 703-patch-code_motif-packlib-Imakefiles.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix up Imakefiles, etc. so that code_motif becomes a separate library
+## DP: after moving it around in the patch 703 shell script.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/code_motif/Imakefile /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/code_motif/Imakefile
+--- cernlib-2005.05.09/src/code_motif/Imakefile	1996-12-10 10:20:59.000000000 -0500
++++ /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/code_motif/Imakefile	2005-06-12 10:31:56.480928814 -0400
+@@ -10,8 +10,10 @@
+ 	kuxxt.c mkdcmp.c mkdgra.c mkdpan.c mkmpan.c mkuip.c
+ 
+ MotifDependantMakeVar(SRCS_C,$(MOTIF_SRCS_C))
+-	
++
++/* Commented out since kmutil.c has been moved to packlib/kuip/code_kuip
+ SRCS_C:= $(SRCS_C) kmutil.c
++*/
+ 
+ #if defined(CERNLIB_VAXVMS)
+ 
+@@ -22,4 +24,10 @@
+  
+ PACKAGE_INCLUDES := $(PACKAGE_INCLUDES) MotifIncludes X11Includes
+ 
+-SubdirLibraryTarget(NullParameter,NullParameter)
++/* Top of package boilerplate to split this out as a separate library */
++
++TopOfPackage(packlib-lesstif)
++
++SubdirLibraryTarget(packlib-lesstif,NullParameter) 
++
++InstallLibrary(packlib-lesstif,$(CERN_LIBDIR))
+diff -urNad cernlib-2005.05.09/src/Imakefile /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/Imakefile
+--- cernlib-2005.05.09/src/Imakefile	2005-06-12 10:31:54.221414133 -0400
++++ /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/Imakefile	2005-06-12 10:32:20.947673659 -0400
+@@ -2,7 +2,7 @@
+ #define PassCDebugFlags
+ 
+ 
+-LIBDIRS= kernlib packlib pawlib graflib mathlib geant321 mclibs phtools
++LIBDIRS= kernlib packlib code_motif pawlib graflib mathlib geant321 mclibs phtools
+ 
+ SUBDIRS= $(LIBDIRS) patchy cfortran
+ 
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile
+--- cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile	1999-11-24 04:52:07.000000000 -0500
++++ /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile	2005-06-12 10:31:56.480928814 -0400
+@@ -3,7 +3,9 @@
+ SRCS_C=	getline.c kalias.c kbrow.c kedit.c kexec.c khash.c kicon.c \ @@\
+ 	kienbr.c kipiaf.c kkern.c kmacro.c kmath.c kmenu.c kmisc.c \ @@\
+ 	kmodel.c kmterm.c kuinit.c kutrue.c kuvers.c kuwhag.c	   \ @@\
+-	kuwhat.c kvect.c
++	kuwhat.c kvect.c \ @@\
++	kmutil.c
++	/* ^^ moved here from code_motif.  --Kevin McCarty */
+ 
+ #ifdef CERNLIB_WINNT
+ SRCS_C :=$(SRCS_C) kmutil0.c
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/Imakefile /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/packlib/kuip/Imakefile
+--- cernlib-2005.05.09/src/packlib/kuip/Imakefile	1997-11-28 12:26:56.000000000 -0500
++++ /tmp/dpep.mcTNBz/cernlib-2005.05.09/src/packlib/kuip/Imakefile	2005-06-12 10:31:56.480928814 -0400
+@@ -4,11 +4,14 @@
+ 
+ LIBDIRS= code_kuip 
+ 
++/* Commented out so that code_motif gives a separate shared library
++ * --Kevin McCarty
+ #ifndef CERNLIB_WINNT
+ LIBDIRS := $(LIBDIRS) code_motif
+ #else
+ LIBDIRS := $(LIBDIRS) code_windows
+ #endif
++*/
+ 
+ SUBDIRS= $(LIBDIRS) programs examples kuip
+ 

@@ -1,0 +1,766 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 214-fix-kernnum-funcs-on-64-bit.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Attempt to fix kernnum use of pointer differences on 64-bit arches.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/cxj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/cxj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/cxj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/cxj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JX  =  (IADDR(X2) - IADDR(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/cyj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/cyj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/cyj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/cyj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JY  =  (IADDR(Y2) - IADDR(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/czj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/czj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/czj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/czj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JZ  =  (IADDR(Z2) - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JZ  =  IPTRDIFF(Z2, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/dxj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/dxj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/dxj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/dxj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JX  =  (IADDR(X2) - IADDR(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/dyj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/dyj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/dyj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/dyj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JY  =  (IADDR(Y2) - IADDR(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/dzj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/dzj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/dzj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/dzj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JZ  =  (IADDR(Z2) - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JZ  =  IPTRDIFF(Z2, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/rxj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/rxj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/rxj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/rxj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JX  =   (IADDR(X2) - IADDR(X)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =   IPTRDIFF(X2, X) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/ryj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/ryj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/ryj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/ryj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JY  =   (IADDR(Y2) - IADDR(Y)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =   IPTRDIFF(Y2, Y) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/rzj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/rzj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f002fort/rzj.inc	1996-02-15 17:48:50.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f002fort/rzj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JZ  =   (IADDR(Z2) - IADDR(Z)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JZ  =   IPTRDIFF(Z2, Z) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cdi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cdi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cdi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cdi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           ID  =  (IADDR(D2)  - IADDR(D)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          ID  =  IPTRDIFF(D2, D) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cujk.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cujk.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cujk.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cujk.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           JU  =  (IADDR(U12) - IADDR(U)) / 8
+           KU  =  (IADDR(U22) - IADDR(U)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JU  =  IPTRDIFF(U12, U) / 8
++          KU  =  IPTRDIFF(U22, U) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cxi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cxi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cxi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cxi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           IX  =  (IADDR(X2)  - IADDR(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IX  =  IPTRDIFF(X2, X) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cxij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cxij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cxij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cxij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IX  =  (IADDR(X21) - IADDR(X)) / 8
+           JX  =  (IADDR(X12) - IADDR(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IX  =  IPTRDIFF(X21, X) / 8
++          JX  =  IPTRDIFF(X12, X) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cyij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cyij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cyij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cyij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IY  =  (IADDR(Y21) - IADDR(Y)) / 8
+           JY  =  (IADDR(Y12) - IADDR(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IY  =  IPTRDIFF(Y21, Y) / 8
++          JY  =  IPTRDIFF(Y12, Y) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cyj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cyj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/cyj.inc	1996-02-15 17:48:56.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/cyj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JY  =  (IADDR(Y2) - IADDR(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/czi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/czi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/czi.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/czi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           IZ  =  (IADDR(Z2)  - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IZ  =  IPTRDIFF(Z2, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/czij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/czij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/czij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/czij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IZ  =  (IADDR(Z21) - IADDR(Z)) / 8
+           JZ  =  (IADDR(Z12) - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IZ  =  IPTRDIFF(Z21, Z) / 8
++          JZ  =  IPTRDIFF(Z12, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/czj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/czj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/czj.inc	1996-02-15 17:48:56.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/czj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JZ  =  (IADDR(Z2) - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JZ  =  IPTRDIFF(Z2, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/ddi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/ddi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/ddi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/ddi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           ID  =  (IADDR(D2)  - IADDR(D)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          ID  =  IPTRDIFF(D2, D) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dujk.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dujk.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dujk.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dujk.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           JU  =  (IADDR(U12) - IADDR(U)) / 8
+           KU  =  (IADDR(U22) - IADDR(U)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JU  =  IPTRDIFF(U12, U) / 8
++          KU  =  IPTRDIFF(U22, U) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dxi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dxi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dxi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dxi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           IX  =  (IADDR(X2)  - IADDR(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IX  =  IPTRDIFF(X2, X) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dxij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dxij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dxij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dxij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IX  =  (IADDR(X21) - IADDR(X)) / 8
+           JX  =  (IADDR(X12) - IADDR(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IX  =  IPTRDIFF(X21, X) / 8
++          JX  =  IPTRDIFF(X12, X) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dyij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dyij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dyij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dyij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IY  =  (IADDR(Y21) - IADDR(Y)) / 8
+           JY  =  (IADDR(Y12) - IADDR(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IY  =  IPTRDIFF(Y21, Y) / 8
++          JY  =  IPTRDIFF(Y12, Y) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dyj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dyj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dyj.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dyj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JY  =  (IADDR(Y2) - IADDR(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dzi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dzi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dzi.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dzi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           IZ  =  (IADDR(Z2)  - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IZ  =  IPTRDIFF(Z2, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dzij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dzij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dzij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dzij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IZ  =  (IADDR(Z21) - IADDR(Z)) / 8
+           JZ  =  (IADDR(Z12) - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IZ  =  IPTRDIFF(Z21, Z) / 8
++          JZ  =  IPTRDIFF(Z12, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dzj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dzj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/dzj.inc	1996-02-15 17:48:56.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/dzj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JZ  =  (IADDR(Z2) - IADDR(Z)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JZ  =  IPTRDIFF(Z2, Z) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rdi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rdi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rdi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rdi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           ID  =  (IADDR(D2)  - IADDR(D)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          ID  =  IPTRDIFF(D2, D) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rujk.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rujk.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rujk.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rujk.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           JU  =  (IADDR(U12) - IADDR(U)) / 4
+           KU  =  (IADDR(U22) - IADDR(U)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JU  =  IPTRDIFF(U12, U) / 4
++          KU  =  IPTRDIFF(U22, U) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rxi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rxi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rxi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rxi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           IX  =  (IADDR(X2)  - IADDR(X)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          IX  =  IPTRDIFF(X2, X) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rxij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rxij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rxij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rxij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IX  =  (IADDR(X21) - IADDR(X)) / 4
+           JX  =  (IADDR(X12) - IADDR(X)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          IX  =  IPTRDIFF(X21, X) / 4
++          JX  =  IPTRDIFF(X12, X) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/ryij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/ryij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/ryij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/ryij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IY  =  (IADDR(Y21) - IADDR(Y)) / 4
+           JY  =  (IADDR(Y12) - IADDR(Y)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          IY  =  IPTRDIFF(Y21, Y) / 4
++          JY  =  IPTRDIFF(Y12, Y) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/ryj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/ryj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/ryj.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/ryj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JY  =   (IADDR(Y2) - IADDR(Y)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =   IPTRDIFF(Y2, Y) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rzi.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rzi.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rzi.inc	1996-02-15 17:48:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rzi.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           IZ  =  (IADDR(Z2)  - IADDR(Z)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          IZ  =  IPTRDIFF(Z2, Z) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rzij.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rzij.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rzij.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rzij.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -25,3 +25,7 @@
+           IZ  =  (IADDR(Z21) - IADDR(Z)) / 4
+           JZ  =  (IADDR(Z12) - IADDR(Z)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          IZ  =  IPTRDIFF(Z21, Z) / 4
++          JZ  =  IPTRDIFF(Z12, Z) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rzj.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rzj.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f003fort/rzj.inc	1996-02-15 17:48:55.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f003fort/rzj.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -21,3 +21,6 @@
+ #if defined(CERNLIB_NUMIB1)
+           JZ  =   (IADDR(Z2) - IADDR(Z)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JZ  =   IPTRDIFF(Z2, Z) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f004fort/dlocf.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f004fort/dlocf.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f004fort/dlocf.inc	1996-02-15 17:49:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f004fort/dlocf.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -57,3 +57,12 @@
+           IZ  =  (IADDR(Z21(1)) - LOCZ) / 8
+           LZ  =  (IADDR(Z12(1)) - LOCZ) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          IF(MIN0(M,N,K) .LE. 0)  RETURN
++          IX  =  IPTRDIFF(X21(1), X(1)) / 8
++          JX  =  IPTRDIFF(X12(1), X(1)) / 8
++          JY  =  IPTRDIFF(Y21(1), Y(1)) / 8
++          LY  =  IPTRDIFF(Y12(1), Y(1)) / 8
++          IZ  =  IPTRDIFF(Z21(1), Z(1)) / 8
++          LZ  =  IPTRDIFF(Z12(1), Z(1)) / 8
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f004fort/rlocf.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f004fort/rlocf.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f004fort/rlocf.inc	1996-02-15 17:49:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f004fort/rlocf.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -57,3 +57,12 @@
+           IZ  =  (IADDR(Z21(1)) - LOCZ) / 4
+           LZ  =  (IADDR(Z12(1)) - LOCZ) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          IF(MIN0(M,N,K) .LE. 0)  RETURN
++          IX  =  IPTRDIFF(X21(1), X(1)) / 4
++          JX  =  IPTRDIFF(X12(1), X(1)) / 4
++          JY  =  IPTRDIFF(Y21(1), Y(1)) / 4
++          LY  =  IPTRDIFF(Y12(1), Y(1)) / 4
++          IZ  =  IPTRDIFF(Z21(1), Z(1)) / 4
++          LZ  =  IPTRDIFF(Z12(1), Z(1)) / 4
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f004fort/zisxy.inc cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f004fort/zisxy.inc
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/f004fort/zisxy.inc	1996-02-15 17:49:01.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/f004fort/zisxy.inc	2008-01-02 20:02:31.000000000 +0000
+@@ -9,9 +9,15 @@
+ *
+ * zisxy.inc
+ *
++#ifdef CERNLIB_NUM64
++	  IF(IPTRSAME(Z(1), X(1)) .EQ. 1)  GOTO 30
++	  IF(IPTRSAME(Z(1), Y(1)) .EQ. 1)  GOTO 40
++	  IF(IPTRSAME(X(1), Y(1)) .EQ. 1)  GOTO 20
++#else
+           IF(LOCZ .EQ. LOCX)  GOTO 30
+           IF(LOCZ .EQ. LOCY)  GOTO 40
+           IF(LOCX .EQ. LOCY)  GOTO 20
++#endif
+   10      LY1L  =  1
+           LZ1L  =  1
+           DO 13     L  =  1, K
+@@ -68,7 +74,11 @@
+              LZII  =  LZII + IZ + LZ
+   24         CONTINUE
+           RETURN
++#ifdef CERNLIB_NUM64
++  30      IF(IPTRSAME(X(1), Y(1)) .EQ. 1)  GOTO 50
++#else
+   30      IF(LOCX .EQ. LOCY)  GOTO 50
++#endif
+           LXI1  =  1
+           DO 34     I  =  1, M
+              LY1L  =  1
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/kernnum/pilot.h cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/kernnum/pilot.h
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/kernnum/pilot.h	1997-02-04 17:36:48.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/kernnum/pilot.h	2008-01-02 20:02:31.000000000 +0000
+@@ -19,7 +19,7 @@
+ #endif
+ #endif
+ 
+-#if defined(CERNLIB_LINUX)||defined(CERNLIB_MSDOS) && !defined(CERNLIB_WINNT)
++#if defined(CERNLIB_LINUX) && !defined(CERNLIB_QMLXIA64) || defined(CERNLIB_MSDOS) && !defined(CERNLIB_WINNT)
+ #ifndef CERNLIB_NUMIB2
+ #define CERNLIB_NUMIB2
+ #endif
+@@ -31,6 +31,18 @@
+ #endif
+ #endif
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++#ifndef CERNLIB_NUM64
++#define CERNLIB_NUM64
++#endif
++#ifdef CERNLIB_NUMD38
++#undef CERNLIB_NUMD38
++#endif
++#ifndef CERNLIB_NUMD279
++#define CERNLIB_NUMD279
++#endif
++#endif
++
+ #if defined(CERNLIB_VAXVMS)
+ #ifndef CERNLIB_NUMDE
+ #define CERNLIB_NUMDE
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/kernnumt/pilot.h cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/kernnumt/pilot.h
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/kernnumt/pilot.h	1997-02-04 17:36:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/kernnumt/pilot.h	2008-01-02 20:02:31.000000000 +0000
+@@ -44,6 +44,11 @@
+ #ifndef CERNLIB_NUMLN
+ #define CERNLIB_NUMLN
+ #endif
++#if defined(CERNLIB_QMLXIA64)
++#ifndef CERNLIB_NUM64
++#define CERNLIB_NUM64
++#endif
++#endif
+ #endif
+ 
+ #if defined(CERNLIB_MSDOS)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk0/cvdist.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk0/cvdist.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk0/cvdist.F	1996-02-15 17:48:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk0/cvdist.F	2008-01-02 20:02:31.000000000 +0000
+@@ -14,7 +14,7 @@
+           IF(N .LE. 0)  RETURN
+           CVDIST  =  DISTF(X(1),Y(1))
+           IF(N .LE. 1)  RETURN
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  (LOCF(X2) - LOCF(X)) / 2
+           JY  =  (LOCF(Y2) - LOCF(Y)) / 2
+ #endif
+@@ -26,6 +26,10 @@
+           JX  =  (%LOC(X2) - %LOC(X)) / 8
+           JY  =  (%LOC(Y2) - %LOC(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+           LX  =  1
+           LY  =  1
+           DO 10     J  =  2, N
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk0/dvdist.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk0/dvdist.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk0/dvdist.F	1996-02-15 17:48:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk0/dvdist.F	2008-01-02 20:02:31.000000000 +0000
+@@ -14,7 +14,7 @@
+           IF(N .LE. 0)  RETURN
+           DVDIST  =  DISTF(X(1),Y(1))
+           IF(N .LE. 1)  RETURN
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  (LOCF(X2) - LOCF(X)) / 2
+           JY  =  (LOCF(Y2) - LOCF(Y)) / 2
+ #endif
+@@ -26,6 +26,10 @@
+           JX  =  (%LOC(X2) - %LOC(X)) / 8
+           JY  =  (%LOC(Y2) - %LOC(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+           LX  =  1
+           LY  =  1
+           DO 10     J  =  2, N
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk0/rvdist.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk0/rvdist.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk0/rvdist.F	1996-02-15 17:48:41.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk0/rvdist.F	2008-01-02 20:02:31.000000000 +0000
+@@ -14,7 +14,7 @@
+           IF(N .LE. 0)  RETURN
+           RVDIST  =  DISTF(X(1),Y(1))
+           IF(N .LE. 1)  RETURN
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  LOCF(X2) - LOCF(X)
+           JY  =  LOCF(Y2) - LOCF(Y)
+ #endif
+@@ -26,6 +26,10 @@
+           JX  =  (%LOC(X2) - %LOC(X)) / 4
+           JY  =  (%LOC(Y2) - %LOC(Y)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 4
++          JY  =  IPTRDIFF(Y2, Y) / 4
++#endif
+           LX  =  1
+           LY  =  1
+           DO 10     J  =  2, N
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/check3.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/check3.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/check3.F	1996-03-21 17:16:07.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/check3.F	2008-01-02 20:02:31.000000000 +0000
+@@ -343,7 +343,7 @@
+           I  =  1
+           IF(N .EQ. 1)  RETURN
+           LXJ  =  1
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  LOCF(X2) - LOCF(X)
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -352,6 +352,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 4
++#endif
+           DO 10     J  =  2, N
+              LXJ  =  LXJ + JX
+              T    =  ABSF(X(LXJ))
+@@ -373,7 +376,7 @@
+           I  =  1
+           IF(N .EQ. 1)  RETURN
+           LXJ  =  1
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  (LOCF(X2) - LOCF(X)) / 2
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -382,6 +385,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++#endif
+           DO 10     J  =  2, N
+              LXJ  =  LXJ + JX
+              T    =  ABSF(X(LXJ))
+@@ -403,7 +409,7 @@
+           I  =  1
+           IF(N .EQ. 1)  RETURN
+           LXJ  =  1
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  (LOCF(X2) - LOCF(X)) / 2
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -412,6 +418,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++#endif
+           DO 10     J  =  2, N
+              LXJ  =  LXJ + JX
+              T    =  ABSF(X(LXJ))
+@@ -441,7 +450,7 @@
+           RVSUMA  =  0.
+           IF(N .LE. 0)  RETURN
+           LXJ  =  1
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  LOCF(X2) - LOCF(X)
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -450,6 +459,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 4
++#endif
+           DO 10     J  =  1, N
+              RVSUMA  =  RVSUMA + ABS(X(LXJ))
+              LXJ  =  LXJ + JX
+@@ -461,7 +473,7 @@
+           DVSUMA  =  0.
+           IF(N .LE. 0)  RETURN
+           LXJ  =  1
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  (LOCF(X2) - LOCF(X)) / 2
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -470,6 +482,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++#endif
+           DO 10     J  =  1, N
+              DVSUMA  =  DVSUMA + ABS(SNGL(X(LXJ)))
+              LXJ  =  LXJ + JX
+@@ -481,7 +496,7 @@
+           CVSUMA  =  0.
+           IF(N .LE. 0)  RETURN
+           LXJ  =  1
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  (LOCF(X2) - LOCF(X)) / 2
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -490,6 +505,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 8
++#endif
+           DO 10     J  =  1, N
+           CVSUMA = CVSUMA + AMAX1(ABS(REAL(X(LXJ))),ABS(AIMAG(X(LXJ))))
+           LXJ  =  LXJ + JX
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/f002ch.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/f002ch.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/f002ch.F	1996-03-21 17:16:08.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/f002ch.F	2008-01-02 20:02:31.000000000 +0000
+@@ -329,7 +329,7 @@
+           IF(.NOT. OK)  WRITE(IOUNIT,1000) N, IFAIL
+           IF(N .LE. 0) RETURN
+           KFAIL  =  IRANF(1,N)
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JY  =  LOCF(Y2) - LOCF(Y)
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -338,6 +338,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JY  =  (%LOC(Y2) - %LOC(Y)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 4
++#endif
+           LY     =  (KFAIL - 1)*JY + 1
+           S      =  Y(LY)
+           Y(LY)  =  ZERO
+@@ -366,7 +369,7 @@
+           IF(.NOT. OK)  WRITE(IOUNIT,1000) N, IFAIL
+           IF(N .LE. 0) RETURN
+           KFAIL  =  IRANF(1,N)
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JY  =  (LOCF(Y2) - LOCF(Y)) / 2
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -375,6 +378,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JY  =  (%LOC(Y2) - %LOC(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+           LY     =  (KFAIL - 1)*JY + 1
+           S      =  Y(LY)
+           Y(LY)  =  ZERO
+@@ -403,7 +409,7 @@
+           IF(.NOT. OK)  WRITE(IOUNIT,1000) N, IFAIL
+           IF(N .LE. 0) RETURN
+           KFAIL  =  IRANF(1,N)
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JY  =  (LOCF(Y2) - LOCF(Y)) / 2
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -412,6 +418,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JY  =  (%LOC(Y2) - %LOC(Y)) / 8
+ #endif
++#if defined(CERNLIB_NUM64)
++          JY  =  IPTRDIFF(Y2, Y) / 8
++#endif
+           LY     =  (KFAIL - 1)*JY + 1
+           S      =  Y(LY)
+           Y(LY)  =  ZERO
+@@ -1139,7 +1148,7 @@
+           XS2  =  ZERO
+           XM2  =  ZERO
+           IF(N .LE. 0)  RETURN
+-#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))
++#if (!defined(CERNLIB_NUMUC))&&(!defined(CERNLIB_NUMCR))&&(!defined(CERNLIB_NUMDE))&&(!defined(CERNLIB_NUM64))
+           JX  =  LOCF(X2) - LOCF(X)
+ #endif
+ #if defined(CERNLIB_NUMUC)||defined(CERNLIB_NUMCR)
+@@ -1148,6 +1157,9 @@
+ #if defined(CERNLIB_NUMDE)
+           JX  =  (%LOC(X2) - %LOC(X)) / 4
+ #endif
++#if defined(CERNLIB_NUM64)
++          JX  =  IPTRDIFF(X2, X) / 4
++#endif
+           LX  =  1
+           S1  =  ZERO
+           S2  =  ZERO
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/f011ch.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/f011ch.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/f011ch.F	1996-03-21 17:16:10.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/f011ch.F	2008-01-02 20:03:24.000000000 +0000
+@@ -251,7 +251,8 @@
+      +           3X,7H IDIM =,I5, 3X, 4H E =,1PE12.3)
+           END
+           SUBROUTINE TSING(N,A,R,OK,FACT,SETEX,RABS,VXCH)
+-          REAL      A(*),     R(*),     DET(2)
++          REAL      A(*),     R(*)
++          DOUBLE PRECISION    DET(2)
+           LOGICAL   OK,       OKDET
+ #include "kernnumt/sysdat.inc"
+ #include "ch3dat.inc"

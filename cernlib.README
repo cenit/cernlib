@@ -1,0 +1,60 @@
+The change done with regard with the CERN library are as follow:
+
+1) Package organization
+
+The main package is cernlib-devel which includes the cernlib static 
+libraries, include files and data files. Different versions (corresponding 
+with years) of the cernlib can be installed along.
+
+The other packages can't have different versions installed in parallel.
+
+The package cernlib-utils contains the cernlib script which can be used
+to compile the cernlib library, and /etc/profile.d/cernlib-<version>.sh
+which sets the environment variables usefull for the cernlib.
+
+The package kuipc contains the kuipc interpreter, paw contains the paw
+binary, and cernlib-packlib contains the other binaries from the 
+cernlib.
+
+2) Filesystem Hierarchy Standard conformance
+
+The upstream Cernlib installs in the subdirectories (bin, lib, include...) 
+of the $CERN_ROOT directory which is usually $CERN/$CERN_LEVEL. A mix of
+this approach and a standard FHS conformant approach has been followed here. 
+
+For the libraries, the Cernlib upstream scheme has been retained, with 
+CERN=/usr/lib/cernlib
+CERN_LEVEL=2005
+and therefore the libraries are in /usr/lib/cernlib/2005/lib. The 
+environment variables are set in /etc/profile.d/cernlib-<version>.sh.
+
+For the include files and the data files the subdirectory cernlib/2005
+appears in the FHS location, without subdirectories, therefore we have the
+equivalences:
+$CERN_ROOT/include     ->     /usr/include/cernlib/$CERN_LEVEL/
+$CERN_ROOT/share       ->     /usr/share/cernlib/$CERN_LEVEL/
+
+The binary files go into /usr/bin.
+
+3) Removal of non-free code
+
+Debian patches and files from the debian Cernlib package where used to remove
+files licensed under non-GPL compatible licences. The script 
+cernlib-remove-deadpool and the file cernlib-deadpool.txt which lists 
+problematic files can be used in the SOURCES directory with the 
+upstream sources to remove the problematic files.
+
+4) Use of external lapack
+
+The cernlib script has been modified to use an external lapack and not
+the one provided with the cernlib.
+
+5) kernlib out of packlib
+
+kernlib has been moved outside of packlib. If you use the cernlib script
+for linking it should be taken into account, however if you link directly
+with packlib you could need to add the kernlib on your link command line.
+
+6) split of motif dependent libs from packlib and pawlib
+
+The motif dependent libs are in libpacklib-lesstif and libpawlib-lesstif.

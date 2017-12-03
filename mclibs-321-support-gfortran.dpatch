@@ -1,0 +1,33 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 321-support-gfortran.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Minor changes to support use of gfortran.  From Harald Vogt.
+
+@DPATCH@
+diff -urNad mclibs-2005.dfsg~/src/mclibs/herwig/code/hwhew2.F mclibs-2005.dfsg/src/mclibs/herwig/code/hwhew2.F
+--- mclibs-2005.dfsg~/src/mclibs/herwig/code/hwhew2.F	1996-12-03 09:16:55.000000000 -0500
++++ mclibs-2005.dfsg/src/mclibs/herwig/code/hwhew2.F	2006-09-27 13:47:59.876963852 -0400
+@@ -75,8 +75,7 @@
+       H(J,I)=(ZDMP*ZP-ZDPM*ZQ)*ZT
+       CH(J,I)=(ZDMP*ZPS-ZDPM*ZQS)*ZT
+       ZD=H(J,I)*CH(J,I)
+-      PT5=CMPLX(.5,0.)
+-      D(J,I)=PT5*ZD
++      D(J,I)=CMPLX(.5,0.)*ZD
+    11 CONTINUE
+       DO 60 I=1,NPART-1
+       IPP1=I+1
+diff -urNad mclibs-2005.dfsg~/src/mclibs/isajet/test/Imakefile mclibs-2005.dfsg/src/mclibs/isajet/test/Imakefile
+--- mclibs-2005.dfsg~/src/mclibs/isajet/test/Imakefile	2000-07-25 12:21:34.000000000 -0400
++++ mclibs-2005.dfsg/src/mclibs/isajet/test/Imakefile	2006-09-27 13:49:49.783806148 -0400
+@@ -8,4 +8,9 @@
+ 
+ CernlibFortranProgramTarget(isajett,isajett.o,NullParameter,NullParameter,pdflib804 mathlib kernlib isajet)
+ 
++#if !defined(CERNLIB_GFORTRAN)
++/* breaks on 'STOP 99' if compiled with gfortran */
+ TestTarget(isajett,isajet.dat,test.input)
++#else
++test::
++#endif

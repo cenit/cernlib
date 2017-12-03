@@ -1,0 +1,32 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 107-define-strdup-macro-safely.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: In some cases strdup() and strndup() are macros, causing a build
+## DP: failure.  Ensure any such macros are undefined before redeclaring them.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/kuip/kstring.h /tmp/dpep.ieQnkg/cernlib-2005.05.09/src/packlib/kuip/kuip/kstring.h
+--- cernlib-2005.05.09/src/packlib/kuip/kuip/kstring.h	1997-03-14 12:16:39.000000000 -0500
++++ /tmp/dpep.ieQnkg/cernlib-2005.05.09/src/packlib/kuip/kuip/kstring.h	2005-06-09 14:58:22.446739916 -0400
+@@ -32,6 +32,9 @@
+ 
+ extern char* strrstr( const char* str1, const char* str2 );
+ 
++#ifdef strdup
++# undef strdup /* otherwise the next function declaration may bomb */
++#endif
+ #define strdup Strdup           /* prototype without const */
+ extern char* strdup( const char* str );
+ 
+@@ -46,6 +49,10 @@
+                      const char* str4 );
+ extern char* str5dup( const char* str1, const char* str2, const char* str3,
+                      const char* str4, const char* str5 );
++
++#ifdef strndup
++# undef strndup /* otherwise the next function declaration may bomb */
++#endif
+ extern char* strndup( const char* buf, size_t n );
+ extern char* stridup( int i );
+ 

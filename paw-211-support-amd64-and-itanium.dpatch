@@ -1,0 +1,1199 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 211-support-amd64-and-itanium.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Large patch from Harald Vogt <hvogt@ifh.de> to make PAW and Paw++ work
+## DP: (at least when statically linked) on 64-bit architectures.
+## DP: Slightly modified in an attempt to keep ABI compatibility of the
+## DP: dynamic libraries; not that it matters much as they don't work well
+## DP: when dynamically linked on 64-bit anyway.  Last revision 2006-07-20.
+
+@DPATCH@
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/Imakefile paw-2.14.04/src/pawlib/comis/code/Imakefile
+--- paw-2.14.04~/src/pawlib/comis/code/Imakefile	2006-09-08 14:44:11.387353882 -0400
++++ paw-2.14.04/src/pawlib/comis/code/Imakefile	2006-09-08 14:44:11.806264586 -0400
+@@ -50,6 +50,10 @@
+ SRCS_F := $(SRCS_F) cscrexec.F
+ #endif
+ 
++#if defined(CERNLIB_QMLXIA64)
++SRCS_F := $(SRCS_F) csrtgpl.F csitgpl.F
++#endif
++
+ #if defined(CERNLIB_OLD)
+ SRCS_F := $(SRCS_F) cspdir.F csrmbk.F
+ #endif
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/csaddr.F paw-2.14.04/src/pawlib/comis/code/csaddr.F
+--- paw-2.14.04~/src/pawlib/comis/code/csaddr.F	1996-02-26 12:16:25.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/csaddr.F	2006-09-08 14:44:11.806264586 -0400
+@@ -17,8 +17,15 @@
+       INTEGER CSLTGP,CSITGP
+       CHARACTER*32 NAME
+ #include "comis/cstab.inc"
+-#if defined(CERNLIB_SHL)
++#if defined(CERNLIB_SHL)&&(!defined(CERNLIB_QMLXIA64))
+       INTEGER CS_GET_FUNC
++#endif
++#if defined(CERNLIB_SHL)&&(defined(CERNLIB_QMLXIA64))
++#include "comis/cstab64.inc"
++      INTEGER CSITGPL
++      INTEGER*8 CS_GET_FUNC
++#endif
++#if defined(CERNLIB_SHL)
+       NAME=CHNAME
+       NC=LENOCC(NAME)
+       CALL CSCHID(NAME(:NC))
+@@ -26,21 +33,39 @@
+       I=CSLTGP(IPVS)
+       IF(I.GT.0)THEN
+         IF(IFCS.EQ.0)THEN
++#if defined (CERNLIB_QMLXIA64)
++          IADGPL=CS_GET_FUNC(NAME(1:NC)//'_')
++          IF(IADGPL.NE.0)THEN
++            IFCS=-2
++            CALL CSRTGPL(I)
++#else
+           IADGP=CS_GET_FUNC(NAME(1:NC)//'_')
+           IF(IADGP.NE.0)THEN
+             IFCS=-2
+             CALL CSRTGP(I)
++#endif
++#endif
++#if defined(CERNLIB_SHL)
+           ELSE
+             I=0
+           ENDIF
+         ENDIF
+       ELSE
++#if defined (CERNLIB_QMLXIA64)
++          IADGPL=CS_GET_FUNC(NAME(1:NC)//'_')
++        IF(IADGPL.NE.0)THEN
++          IFCS=-2
++          ITYPGP=-2
++          I=CSITGPL(IPVS)
++        ENDIF
++#else
+         IADGP=CS_GET_FUNC(NAME(1:NC)//'_')
+         IF(IADGP.NE.0)THEN
+           IFCS=-2
+           ITYPGP=-2
+           I=CSITGP(IPVS)
+         ENDIF
++#endif
+       END IF
+       CSADDR=I
+ #endif
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/csinit.F paw-2.14.04/src/pawlib/comis/code/csinit.F
+--- paw-2.14.04~/src/pawlib/comis/code/csinit.F	2005-04-18 11:41:04.000000000 -0400
++++ paw-2.14.04/src/pawlib/comis/code/csinit.F	2006-09-08 14:44:11.807264373 -0400
+@@ -64,6 +64,9 @@
+ #if defined(CERNLIB_SHL)
+ #include "comis/cshlnm.inc"
+ #endif
++#if defined(CERNLIB_SHL)&&(defined(CERNLIB_QMLXIA64))
++#include "comis/cstab64.inc"
++#endif
+ #if defined(CERNLIB_PAW)
+ #include "paw/pcmode.inc"
+ #include "comis/cshfill.inc"
+@@ -159,6 +162,9 @@
+       ICHMINU=ICHAR('-')
+       ICHPLUS=ICHAR('+')
+       ICHCOMM=ICHAR(',')
++#if defined(CERNLIB_SHL)&&(defined(CERNLIB_QMLXIA64))
++      IPIADGV=0
++#endif
+ #if defined(CERNLIB_PAW)
+       CALL CSPAWI
+       MODHFI=0
+@@ -211,8 +217,8 @@
+ #endif
+ #if (defined(CERNLIB_LINUX))
+       ITMPLEN=CSTMPD(CHPATH, 256)
+-      CHF77 ='g77 -c'
+-      CHCC  ='cc -c'
++      CHF77 ='g77 -g -c -fPIC'
++      CHCC  ='cc -g -c -fPIC'
+ #endif
+ #if (defined(CERNLIB_SGI))&&(defined(CERNLIB_SHL))
+       ITMPLEN=CSTMPD(CHPATH, 256)
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/csintx.F paw-2.14.04/src/pawlib/comis/code/csintx.F
+--- paw-2.14.04~/src/pawlib/comis/code/csintx.F	1996-12-05 04:50:37.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/csintx.F	2006-09-08 14:44:11.807264373 -0400
+@@ -38,6 +38,9 @@
+ #if defined(CERNLIB_PAW)
+ #include "comis/cskucs.inc"
+ #endif
++#if defined(CERNLIB_QMLXIA64)
++#include "comis/cstab64.inc"
++#endif
+ #if (defined(CERNLIB_UNIX))&&(!defined(CERNLIB_ALPHA_OSF))
+       INTEGER CSTRCMP
+ #endif
+@@ -1105,6 +1108,23 @@
+       ENDIF
+ #endif
+ #if (!defined(CERNLIB_VAX))&&(!defined(CERNLIB_APOLLO))
++#if defined(CERNLIB_QMLXIA64)
++      IF(IQ(IP+KSIFCS).EQ.-2)THEN
++*Dynamic linker may give long addresses
++        IADGPL = IADGPLV(IADGP)
++      ELSE
++        IADGPL = IADGP
++      ENDIF
++      IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
++        ICSRES=CSCALI(IADGPL,NPAR,IDA(IOFSPL))
++      ELSEIF(ITP.EQ.2)THEN
++        RCSRES=CSCALR(IADGPL,NPAR,IDA(IOFSPL))
++      ELSEIF(ITP.EQ.5)THEN
++        DCSRES=CSCALD(IADGPL,NPAR,IDA(IOFSPL))
++      ELSEIF(ITP.EQ.7)THEN
++        DCSRES=CSCALD(IADGPL,NPAR,IDA(IOFSPL))
++      ENDIF
++#else
+       IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
+         ICSRES=CSCALI(IADGP,NPAR,IDA(IOFSPL))
+       ELSEIF(ITP.EQ.2)THEN
+@@ -1115,6 +1135,7 @@
+         DCSRES=CSCALD(IADGP,NPAR,IDA(IOFSPL))
+       ENDIF
+ #endif
++#endif
+       IPC=IPC+4
+       GO TO 999
+ *NUM I
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/csitgpl.F paw-2.14.04/src/pawlib/comis/code/csitgpl.F
+--- paw-2.14.04~/src/pawlib/comis/code/csitgpl.F	1969-12-31 19:00:00.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/csitgpl.F	2006-09-08 14:44:11.808264160 -0400
+@@ -0,0 +1,32 @@
++* COMIS
++*
++*
++#if (defined(CERNLIB_QMLXIA64))
++#include "comis/pilot.h"
++*CMZU:  1.16/16 04/10/93  12.14.52  by  Vladimir Berezhnoi
++*-- Author : V.Berezhnoi
++* special for 64 bit addresses for dynamic linking (H. Vogt)
++      INTEGER FUNCTION CSITGPL(IP)
++***------------------------------
++*   it is last routine from the tables-set.
++***-----------------------------
++#include "comis/cspar.inc"
++#include "comis/mdpool.inc"
++#include "comis/cspnts.inc"
++#include "comis/cstabps.inc"
++#include "comis/cstab64.inc"
++      I=MHLOC(KSIDP+NWIDEN)
++      IQ(I)=0
++      IQ(I+1)=NCIDEN
++      DO 1 K=1,NWIDEN
++        IQ(I+KSIDP-1+K)=IDEN(K)
++   1  CONTINUE
++      CALL CSRTGPL(I)
++      IF(IP.EQ.0)THEN
++        IPGP=I
++      ELSE
++        IQ(IP)=I
++      ENDIF
++      CSITGPL=I
++      END
++#endif
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/cskcal.F paw-2.14.04/src/pawlib/comis/code/cskcal.F
+--- paw-2.14.04~/src/pawlib/comis/code/cskcal.F	1996-12-05 04:50:39.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/cskcal.F	2006-09-08 14:44:11.808264160 -0400
+@@ -31,6 +31,9 @@
+ #include "comis/cstab.inc"
+ #include "comis/csfres.inc"
+ #include "comis/cssysd.inc"
++#if defined(CERNLIB_QMLXIA64)
++#include "comis/cstab64.inc"
++#endif
+       CHARACTER PRONAME*32
+       INTEGER CSCALI
+       DOUBLE PRECISION CSCALD
+@@ -232,6 +235,24 @@
+         I2=I2+KS
+         I=I+1
+  9203 CONTINUE
++#if defined(CERNLIB_QMLXIA64)
++*  Dynamic linker may give long addresses
++      IF (IFCS.EQ.-2)THEN
++        IADGPL = IADGPLV(IADGP)
++      ELSE
++        IADGPL = IADGP
++      ENDIF
++      IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
++        ICSRES=CSCALI(IADGPL,NOPAR,IF77PL(1))
++      ELSEIF(ITP.EQ.2)THEN
++        RCSRES=CSCALR(IADGPL,NOPAR,IF77PL(1))
++      ELSEIF(ITP.EQ.5)THEN
++        DCSRES=CSCALD(IADGPL,NOPAR,IF77PL(1))
++      ELSEIF(ITP.EQ.7)THEN
++*  I think it will works correctly
++        DCSRES=CSCALD(IADGPL,NOPAR,IF77PL(1))
++      ENDIF
++#else
+ *      IT=IABS(ITYPGP)
+       IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
+         ICSRES=CSCALI(IADGP,NOPAR,IF77PL(1))
+@@ -245,6 +266,7 @@
+       ENDIF
+ *+SELF,IF=UNIX,IF=-SGI,IF=-IBMRT,IF=-DECS,IF=-HPUX,IF=-SUN,IF=-MSDOS.
+ #endif
++#endif
+ #if (defined(CERNLIB_UNIX))&&(!defined(CERNLIB_STDUNIX))
+       I=1
+       DO 9203 K=ITA-NPAR+1,ITA
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/cslink.F paw-2.14.04/src/pawlib/comis/code/cslink.F
+--- paw-2.14.04~/src/pawlib/comis/code/cslink.F	1996-02-26 12:16:17.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/cslink.F	2006-09-08 14:44:11.808264160 -0400
+@@ -21,10 +21,15 @@
+ #include "comis/cstab.inc"
+ #include "comis/cspnts.inc"
+ #include "comis/cslun.inc"
+-#if defined(CERNLIB_SHL)
++#if defined(CERNLIB_SHL)&&(!defined(CERNLIB_QMLXIA64))
+       CHARACTER*(KLENID) FNNAME
+       INTEGER CS_GET_FUNC
+ #endif
++#if defined(CERNLIB_SHL)&&(defined(CERNLIB_QMLXIA64))
++#include "comis/cstab64.inc"
++      CHARACTER*(KLENID) FNNAME
++      INTEGER*8 CS_GET_FUNC
++#endif
+          COMMON/CSGSCM/IGS,JGS,NGS,CSJUNK(3)
+       IF(ISTLIB.EQ.0 .AND. ITBS.EQ.0)RETURN
+    2  I=IPGP
+@@ -60,12 +65,20 @@
+ #if defined(CERNLIB_SHL)
+           CALL CSGTIDP(I,FNNAME,NC)
+           CALL CUTOL(FNNAME(1:NC))
++#if defined (CERNLIB_QMLXIA64)
++          IADGPL=CS_GET_FUNC(FNNAME(1:NC)//'_')
++          IF(IADGPL.NE.0)THEN
++            IFCS=-2
++            CALL CSRTGPL(I)
++          ENDIF
++#else
+           IADGP=CS_GET_FUNC(FNNAME(1:NC)//'_')
+           IF(IADGP.NE.0)THEN
+             IFCS=-2
+             CALL CSRTGP(I)
+           ENDIF
+ #endif
++#endif
+           IP=0
+         ENDIF
+       ENDIF
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/cspawi.F paw-2.14.04/src/pawlib/comis/code/cspawi.F
+--- paw-2.14.04~/src/pawlib/comis/code/cspawi.F	1996-02-26 12:16:22.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/cspawi.F	2006-09-08 14:44:11.808264160 -0400
+@@ -23,10 +23,12 @@
+       COMMON/PAWC/NWPAW,IXPAWC,IHDIV,IXHIGZ,IXKU,FENC(5),LMAIN,HCV(9989)
+       DIMENSION IQ(2),Q(2),LQ(8000)
+       EQUIVALENCE (LQ(1),LMAIN),(IQ(1),LQ(9)),(Q(1),IQ(1))
++      CHARACTER*8 MYCSPAWC
++      MYCSPAWC = 'CSPAWC  '
+ ****      JKUVBS=LOCF(IQ(1))-1
+       JKUVBS=LOCF(IQ(1))+KUVOFS-1
+       KUVCUR=0
+-      CALL CCOPYS(MJSCHA('CSPAWC  '),JID,8)
++      CALL CCOPYS(MJSCHA(MYCSPAWC),JID,8)
+       NCIDEN=6
+       NWIDEN=2
+       I=CSLTGB(IPVS)
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/csrtgpl.F paw-2.14.04/src/pawlib/comis/code/csrtgpl.F
+--- paw-2.14.04~/src/pawlib/comis/code/csrtgpl.F	1969-12-31 19:00:00.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/csrtgpl.F	2006-09-08 14:44:11.808264160 -0400
+@@ -0,0 +1,31 @@
++* COMIS
++*
++*
++#if (defined(CERNLIB_QMLXIA64))
++#include "comis/pilot.h"
++*CMZ :  1.18/14 10/01/95  15.41.06  by  Vladimir Berezhnoi
++*-- Author : V.Berezhnoi
++* special for 64 bit addresses for dynamic linking (H. Vogt)
++
++      SUBROUTINE CSRTGPL(I)
++***--------------------------
++#include "comis/cspar.inc"
++#include "comis/mdpool.inc"
++#include "comis/cstabps.inc"
++#include "comis/cstab.inc"
++#include "comis/cstab64.inc"
++
++      IPIADGV = IPIADGV + 1
++      IF (IPIADGV .GT. MAXIAD64)  THEN
++        WRITE (*,'(2a,I4)') 'to much addresses for dynamik linking, ',
++     &                      'limit is ', MAXIAD64
++        WRITE (*,'(2a)') 'increase MAXIAD64 in cstab64.inc and ',
++     &                    'recompile COMIS'
++
++        STOP
++      END IF
++      IADGPLV(IPIADGV) = IADGPL
++      IADGP            = IPIADGV
++      CALL CCOPYA(IADGP,IQ(I+2),KSIDP-2)
++      END
++#endif
+diff -urNad paw-2.14.04~/src/pawlib/comis/code/cstran.F paw-2.14.04/src/pawlib/comis/code/cstran.F
+--- paw-2.14.04~/src/pawlib/comis/code/cstran.F	2001-02-07 04:27:01.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/code/cstran.F	2006-09-08 14:44:11.810263734 -0400
+@@ -521,6 +521,7 @@
+ *                 '#'             DRSJNT
+ *            'OD'/'FI'/'ENDDO'/'ENDIF'/'END' DELIM DRSJNT
+ ****
++      CHARACTER*8 MYCSPAWC
+       INTEGER GSCMST(3046),GSSTRC(135),GSSTRP(255)
+       INTEGER GSCMS1(361),GSCMS2(361),GSCMS3(361),GSCMS4(361),
+      *GSCMS5(361),GSCMS6(361),GSCMS7(361),GSCMS8(361),GSCMS9(158)
+@@ -719,6 +720,7 @@
+       DATA IOST/0/
+ **      DATA NHSSC/4H;   /, NHSEQ/4H=   /, NHSBR/4H)   /
+       DATA NMPAWC/4HPAWC/
++      MYCSPAWC = 'CSPAWC  '
+       CALL CCOPYA(IDEN,IDENPR,NWIDEN)
+       NCIDPR=NCIDEN
+       NWIDPR=NWIDEN
+@@ -903,7 +905,7 @@
+   211 CONTINUE
+ #if defined(CERNLIB_PAW)
+       KEYWD=22
+-      CALL CCOPYS(MJSCHA('CSPAWC  '),JID,8)
++      CALL CCOPYS(MJSCHA(MYCSPAWC),JID,8)
+       NCIDEN=6
+       NWIDEN=2
+       IGB=CSLTGB(IPVSB)
+diff -urNad paw-2.14.04~/src/pawlib/comis/comis/cstab64.inc paw-2.14.04/src/pawlib/comis/comis/cstab64.inc
+--- paw-2.14.04~/src/pawlib/comis/comis/cstab64.inc	1969-12-31 19:00:00.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/comis/cstab64.inc	2006-09-08 14:44:11.810263734 -0400
+@@ -0,0 +1,10 @@
++*
++*
++* cstab64.inc
++*
++      PARAMETER (MAXIAD64=100) !maximum number of shared objects
++      INTEGER*8 IADGPL,IADGPLV(MAXIAD64)
++      INTEGER   IADGPL1, IADGPL2
++      COMMON /CSTB64/ IADGPL,IADGPLV
++      COMMON /CSTB64I/ IPIADGV
++      EQUIVALENCE (IADGPL, IADGPL1)
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/ccopys.c paw-2.14.04/src/pawlib/comis/deccc/ccopys.c
+--- paw-2.14.04~/src/pawlib/comis/deccc/ccopys.c	1997-09-02 11:50:38.000000000 -0400
++++ paw-2.14.04/src/pawlib/comis/deccc/ccopys.c	2006-09-08 14:44:11.810263734 -0400
+@@ -33,11 +33,42 @@
+ #else
+ void ccopys_(ja,jb,nn)
+ #endif
++
++/*
++ * 64-bit pointer systems require a special treatment of addresses - see below -
++ * using the CERNLIB_QMLXIA64 cpp flag (H. Vogt - Sep 2005)
++ */
++
++/* For Itanium, the situation is even worse.  Itanium architecture is such
++ * that the data section starts at 0x6000000000000000.  The stack is
++ * supposed to be between 0x80...0 and 0xa0...0 starting at the high end
++ * and growing downwards, although on a test machine (merulo.debian.org)
++ * it seemed instead to start at 0x6000100000000000 and grow downwards.
++ * The addresses we actually get are truncated to the lowest 32 bits,
++ * so we assume that those greater than 0x80000000 are in the stack.
++ *
++ * Constant strings are in the text section starting at 0x40...0; we hope
++ * this function doesn't receive any.
++ * -- Kevin McCarty
++ */
++
++#if defined(CERNLIB_QMLXIA64)
++# include "cscal_lp64.h"
++     int *ja, *jb;
++     int *nn;
++{
++  int i,n; char *a,*b;
++  n=*nn; 
++  setaddr_lp64(*ja,*jb)
++
++#else
+      char **ja, **jb;
+      int *nn;
+ {
+   int i,n; char *a,*b;
+-  n=*nn; a=*ja; b=*jb;
++  n=*nn; 
++  a=*ja; b=*jb;
++#endif
+   if ( a >= b )
+      for ( i=0; i<n; i++ )
+           b[i]=a[i];
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/cs_hlshl.c paw-2.14.04/src/pawlib/comis/deccc/cs_hlshl.c
+--- paw-2.14.04~/src/pawlib/comis/deccc/cs_hlshl.c	1998-01-12 04:56:07.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/deccc/cs_hlshl.c	2006-09-08 14:48:50.060932620 -0400
+@@ -25,9 +25,24 @@
+ #if (defined(CERNLIB_SUN)||defined(CERNLIB_SGI)||defined(CERNLIB_IBMRT)||defined(CERNLIB_ALPHA_OSF)||defined(CERNLIB_LINUX))&&(defined(CERNLIB_SHL))
+ /*CMZ :          22/05/95  18.40.45  by  Julian Bunn*/
+ /*-- Author :*/
+-#if defined(CERNLIB_SUN)||defined(CERNLIB_LINUX)
++#if defined(CERNLIB_SUN)||defined(CERNLIB_LINUX)&&(!defined(CERNLIB_QMLXIA64))
+ #define SUN
+ #endif
++
++/*
++ * 64-bit pointer systems require a special treatment of addresses  
++ * using the CERNLIB_QMLXIA64 cpp flag (H. Vogt - Sep 2005)
++ * This code will be consistent with that of jumptn.c and jumpxn.c
++ * in packlib/kernlib/kerngen/ccgen (usage of jumpad_)
++ */
++
++#if defined(CERNLIB_LINUX)
++#include <stdio.h>
++#if defined(CERNLIB_QMLXIA64)
++#define ALPHA_OSF
++#endif
++#endif
++
+ #if defined(CERNLIB_SGI)
+ #define SGI
+ #endif
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/cscal_lp64.h paw-2.14.04/src/pawlib/comis/deccc/cscal_lp64.h
+--- paw-2.14.04~/src/pawlib/comis/deccc/cscal_lp64.h	1969-12-31 19:00:00.000000000 -0500
++++ paw-2.14.04/src/pawlib/comis/deccc/cscal_lp64.h	2006-09-08 14:44:11.811263521 -0400
+@@ -0,0 +1,74 @@
++#if defined(CERNLIB_QMLXIA64)
++/* Hideous hack macros that attempt to deal with 64-bit pointers using
++ * knowledge about only 32 bits of them. */
++
++/* Test whether a variable is automatic or static based on the lowest 32 bits
++ * of its address.
++ *
++ * Itanium architecture is such that the data section starts at
++ * 0x6000000000000000.  The stack is supposed to be between 0x80...0 and
++ * 0xa0...0 starting at the high end and growing downwards, although on a test
++ * machine (merulo.debian.org) it seemed instead to start at 0x6000100000000000
++ * and grow downwards.  The addresses we actually get are truncated to the
++ * lowest 32 bits, so we assume that those greater than 0x80000000 are in the
++ * stack.  Constant strings are in the text section starting at 0x40...0; we
++ * hope that functions using these macros don't receive any.
++ *
++ * On AMD64, the data section and constant strings are all within 32 bits
++ * of NULL, starting at 0x400000 and growing upward.  The stack starts
++ * at 0x80000000000 and grows downward.  However, tests I've run on an AMD64
++ * indicate that the low-order 32 bits of the address for variables on the
++ * stack may be indistinguishable from data segments; therefore we simply
++ * hope (pray) that all variables used are in the data segments.
++ *
++ * On Alpha, on the other hand, I couldn't find any docs for the Linux
++ * segmentation for virtual memory.  Judging by a test machine
++ * (escher.debian.org), the data section starts slightly above 0x120010000.
++ * On the other hand the stack grows downward from 0x120000000.  Here it
++ * seems safe to suppose that the variable is in the stack if the uint32
++ * truncated address received is less than 0x20000000.
++ *
++ * -- Kevin McCarty
++ */
++
++#if defined (__ia64__)
++# define autotest(_var) ((unsigned long)(_var) > 0x80000000UL)
++#elif defined (__alpha__)
++# define autotest(_var) ((unsigned long)(_var) < 0x20000000UL)
++#else /* amd64 */
++# define autotest(_var) 0 /* can't test for it */
++#endif
++
++
++#define restore_pointer(_var, _ptr, _cast) do {			      	    \
++   static int sdummy = 0; int adummy = 0;                                   \
++   unsigned long sbase = ((unsigned long)&sdummy) & 0xffffffff00000000UL;   \
++   unsigned long abase = ((unsigned long)&adummy) & 0xffffffff00000000UL;   \
++   _ptr = (_cast)((unsigned long)(_var) + (autotest(_var) ? abase : sbase));\
++ } while (0)
++
++
++#define setcall_lp64(type)                                                  \
++ long *fptr;                                                                \
++ int *n;                                                                    \
++ unsigned pin[16];                                                          \
++{                                                                           \
++   int jumpad_();                                                           \
++   type (*name)();                                                          \
++   unsigned long ptr = (unsigned long)jumpad_;                              \
++   unsigned long p[16];                                                     \
++   int  count;                                                              \
++   ptr += *fptr;                                                            \
++   name = (type (*)())ptr;                                                  \
++   for ( count=0; count<16; count++ )                                       \
++     restore_pointer(pin[count], p[count], unsigned long);                  \
++   /* end of macro */
++
++
++#define setaddr_lp64(__ja, __jb)                                            \
++  restore_pointer(__ja, a, char*);                                          \
++  restore_pointer(__jb, b, char*);                                          \
++   /* end of macro */
++
++#endif
++
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/cscald.c paw-2.14.04/src/pawlib/comis/deccc/cscald.c
+--- paw-2.14.04~/src/pawlib/comis/deccc/cscald.c	2004-10-27 05:01:54.000000000 -0400
++++ paw-2.14.04/src/pawlib/comis/deccc/cscald.c	2006-09-08 14:45:54.322410202 -0400
+@@ -29,11 +29,10 @@
+ #define cscald   
+ #undef  cscald
+ 
+-#ifdef CERNLIB_WINNT
++#if defined(CERNLIB_WINNT) || defined(CERNLIB_LINUX)
+ # include <stdio.h>
+ #endif
+-
+-#if (defined(CERNLIB_QX_SC))&&(!defined(CERNLIB_WINNT))
++#if (defined(CERNLIB_QX_SC))&&(!defined(CERNLIB_WINNT))&&(!defined(CERNLIB_QMLXIA64))
+ double cscald_ (name,n,p)
+ #endif
+ #if defined(CERNLIB_QXNO_SC)
+@@ -46,10 +45,30 @@
+     int CSCALD (name,n,p)
+ #  endif
+ #endif
++
++/*
++ * 64-bit pointer systems require a special treatment of addresses - see below 
++ * using the CERNLIB_QMLXIA64 macro definition (H. Vogt - Sep 2005)
++ * This code will be consistent with that of jumptn.c and jumpxn.c
++ * in packlib/kernlib/kerngen/ccgen (usage of jumpad_)
++ *
++ * for shared objects loaded by the dynamic linker content of the 1st arg
++ * in cscald_ is a pointer which may be above the 32 bit address space
++ * therefore *fptr has been changed to type long
++ * see changes in csintx.F, cskcal.F, ... (introduction of INTEGER*8 array for
++ * those pointers)
++ */
++
++#if defined(CERNLIB_QMLXIA64)
++# include "cscal_lp64.h"
++double cscald_ (fptr,n,pin)
++ setcall_lp64(double)
++#else
+  double (type_of_call *(*name)) ();
+  int *n;
+- int *p[15];
++ int *p[16];
+ {
++#endif
+    double d;
+    switch (*n)
+    {
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/cscali.c paw-2.14.04/src/pawlib/comis/deccc/cscali.c
+--- paw-2.14.04~/src/pawlib/comis/deccc/cscali.c	2004-10-22 08:42:40.000000000 -0400
++++ paw-2.14.04/src/pawlib/comis/deccc/cscali.c	2006-09-08 14:46:14.981004397 -0400
+@@ -26,11 +26,10 @@
+ #define cscali
+ #undef  cscali
+ 
+-#ifdef CERNLIB_WINNT
++#if defined(CERNLIB_WINNT) || defined(CERNLIB_LINUX)
+ # include <stdio.h>
+ #endif
+-
+-#if (defined(CERNLIB_QX_SC))&&(!defined(CERNLIB_WINNT))
++#if (defined(CERNLIB_QX_SC))&&(!defined(CERNLIB_WINNT))&&(!defined(CERNLIB_QMLXIA64))
+ int cscali_ (name,n,p)
+ #endif
+ #if defined(CERNLIB_QXNO_SC)
+@@ -39,10 +38,30 @@
+ #if defined(CERNLIB_QXCAPT)
+ int type_of_call CSCALI (name,n,p)
+ #endif
++
++/*
++ * 64-bit pointer systems require a special treatment of addresses - see below 
++ * using the CERNLIB_QMLXIA64 macro definition (H. Vogt - Sep 2005)
++ * This code will be consistent with that of jumptn.c and jumpxn.c
++ * in packlib/kernlib/kerngen/ccgen (usage of jumpad_)
++ *
++ * for shared objects loaded by the dynamic linker content of the 1st arg
++ * in cscali_ is a pointer which may be above the 32 bit address space
++ * therefore *fptr has been changed to type long
++ * see changes in csintx.F, cskcal.F, ... (introduction of INTEGER*8 array for
++ * those pointers)
++ */
++
++#if defined(CERNLIB_QMLXIA64)
++# include "cscal_lp64.h"
++int cscali_ (fptr,n,pin)
++ setcall_lp64(int)
++#else
+  int (type_of_call *(*name)) ();
+  int *n;
+- int *p[15];
++ int *p[16];
+ {
++#endif
+    int i;
+    switch (*n)
+    {
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/cscalr.c paw-2.14.04/src/pawlib/comis/deccc/cscalr.c
+--- paw-2.14.04~/src/pawlib/comis/deccc/cscalr.c	2004-10-22 08:03:16.000000000 -0400
++++ paw-2.14.04/src/pawlib/comis/deccc/cscalr.c	2006-09-08 14:47:10.662129691 -0400
+@@ -30,19 +30,15 @@
+ #define cscalr
+ #undef  cscalr
+ 
+-#ifdef CERNLIB_WINNT
++#if defined(CERNLIB_WINNT) || defined(CERNLIB_LINUX)
+ # include <stdio.h>
+ #endif
+-
+-
+-#if (defined(CERNLIB_QX_SC))&&(!defined(CERNLIB_WINNT))
++#if (defined(CERNLIB_QX_SC))&&(!defined(CERNLIB_WINNT))&&(!defined(CERNLIB_QMLXIA64))
+ float cscalr_ (name,n,p)
+ #endif
+-
+ #if defined(CERNLIB_QXNO_SC)
+ float cscalr (name,n,p)
+ #endif
+-
+ #if defined(CERNLIB_QXCAPT)
+ # if defined(CERNLIB_MSSTDCALL)
+    float type_of_call CSCALR(name,n,p)
+@@ -51,10 +47,42 @@
+ # endif
+ #endif
+ 
++/*
++ * 64-bit pointer systems require a special treatment of addresses - see below 
++ * using the CERNLIB_QMLXIA64 macro definition (H. Vogt - Sep 2005)
++ * This code will be consistent with that of jumptn.c and jumpxn.c
++ * in packlib/kernlib/kerngen/ccgen (usage of jumpad_)
++ *
++ * for shared objects loaded by the dynamic linker content of the 1st arg
++ * in cscalr_ is a pointer which may be above the 32 bit address space
++ * therefore *fptr has been changed to type long
++ * see changes in csintx.F, cskcal.F, ... (introduction of INTEGER*8 array for
++ * those pointers)
++ */
++
++#if defined(CERNLIB_QMLXIA64)
++
++/* Additional note: g77 generates code such that it expects REAL functions
++ * to return "double".  Hence C functions to be used in FORTRAN as REAL
++ * must return "double", and declarations of REAL FORTRAN functions in C files
++ * must also return "double".  On most architectures one can get away with
++ * using "float" instead, but not on amd64 ... see
++ * http://gcc.gnu.org/bugzilla/show_bug.cgi?id=15397
++ *
++ * -- Kevin McCarty */
++# if !(defined(CERNLIB_GFORTRAN)||defined(CERNLIB_INTELIFC))  /* i.e. g77 */
++#  define float double
++# endif
++
++# include "cscal_lp64.h"
++float cscalr_ (fptr,n,pin)
++ setcall_lp64(float)
++#else
+  float (type_of_call *(*name)) ();
+  int *n;
+- int *p[15];
++ int *p[16];
+ {
++#endif
+    float r;
+    switch (*n)
+    {
+diff -urNad paw-2.14.04~/src/pawlib/comis/deccc/cstrcmp.c paw-2.14.04/src/pawlib/comis/deccc/cstrcmp.c
+--- paw-2.14.04~/src/pawlib/comis/deccc/cstrcmp.c	1997-09-02 11:50:44.000000000 -0400
++++ paw-2.14.04/src/pawlib/comis/deccc/cstrcmp.c	2006-09-08 14:44:11.812263308 -0400
+@@ -36,6 +36,43 @@
+ #else
+ int cstrcmp_(ja,na,jb,nb)
+ #endif
++
++/*
++ * 64-bit pointer systems require a special treatment of addresses - see below -
++ * using the CERNLIB_QMLXIA64 cpp flag (H. Vogt - Sep 2005)
++ */
++ 
++/* For Itanium, the situation is even worse.  Itanium architecture is such
++ * that the data section starts at 0x6000000000000000.  The stack is
++ * supposed to be between 0x80...0 and 0xa0...0 starting at the high end
++ * and growing downwards, although on a test machine (merulo.debian.org)
++ * it seemed instead to start at 0x6000100000000000 and grow downwards.
++ * The addresses we actually get are truncated to the lowest 32 bits,
++ * so we assume that those greater than 0x80000000 are in the stack.
++ *
++ * Constant strings are in the text section starting at 0x40...0; we hope
++ * this function doesn't receive any.
++ * -- Kevin McCarty
++ */
++
++#if defined(CERNLIB_QMLXIA64)
++# include "cscal_lp64.h"
++     int *ja, *jb;
++     int *na, *nb;
++{
++
++  static int i,la,lb,k; static char *a,*b;
++  if ( *na >= *nb )
++     {
++       setaddr_lp64(*ja,*jb)
++       la=*na; lb=*nb; k=1;
++     }
++  else
++     {
++       setaddr_lp64(*jb,*ja)
++       la=*nb; lb=*na; k=-1;
++     }
++#else
+      char **ja, **jb;
+      int *na, *nb;
+ {
+@@ -48,6 +85,7 @@
+     {
+       a=*jb; b=*ja; la=*nb; lb=*na; k=-1;
+      }
++#endif
+   for ( i=0; i<lb; i++ )
+     { if(a[i] != b[i])
+       { return ( (a[i] > b[i]) ? k : -k ); }
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/att_color.c paw-2.14.04/src/pawlib/paw/cmotif/att_color.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/att_color.c	1996-03-01 06:38:53.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/att_color.c	2006-09-08 14:44:11.812263308 -0400
+@@ -114,7 +114,7 @@
+ 
+    XtVaGetValues(ObjectRow,XmNmenuHistory,&CurrentObject,NULL);
+    XtVaGetValues(CurrentObject,XmNuserData,&data,NULL);
+-   switch ((int ) client_data) {
++   switch ((long) client_data) {
+       case 1: /* Surface */
+          sprintf(Svalue,"%d",data->SurfaceColor);
+          break;
+@@ -164,7 +164,7 @@
+       Ncol=atoi((char *)XmTextGetString(NcolText));
+    } else Ncol=8;
+    ColorNum=atoi((char *)XmTextGetString(AttColorText));
+-   switch((int) client_data) {
++   switch((long) client_data) {
+       case 1: /* UpArrow */
+          ColorNum++;
+          break;
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/att_define_color.c paw-2.14.04/src/pawlib/paw/cmotif/att_define_color.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/att_define_color.c	1999-03-01 04:07:01.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/att_define_color.c	2006-09-08 14:44:11.812263308 -0400
+@@ -338,7 +338,7 @@
+ static void MoveScale_cb(Widget w,caddr_t client_data,
+                          XmAnyCallbackStruct *call_data)
+ {
+-   switch ((int ) client_data) {
++   switch ((long) client_data) {
+       case 1 : /* RED */
+          EditColor.red=((XmScaleCallbackStruct *) call_data)->value;
+          break;
+@@ -369,7 +369,7 @@
+       default :
+          fprintf(stderr,"Error in function MoveScale_cb");
+    } /*end of switch */
+-   apply_color((int) client_data);
++   apply_color((long) client_data);
+ }
+ 
+ /*****************************************************************************
+@@ -452,7 +452,7 @@
+    char *ComStr;
+ 
+    ColorNum=atoi((char *)XmTextGetString(ColorIndex));
+-   switch((int) client_data) {
++   switch((long) client_data) {
+       case 1: /* UpArrow */
+          ColorNum++;
+          break;
+@@ -494,7 +494,7 @@
+    XmAnyCallbackStruct cb;
+ 
+    Ncol=atoi((char *)XmTextGetString(NcolText));
+-   switch((int) client_data) {
++   switch((long) client_data) {
+       case 1: /* UpArrow*/
+          Ncol++;
+          break;
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/att_general.c paw-2.14.04/src/pawlib/paw/cmotif/att_general.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/att_general.c	1996-03-01 06:38:53.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/att_general.c	2006-09-08 14:44:11.813263095 -0400
+@@ -454,7 +454,7 @@
+ {
+    char ComStr[15];
+ 
+-   sprintf(ComStr,"IGSET MTYP %d",(int) client_data);
++   sprintf(ComStr,"IGSET MTYP %ld",(long) client_data);
+    execute_kuip_cmd(ComStr);
+    if (appres.auto_refresh) {
+       plot_current_histo();
+@@ -471,8 +471,8 @@
+ {
+    char ComStr[15];
+ 
+-   sprintf(ComStr,"IGSET LTYP %d",(int) client_data);
+-   sprintf(ComStr,"SET DMOD %d",(int) client_data);
++   sprintf(ComStr,"IGSET LTYP %ld",(long) client_data);
++   sprintf(ComStr,"SET DMOD %ld",(long) client_data);
+ 
+    execute_kuip_cmd(ComStr);
+    if (appres.auto_refresh) {
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/att_geometry.c paw-2.14.04/src/pawlib/paw/cmotif/att_geometry.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/att_geometry.c	1999-02-01 12:56:11.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/att_geometry.c	2006-09-08 14:44:11.815262668 -0400
+@@ -2582,7 +2582,7 @@
+    char *ComStr;
+ 
+    XtVaGetValues(CButton,XmNuserData,&data,NULL);
+-   switch ((int) client_data ) {
++   switch ((long) client_data ) {
+       case 1 : /**** value change in text */
+          Fvalue= (float)atof((char *)XmTextGetString(Text));
+ 
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/att_main.c paw-2.14.04/src/pawlib/paw/cmotif/att_main.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/att_main.c	1996-03-01 06:38:54.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/att_main.c	2006-09-08 14:44:11.816262455 -0400
+@@ -139,7 +139,7 @@
+ {
+    int i;
+    XmAnyCallbackStruct cb;
+-   int pos;
++   long pos;
+    char tempstr[6];
+    int tempint;
+ 
+@@ -147,7 +147,7 @@
+ 
+    switch (*label) {
+       case 'B' :
+-         pos=(int) strchr(value,'.')-(int) value;
++         pos=strchr(value,'.')-value;
+          strncpy(tempstr,value,pos);
+          tempint=atoi(tempstr);
+          if (tempint>=1000) {
+@@ -157,7 +157,7 @@
+             StateObject[i].ContourColor=tempint;
+             StateObject[i].SurfaceColor=0;
+          }
+-         value=(char *)((int) value+pos+1);
++         value=(char *)(value+pos+1);
+          strncpy(tempstr,value,2);
+          StateObject[i].StatColor=tempstr[1]-'0';
+          StateObject[i].ZoneColor=tempstr[0]-'0';
+@@ -324,12 +324,12 @@
+ static char *Clean(char *string)
+ {
+    char *Apos;
+-   int pos;
++   long pos;
+    char end[MAX_TITLE_SIZE];
+ 
+    Apos=strrchr(string,39); /* #27 == ' */
+    if (Apos) {
+-      pos=((int)Apos  - (int)string  );
++      pos=Apos  - string;
+       strcpy(end,++Apos);
+       string[pos]='\0';
+       strcat(Clean(string),"@'");
+@@ -692,7 +692,7 @@
+    XtVaGetValues(ObjectRow,XmNmenuHistory,&CurrentToggle,NULL);
+    XtVaGetValues(CurrentToggle,XmNuserData,&CurrentState,NULL);
+    LineWidth=CurrentState->LineWidth;
+-   switch((int) client_data) {
++   switch((long) client_data) {
+       case 1: /* UpArrow */
+          LineWidth++;
+          break;
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/attatch.c paw-2.14.04/src/pawlib/paw/cmotif/attatch.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/attatch.c	1996-03-01 06:38:54.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/attatch.c	2006-09-08 14:44:11.816262455 -0400
+@@ -88,7 +88,7 @@
+ 
+    XtVaGetValues(ObjectRow,XmNmenuHistory,&CurrentObject,NULL);
+    XtVaGetValues(CurrentObject,XmNuserData,&data,NULL);
+-   switch ((int) client_data ) {
++   switch ((long) client_data ) {
+       case 1 : /**** value change in text */
+          Svalue=(char *)XmTextGetString(IndexText);
+ 
+@@ -124,7 +124,7 @@
+        /* value change in scale */
+          XmScaleGetValue(w,&Ivalue);
+          Svalue=(char *)XmTextGetString(IndexText);
+-         Svalue[((int) client_data )-2]='0' + Ivalue;
++         Svalue[((long) client_data )-2]='0' + Ivalue;
+          XmTextSetString(IndexText,Svalue);
+          if (data->IndexHatch!=atoi(Svalue)) {
+             data->IndexHatch=atoi(Svalue);
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/axis.c paw-2.14.04/src/pawlib/paw/cmotif/axis.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/axis.c	1996-03-01 06:38:54.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/axis.c	2006-09-08 14:44:11.817262242 -0400
+@@ -1336,7 +1336,7 @@
+ {
+    XmAnyCallbackStruct cbs1;
+ 
+-   switch ((int)type) {
++   switch ((long)type) {
+       case 1:
+        axis.xo = 1;
+        break;
+@@ -1432,7 +1432,7 @@
+    unselect_list();
+    comstr = XtCalloc(MAX_CMD_LENGTH, 1);
+ 
+-   switch ((int)type) {
++   switch ((long)type) {
+       case 0:
+ 
+        XmToggleButtonGadgetSetState(labeltoggleButtonGadget0,True,False);
+@@ -1680,7 +1680,7 @@
+    cbs1.reason = 0;
+    cbs1.event = (XEvent *) NULL;
+ 
+-   switch ((int) num) {
++   switch ((long) num) {
+       case 1:
+        if (XmToggleButtonGadgetGetState(labeltoggleButtonGadget1))
+           XtCallCallbacks(labeltoggleButtonGadget1,XmNvalueChangedCallback,
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/histo.c paw-2.14.04/src/pawlib/paw/cmotif/histo.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/histo.c	1996-03-01 06:38:56.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/histo.c	2006-09-08 14:44:11.818262029 -0400
+@@ -529,7 +529,7 @@
+ static void show_option(Widget w, int *type, XmToggleButtonCallbackStruct *cbs)
+ {
+    if (cbs->set) {
+-      switch( (int)type ) {
++      switch( (long)type ) {
+          case 1:
+             if ( !widget_stat ) {
+                widget_stat = create_statFormDialog();
+@@ -651,7 +651,7 @@
+             return;
+       }
+    } else {
+-      switch( (int)type ) {
++      switch( (long)type ) {
+          case 1:
+           if (widget_stat) {
+              XtUnmanageChild(widget_stat);
+@@ -758,7 +758,7 @@
+    int            x,y;
+ 
+ 
+-   switch( (int)type ) {
++   switch( (long)type ) {
+       case 1:
+          sprintf (comstr,"Set STAT %d%d%d%d%d%d%d"
+                   ,XmToggleButtonGadgetGetState(AllchanToggleButtonGadget)
+@@ -996,7 +996,7 @@
+ static void coordinate_set(Widget w, int *type, XmAnyCallbackStruct *cbs)
+ {
+ 
+-   switch( (int)type ) {
++   switch( (long)type ) {
+       case 1:
+          sprintf (histogram.coordinate,"   ");
+          break;
+@@ -1034,7 +1034,7 @@
+    int      ilen1, ilen2;
+    XmString xmstr;
+ 
+-   switch( (int)type ) {
++   switch( (long)type ) {
+       case 1:
+          histogram.x1 = cbs->value;
+          if( x_range_lock != 0 ) {
+@@ -1131,7 +1131,7 @@
+       if( histogram.y1 <= 0 ) histogram.y1 = 1;
+       if( histogram.y2 <= 0 ) histogram.y2 = 1;
+ 
+-   if ( (int)type < 3 ) {
++   if ( (long)type < 3 ) {
+       XmScaleSetValue(X2Scale,histogram.x2);
+       XmScaleSetValue(X1Scale,histogram.x1);
+       if( x_range_lock == 0 || upd_nbin) {
+diff -urNad paw-2.14.04~/src/pawlib/paw/cmotif/init.c paw-2.14.04/src/pawlib/paw/cmotif/init.c
+--- paw-2.14.04~/src/pawlib/paw/cmotif/init.c	1996-03-12 11:58:51.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/cmotif/init.c	2006-09-08 14:44:11.818262029 -0400
+@@ -286,7 +286,7 @@
+ static void destroy_browser(Widget w, int *which, XmAnyCallbackStruct *cbs)
+ {
+    MenuCbStruct    *menu_item;
+-   int              i = (int) which;
++   long             i = (long) which;
+ 
+    browser[i].widget = NULL;
+    if (browser[i].open_dialog) {
+@@ -308,7 +308,7 @@
+  ***********************************************************************/
+ static void destroy_graphics(Widget w, int *which, XmAnyCallbackStruct *cbs)
+ {
+-   int    i = (int) which;
++   long   i = (long) which;
+ 
+    graphics[i].widget = NULL;
+ }
+diff -urNad paw-2.14.04~/src/pawlib/paw/ntuple/c_hcntpar.h paw-2.14.04/src/pawlib/paw/ntuple/c_hcntpar.h
+--- paw-2.14.04~/src/pawlib/paw/ntuple/c_hcntpar.h	1996-04-23 14:37:45.000000000 -0400
++++ paw-2.14.04/src/pawlib/paw/ntuple/c_hcntpar.h	2006-09-08 14:44:11.818262029 -0400
+@@ -47,7 +47,7 @@
+ #define ZID	12
+ #define ZITMP	10
+ #define ZNTMP	6
+-#define ZNTMP1	3
++#define ZNTMP1	4
+ #define ZLINK	6
+ 
+ #endif	/*	CERN_C_HCNTPAR	*/
+diff -urNad paw-2.14.04~/src/pawlib/paw/ntuple/qp_execute.c paw-2.14.04/src/pawlib/paw/ntuple/qp_execute.c
+--- paw-2.14.04~/src/pawlib/paw/ntuple/qp_execute.c	2001-09-18 09:41:35.000000000 -0400
++++ paw-2.14.04/src/pawlib/paw/ntuple/qp_execute.c	2006-09-08 14:44:11.819261816 -0400
+@@ -184,12 +184,19 @@
+ 					/* all definitions for the stack */
+ #undef INIT_STACK_TO_NULL		/* are kept together in this file */
+ 
++#if defined(CERNLIB_QMLXIA64)
++# undef HBALLOC
++# undef HGNTBF
++# define HBALLOC HBALLOC64
++# define HGNTBF HGNTBF64
++#endif
++
+ /* extern functions */
+ extern void qp_exec_evt( QueryExe *, long, long, QPCmd *, int *);
+ 
+ typedef		char	tName[MAX_NAME_LEN+1];
+ tName		*namelist;
+-int		*offsetlist;
++long		*offsetlist;
+ int		*indexlist;
+ 
+ 
+@@ -245,7 +252,23 @@
+ 	char		ntname[MAX_NAME_LEN+6];
+ 	int		i, ierr, indx, itype, isize, ielem;
+ 	Int32 *		addr;
+-	int		ibase[1], ioff, nuse;
++
++	/* LP64 compatibility:
++	   - use static for ibase (at least) because its address is stored
++	     as Int32 in structure CWNBlock
++	     static takes ibase from the stack and puts it the code area.
++	   - use type long for ioff and offsetlist[i]
++	     (for 32 bit architectures type long is 4 Bytes as it is used
++	      also in packlib/hbook/chbook/halloc.c in hballo1 !)
++	   The x86-64 ABI has the code area in the 32 bit address space
++	   but addresses to the stack and to dynamically allocated areas
++	   may and will be above the 32 bit address space (below 0x80000000000).
++	   See also: http://www.x86-64.org/documentation/abi-0.96.pdf
++	   (H. Vogt, Oct. 2005) */
++
++	static int	ibase[1];
++	long		ioff;
++	int		nuse;
+ 	int		id = qe->id;
+ 	char *		path = qe->path;
+ 	char *		title;
+@@ -286,7 +309,11 @@
+ 	CWNBlock = (RefCWN *) calloc( CWNCount + 1, sizeof( RefCWN ) );
+ 	qp_assert( MAX_NAME_LEN == 32 ); /* see hbook.h (HGNTBF) */
+ 	namelist = (tName *) calloc( CWNCount + 1, sizeof(tName) );
+-	offsetlist = (int *) calloc( CWNCount + 1, sizeof(int) );
++
++	/* offsetlist should be of type long (see above) (H. Vogt, Oct. 2005) */
++
++	offsetlist = (long *) calloc( CWNCount + 1, sizeof(long) );
++
+ 	indexlist = (int *) calloc( CWNCount + 1, sizeof(int) );
+ 	qp_assert(
+ 		CWNBlock != 0 &&
+@@ -381,6 +408,7 @@
+ 						offsetlist[nt_load_cnt]=
+ 						CWNBlock[index].p -
+ 						PAWC.iq_eqv;
++
+ 						strncpy(
+ 						namelist[nt_load_cnt],
+ 						vi->name,
+@@ -871,8 +899,21 @@
+ 			if ( cmd->u.scan.pawpp ) {
+ 				char	buf[33];
+ 
++				/* for LP64 ABI matlab and matrow are 64 bit pointer, type is void*  
++				   but PCADDR.jmlab and PCADDR.jmrow are of type int
++				   see: c_pcaddr.h and qp_command.h
++				   it is related to CWNBlock -> see above (H. Vogt)*/
++
++#if defined(CERNLIB_QMLXIA64)
++				unsigned long long int	 myjmlab, myjmrow;
++				myjmlab = PCADDR.jmlab;
++				myjmrow = PCADDR.jmrow;
++				c->matlab = (TableCallBack) myjmlab;
++				c->matrow = (TableCallBack) myjmrow;
++#else
+ 				c->matlab = (TableCallBack) PCADDR.jmlab;
+ 				c->matrow = (TableCallBack) PCADDR.jmrow;
++#endif
+ 
+ 				qp_assert( qe->nexpr <= MAX_OUTSTR );
+ 
+@@ -1791,6 +1832,31 @@
+ 	PAWIDN.idnevt = ievt;
+         PAWCHN.ichevt = ievt_chain;
+ 
++#if defined(CERNLIB_QMLXIA64)
++/* avoid addresses from calloc which are above 32 bits here */
++	static Int32 helpp[8];
++	int i;
++	if ( npar < 9 ) {
++		for ( i=0; i<npar; i++ ) helpp[i] = stack[frame[framep-i]];
++	}
++	switch ( npar ) {
++	case 8: p8 = &helpp[7];
++	case 7: p7 = &helpp[6];
++	case 6: p6 = &helpp[5];
++	case 5: p5 = &helpp[4];
++	case 4: p4 = &helpp[3];
++	case 3: p3 = &helpp[2];
++	case 2: p2 = &helpp[1];
++	case 1: p1 = &helpp[0];
++	case 0: 
++		break;
++	default:
++		sf_report( "exec_comis: To many arguments (%d)\n", npar );
++		*errp = R_INTERNAL_ERROR;
++		return FALSE;
++		break;
++	}
++#else
+ 	switch ( npar ) {
+ 	case 8: p8 = &stack[frame[framep-7]];
+ 	case 7: p7 = &stack[frame[framep-6]];
+@@ -1808,6 +1874,7 @@
+ 		return FALSE;
+ 		break;
+ 	}
++#endif
+ 
+ 	switch ( fc ) {
+ 
+diff -urNad paw-2.14.04~/src/pawlib/paw/ntuple/qp_hbook_if.c paw-2.14.04/src/pawlib/paw/ntuple/qp_hbook_if.c
+--- paw-2.14.04~/src/pawlib/paw/ntuple/qp_hbook_if.c	1999-07-05 11:43:35.000000000 -0400
++++ paw-2.14.04/src/pawlib/paw/ntuple/qp_hbook_if.c	2006-09-08 14:44:11.820261603 -0400
+@@ -149,7 +149,15 @@
+ 	int	idn, idtmp;
+ 	int	icycle;
+ 	int	ierr;
+-	int     izero = 0;
++
++	/* LP64 compatibility:
++	   use static for izero because its address is fetched by hbname_
++	   using locb and locb expects 32 bit addresses only.
++	   static takes izero from the stack and puts it the code area
++	   and the LP64 ABI has the code area in the 32 bit address space
++	   but the stack starts downward from 0x80000000000 (H. Vogt) */
++
++	static int     izero = 0;
+ 
+ 	/* split string into  path, id and cycle */
+ 

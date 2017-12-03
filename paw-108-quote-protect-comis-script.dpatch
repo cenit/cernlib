@@ -1,0 +1,28 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 108-quote-protect-comis-script.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Try to be whitespace-safe in script generated at runtime by COMIS.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F /tmp/dpep.tIRzzG/cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F
+--- cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F	2000-09-25 10:16:36.000000000 -0400
++++ /tmp/dpep.tIRzzG/cernlib-2005.05.09/src/pawlib/comis/code/cscrexec.F	2005-06-09 15:41:16.757077306 -0400
+@@ -70,7 +70,7 @@
+       LEXEC=LENOCC(FEXEC)
+       OPEN(LUNOUT,FILE=FEXEC(:LEXEC), STATUS='UNKNOWN',ERR=99)
+       WRITE(LUNOUT,'(A)')         '#!/bin/sh'
+-      WRITE(LUNOUT,'(A)')         'olddir=`pwd`'
++      WRITE(LUNOUT,'(A)')         'olddir="`pwd`"'
+ *      WRITE(LUNOUT,'(A)')         'cd '//CHPATH(:LPATH)
+       CHLINE=                     'cd '//CHPATH(:LPATH)
+       L=LENOCC(CHLINE)
+@@ -206,7 +206,7 @@
+       CHLINE=                     '/bin/rm -f '//NAME(:LN)//'.o'
+       L=LENOCC(CHLINE)
+       WRITE(LUNOUT,'(A)')CHLINE(:L)
+-      WRITE(LUNOUT,'(A)')         'cd $olddir'
++      WRITE(LUNOUT,'(A)')         'cd "$olddir"'
+       WRITE(LUNOUT,'(A)')         'exit 0'
+       CALL CSCLOS(LUNOUT)
+       CLOSE(LUNOUT)

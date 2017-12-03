@@ -1,0 +1,24 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 114-install-scripts-properly.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Install scripts properly (i.e. don't try to strip them).
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/scripts/Imakefile cernlib-2005.05.09.dfsg/src/scripts/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/scripts/Imakefile	2004-07-29 10:17:08.000000000 -0400
++++ cernlib-2005.05.09.dfsg/src/scripts/Imakefile	2005-12-02 10:45:23.091782817 -0500
+@@ -1,10 +1,10 @@
+ 
+-InstallProgram(paw,$(CERN_BINDIR))
++InstallNamedProg(paw,paw,$(CERN_BINDIR))
+ 
+ #if defined(CERNLIB_SHIFT)
+ InstallNamedProg(cernlib_shift,cernlib,$(CERN_BINDIR))
+ #else
+-InstallProgram(cernlib,$(CERN_BINDIR))
++InstallNamedProg(cernlib,cernlib,$(CERN_BINDIR))
+ #endif
+ 
+-InstallProgram(gxint,$(CERN_BINDIR))
++InstallNamedProg(gxint,gxint,$(CERN_BINDIR))

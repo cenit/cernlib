@@ -1,0 +1,1986 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 304-update-Imake-config-files.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Use Imake.cf stolen from recent XFree86 code, as it is much more
+## DP: up-to-date than the Imake.cf in CERNLIB source.  Also update linux.cf
+## DP: to support most Linux architectures.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/config/Imake.cf cernlib-2006.dfsg.2/src/config/Imake.cf
+--- cernlib-2006.dfsg.2~/src/config/Imake.cf	2006-09-15 02:34:47.000000000 -0700
++++ cernlib-2006.dfsg.2/src/config/Imake.cf	2008-03-14 10:03:13.000000000 -0700
+@@ -1,27 +1,5 @@
+-/* $Id: cernlib-304-update-Imake-config-files.dpatch,v 1.6 2008/04/04 22:21:28 pertusus Exp $
+- *
+- * $Log: cernlib-304-update-Imake-config-files.dpatch,v $
+- * Revision 1.6  2008/04/04 22:21:28  pertusus
+- * * Sat Apr  5 2008 Patrice Dumas <pertusus at free.fr> 2006-29
+- * - debian cernlib 2006.dfsg.2-13 patchset
+- *
+- * Revision 1.6  2006/09/15 09:34:47  mclareni
+- * Submitted mods for gcc4/gfortran and MacOSX, corrected to work also on slc4 with gcc3.4 and 4.1
+- *
+- * Revision 1.5  2004/10/05 15:54:40  mclareni
+- * Add configuration file linux-lp64 for Linux 64-bit pointer systems like AMD Opteron and Intel IA64.
+- *
+- * Revision 1.4  1998/09/25 09:23:38  mclareni
+- * Modifications for the Mklinux port flagged by CERNLIB_PPC
+- *
+- * Revision 1.3  1998/06/09 13:54:39  cernlib
+- * Make sure unix is properly undefined to compile kernlib/unix
+- *
+- * Revision 1.2  1995/12/21 11:31:57  cernlib
+- * Imake files end 1995
+- *
+- * Revision 1.1.1.1  1995/12/20  15:26:44  cernlib
+- * X11R6 config files unmodified
+- *
+- *
+- */
+-XCOMM $XConsortium: Imake.cf,v 1.19 95/01/05 19:24:32 kaleb Exp $
++XCOMM $XdotOrg: util/cf/Imake.cf,v 1.12 2005/11/08 06:33:24 jkj Exp $
++XCOMM $Xorg: Imake.cf,v 1.4 2000/08/17 19:41:45 cpqbld Exp $
+ /*
+  * To add support for another platform:
+  * 
+@@ -40,257 +18,586 @@
+  *
+  *     4.  Create a .cf file with the name given by MacroFile.
+  */
++XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
+ 
+-#ifdef ultrix
+-#define MacroIncludeFile <ultrix.cf>
+-#define MacroFile ultrix.cf
+-#ifdef vax
+-#undef vax
+-#define VaxArchitecture
+-#endif
+-#ifdef mips
+-#undef mips
+-#define MipsArchitecture
++#if defined(__APPLE__)
++# undef __APPLE__
++# define MacroIncludeFile <MacOSX.cf>
++# define MacroFile MacOSX.cf
++# define MacOSXArchitecture
++# define DarwinArchitecture
++# ifdef __ppc__
++#  define PpcDarwinArchitecture
++#  undef __ppc__
++# endif
++# ifdef __i386__
++#  define i386DarwinArchitecture
++#  undef __i386__
++# endif
+ #endif
+-#undef ultrix
+-#define UltrixArchitecture
++
++#if defined(clipper) || defined(__clipper__)
++# undef clipper
++# define MacroIncludeFile <ingr.cf>
++# define MacroFile ingr.cf
++# define IngrArchitecture
++#endif /* clipper */
++
++#ifdef __CYGWIN__
++#define MacroIncludeFile <cygwin.cf>
++#define MacroFile cygwin.cf
++#define cygwinArchitecture
++#define i386Architecture
++#undef i386
++#undef i486
++#undef i586
++#undef i686
++#undef __i386__
++#undef _X86_
++#undef __CYGWIN__
++#endif /* CYGWIN */
++
++#ifdef ultrix
++# define MacroIncludeFile <ultrix.cf>
++# define MacroFile ultrix.cf
++# ifdef vax
++#  undef vax
++#  define VaxArchitecture
++# endif
++# ifdef mips
++#  undef mips
++#  define MipsArchitecture
++#  define MipselArchitecture
++# endif
++# undef ultrix
++# define UltrixArchitecture
+ #endif /* ultrix */
+ 
+-#if defined(vax) && !defined(UltrixArchitecture)
+-#define MacroIncludeFile <bsd.cf>
+-#define MacroFile bsd.cf
+-#undef vax
+-#define BSDArchitecture
+-#define VaxArchitecture
++#if defined(vax) && !defined(UltrixArchitecture) && !defined(__OpenBSD__)
++# define MacroIncludeFile <bsd.cf>
++# define MacroFile bsd.cf
++# undef vax
++# define BSDArchitecture
++# define VaxArchitecture
+ #endif /* vax */
+ 
+-#ifdef bsdi
+-#define MacroIncludeFile <bsdi.cf>
+-#define MacroFile bsdi.cf
+-#undef bsdi
+-#define BSD386Architecture
+-#define i386BsdArchitecture
+-#define i386Architecture
++#ifdef __bsdi__
++# define MacroIncludeFile <bsdi.cf>
++# define MacroFile bsdi.cf
++# undef __bsdi__
++# ifdef bsdi
++#  undef bsdi
++# endif
++# define BSDOSArchitecture
++# if defined(__i386__) || defined(i386)
++#  define i386BsdArchitecture
++#  define i386Architecture
++#  undef i386
++#  undef __i386__
++# endif
++# if defined(__ppc__) || defined(ppc)
++#  define PpcBsdArchitecture
++#  define PpcArchitecture
++#  undef ppc
++#  undef __ppc__
++# endif
++# if defined(__sparc__) || defined(__sparc_v9__) || defined(sparc)
++#  define SparcBsdArchitecture
++#  define SparcArchitecture
++#  undef sparc
++#  undef __sparc__
++#  undef __sparc_v9__
++# endif
+ #endif /* bsdi */
+ 
+-#ifdef __NetBSD__
+-#define MacroIncludeFile <NetBSD.cf>
+-#define MacroFile NetBSD.cf
+-#undef __NetBSD__
+-#define NetBSDArchitecture
+-#ifdef __i386__
+-#define i386BsdArchitecture
+-#define i386Architecture
+-#endif
+-#if defined(__sparc__) || defined(sparc)
+-#define SparcArchitecture
+-#undef sparc
++#ifdef __OpenBSD__
++# undef __OpenBSD__
++# undef __NetBSD__
++# define OpenBSDArchitecture
++# define KOpenBSDArchitecture
++# define MacroIncludeFile <OpenBSD.cf>
++# define MacroFile OpenBSD.cf
++# ifdef __i386__
++#  define i386BsdArchitecture
++#  define i386Architecture
++#  undef i386
++# endif
++# if defined(__sparc__) || defined(sparc)
++#  if !defined(__arch64__)
++#   define SparcArchitecture
++#  else
++#   define Sparc64Architecture
++#  endif
++#  undef sparc
++# endif
++# if defined(__mips__) || defined(mips)
++#   define MipsArchitecture
++#   ifdef arc
++#     define ArcArchitecture
++#     undef arc
++#   endif
++#   ifdef pmax
++#     define PmaxArchitecture
++#     undef pmax
++#   endif
++#   undef mips
++# endif
++# if defined(__alpha__) || defined(alpha)
++#   define AlphaArchitecture
++#   undef __alpha__
++#   undef alpha
++# endif
++# if defined(__amd64__) || defined(__x86_64__)
++#   define AMD64Architecture
++#   undef __amd64__
++#   undef __x86_64__
++#   undef amd64
++# endif
++# if defined(__mc68020__) || defined(mc68020)
++#  define Mc68020Architecture
++#  if defined(amiga)
++#   define AmigaArchitecture
++#   undef amiga
++#  endif
++#  if defined(hp300)
++#   define Hp300Architecture
++#   undef hp300
++#  endif
++#  if defined(mac68k)
++#    define Mac68kArchitecture
++#    undef mac68k
++#  endif
++#  if defined(mvme68k)
++#   define Mvme68kArchitecture
++#   undef mvme68k
++#  endif
++#  if defined(sun3) 
++#   define Sun3Architecture
++#   undef sun3
++#  endif
++#  undef mc68000
++# endif
++# ifdef __powerpc__
++#  define PpcArchitecture
++#  undef __powerpc__
++#  undef __macppc__
++#  undef macppc
++# endif
++# ifdef __vax__
++#  undef vax
++#  undef __vax__
++#  define VaxArchitecture
++# endif
++# ifdef __hppa__
++#  ifndef HPArchitecture
++#   define HPArchitecture
++#  endif
++#  undef __hppa__
++# endif /* __hppa__ */
++#endif /* OpenBSD */
++
++/* Systems based on kernel of OpenBSD */
++#if defined(__OpenBSD_kernel__)
++#define KOpenBSDArchitecture
+ #endif
++
++#ifdef __NetBSD__
++# define MacroIncludeFile <NetBSD.cf>
++# define MacroFile NetBSD.cf
++# undef __NetBSD__
++# define NetBSDArchitecture
++# define KNetBSDArchitecture
++# ifdef __i386__
++#  define i386BsdArchitecture
++#  define i386Architecture
++#  undef i386
++# endif
++# if defined(__sparc64__) || defined(__sparc_v9__) || defined(__arch64__)
++#  define Sparc64Architecture
++# endif
++# if defined(__sparc__) || defined(sparc)
++#  define SparcArchitecture
++#  undef sparc
++#  if defined(__sparc_v9__) || defined(__arch64__)
++#    define Sparc64Architecture
++#  endif
++# endif
++# ifdef mips
++#   define MipsArchitecture
++#   define ArcArchitecture
++#   undef mips
++# endif
++# ifdef __alpha__
++#   define AlphaArchitecture
++#   define AlphaBsdArchitecture
++#   undef __alpha__
++# endif
++# ifdef mc68000
++#   define Mc68020Architecture
++# endif
++# ifdef __arm32__
++#   define Arm32Architecture
++#   undef __arm32__
++# endif
++# ifdef __vax__
++#   define VaxArchitecture
++#   undef __vax__
++# endif
++# ifdef __powerpc__
++#   define PpcArchitecture
++#   undef __powerpc__
++# endif
+ #endif /* NetBSD */
+ 
+-#ifdef __FreeBSD__
+-#define MacroIncludeFile <FreeBSD.cf>
+-#define MacroFile FreeBSD.cf
+-#undef __FreeBSD__
+-#define FreeBSDArchitecture
+-#ifdef __i386__
+-#define i386BsdArchitecture
+-#define i386Architecture
++/* Systems based on kernel of NetBSD */
++#if defined(__NetBSD_kernel__)
++#define KNetBSDArchitecture
+ #endif
++
++#ifdef __DragonFly__
++# define MacroIncludeFile <DragonFly.cf>
++# define MacroFile DragonFly.cf
++# undef __DragonFly__
++# undef __FreeBSD__
++# define DragonFlyArchitecture
++# define FreeBSDArchitecture
++# ifdef __i386__
++#  define i386BsdArchitecture
++#  define i386Architecture
++#  undef i386
++# endif
++# ifdef __sparc64__
++#  define Sparc64Architecture
++#  undef __sparc64__
++# endif
++# ifdef __ia64__
++#  define ia64Architecture
++#  undef __ia64__
++# endif
++# ifdef __amd64__
++#  define x86_64Architecture
++#  undef __amd64__
++#  undef __x86_64__
++# endif
++#endif /* __DragonFly__ */
++
++#ifdef __FreeBSD__
++# define MacroIncludeFile <FreeBSD.cf>
++# define MacroFile FreeBSD.cf
++# undef __FreeBSD__
++# define FreeBSDArchitecture
++# define KFreeBSDArchitecture
++# ifdef __i386__
++#  define i386BsdArchitecture
++#  define i386Architecture
++#  undef i386
++# endif
++# ifdef __alpha__
++#  define AlphaBsdArchitecture
++#  define AlphaArchitecture
++#  undef __alpha__
++# endif
++# ifdef __sparc64__
++#  define Sparc64Architecture
++#  undef __sparc64__
++# endif
++# ifdef __ia64__
++#  define ia64Architecture
++#  undef __ia64__
++# endif
++# ifdef __amd64__
++#  define AMD64Architecture
++#  undef __amd64__
++#  undef __x86_64__
++# endif
++# ifdef __powerpc__
++#  define PpcArchitecture
++#  undef __powerpc__
++# endif
+ #endif /* __FreeBSD__ */
+ 
+-#ifdef AMOEBA
+-/* Should be before the 'sun' entry because we may be cross-compiling */
+-#define MacroIncludeFile <Amoeba.cf>
+-#define MacroFile Amoeba.cf
+-#if defined(i80386) || defined(__i80386__)
+-#define i386Architecture
+-#else
+-#if defined(mc68000) || defined(__mc68000__)
+-#define Sun3Architecture
+-#define SunArchitecture
+-#else
+-#if defined(sparc) || defined(__sparc__)
+-#define SparcArchitecture
+-#define SunArchitecture
+-#endif
+-#endif
++/* Systems based on kernel of FreeBSD */
++#if defined(__FreeBSD_kernel__)
++#define KFreeBSDArchitecture
+ #endif
+-#undef i80386
+-#undef mc68000
+-#undef sparc
+-#undef sun
++
++#ifdef AMOEBA
++ /* Should be before the 'sun' entry because we may be cross-compiling */
++# define MacroIncludeFile <Amoeba.cf>
++# define MacroFile Amoeba.cf
++# if defined(i80386) || defined(__i80386__)
++#  undef i80386
++#  define i386Architecture
++# else
++#  if defined(mc68000) || defined(__mc68000__)
++#   undef mc68000
++#   define Sun3Architecture
++#   define SunArchitecture
++#  else
++#   if defined(sparc) || defined(__sparc__)
++#    undef sparc
++#    define SparcArchitecture
++#    define SunArchitecture
++#   endif
++#  endif
++#  undef sun
++# endif
+ #endif /* AMOEBA */
+ 
+ #ifdef sun
+-#define MacroIncludeFile <sun.cf>
+-#define MacroFile sun.cf
+-#ifdef SVR4
+-#undef SVR4
+-#define SVR4Architecture
+-#endif
+-#ifdef sparc
+-#undef sparc
+-#define SparcArchitecture
+-#endif
+-#ifdef mc68000
+-#undef mc68000
+-#define Sun3Architecture
+-#endif
+-#ifdef i386
+-#undef i386
+-#define i386Architecture
+-#endif
+-#undef sun
+-#define SunArchitecture
++# define MacroIncludeFile <sun.cf>
++# define MacroFile sun.cf
++# ifdef SVR4
++#  undef SVR4
++#  define SVR4Architecture
++# endif
++# ifdef sparc
++#  undef sparc
++#  define SparcArchitecture
++# endif
++# ifdef __sparcv9
++#  undef __sparcv9
++#  define Sparc64Architecture
++# endif
++# ifdef mc68000
++#  undef mc68000
++#  define Sun3Architecture
++# endif
++# if defined(__amd64) || defined(__x86_64)
++#  undef __amd64
++#  undef __x86_64
++#  undef amd64
++#  undef i386
++#  define AMD64Architecture
++# endif
++# ifdef i386
++#  undef i386
++#  define i386Architecture
++# endif
++# undef sun
++# define SunArchitecture
+ #endif /* sun */
+ 
+ #ifdef hpux
+-#define MacroIncludeFile <hp.cf>
+-#define MacroFile hp.cf
+-#undef hpux
+-#define HPArchitecture
++# define MacroIncludeFile <hp.cf>
++# define MacroFile hp.cf
++# undef hpux
++# define HPArchitecture
+ #endif /* hpux */
+ 
+-#ifdef USL
+-#define MacroIncludeFile <usl.cf>
+-#define MacroFile usl.cf
+-#undef USL
+-#undef SVR4
+-#define SVR4Architecture
+-#define i386Architecture
+-#endif /* USL */
++#ifdef __SCO__
++# define MacroIncludeFile <sco5.cf>
++# define MacroFile sco5.cf
++# undef __SCO__
++# undef sco
++# undef USL
++# undef SYSV
++# undef i386
++# undef SCO
++# undef SVR4
++# define i386Architecture
++# define SCOArchitecture
++# define i386SVR3Architecture
++# define SVR3Architecture
++# define i386ScoArchitecture
++# define i386Sco325Architecture
++# undef i386
++# undef i486
++# undef i586
++# undef i686
++# undef k6
++# undef __i386__
++# undef __i486__
++# undef __i586__
++# undef __i686__
++# undef __k6__
++# undef __i386
++# undef __i486
++# undef __i586
++# undef __i686
++# undef __k6
++# undef pentium
++# undef __pentium
++# undef pentiumpro
++# undef __pentiumpro
++#endif /* __SCO__ - SCO Open Server 5 */
++
++#ifdef __UNIXWARE__
++# define MacroIncludeFile <usl.cf>
++# define MacroFile usl.cf
++# undef __UNIXWARE__
++# undef USL
++# undef SVR4
++# undef i386
++# undef SVR5
++# undef SYSV5
++# define SVR4Architecture
++# define i386Architecture
++# define USLArchitecture
++# define UnixWareArchitecture
++# undef i386
++# undef i486
++# undef i586
++# undef i686
++# undef k6
++# undef __i386__
++# undef __i486__
++# undef __i586__
++# undef __i686__
++# undef __k6__
++# undef __i386
++# undef __i486
++# undef __i586
++# undef __i686
++# undef __k6
++# undef pentium
++# undef __pentium
++# undef pentiumpro
++# undef __pentiumpro
++#endif /* __UNIXWARE__ */
+ 
+ #ifdef NCR
+-#define MacroIncludeFile <ncr.cf>
+-#define MacroFile ncr.cf
+-#undef NCR
+-#undef SVR4
+-#define SVR4Architecture
+-#define i386Architecture
++# define MacroIncludeFile <ncr.cf>
++# define MacroFile ncr.cf
++# undef NCR
++# undef SVR4
++# undef i386
++# define SVR4Architecture
++# define i386Architecture
++# define NCRArchitecture
+ #endif /* NCR */
+ 
+ #ifdef apollo
+-#define MacroIncludeFile <apollo.cf>
+-#define MacroFile apollo.cf
+-#undef apollo
+-#define ApolloArchitecture
++# define MacroIncludeFile <apollo.cf>
++# define MacroFile apollo.cf
++# undef apollo
++# define ApolloArchitecture
+ #endif /* apollo */
+ 
+ #ifdef sony
+-#define MacroIncludeFile <sony.cf>
+-#define MacroFile sony.cf
+-#undef sony
+-#undef sony_news
+-#define SonyArchitecture
+-#ifdef mc68020
+-#undef mc68020
+-#undef mc68030
+-#define Mc68020Architecture
+-#endif
+-#ifdef mips
+-#undef mips
+-#define MipsArchitecture
+-#endif
+-#if !defined(bsd43) || defined(SYSTYPE_SYSV) || defined(_SYSTYPE_SYSV)
+-#define SonySysvArchitecture
+-#else
+-#define SonyBsdArchitecture
+-#endif
++# define MacroIncludeFile <sony.cf>
++# define MacroFile sony.cf
++# undef sony
++# undef sony_news
++# define SonyArchitecture
++# ifdef mc68020
++#  undef mc68020
++#  undef mc68030
++#  define Mc68020Architecture
++# endif
++# ifdef mips
++#  undef mips
++#  define MipsArchitecture
++# endif
++# ifdef __svr4
++#  define SVR4Architecture
++# else
++#  if !defined(bsd43) || defined(SYSTYPE_SYSV) || defined(_SYSTYPE_SYSV)
++#   define SonySysvArchitecture
++#  else
++#   define SonyBsdArchitecture
++#  endif
++# endif
+ #endif /* sony */
+ 
+ #ifdef M4310
+-#define MacroIncludeFile <pegasus.cf>
+-#define MacroFile pegasus.cf
+-#undef M4310
+-#define PegasusArchitecture
++# define MacroIncludeFile <pegasus.cf>
++# define MacroFile pegasus.cf
++# undef M4310
++# define PegasusArchitecture
+ #endif /* M4310 */
+ 
+ #ifdef M4330
+-#define MacroIncludeFile <m4330.cf>
+-#define MacroFile m4330.cf
+-#undef  M4330
+-#define M4330Architecture
++# define MacroIncludeFile <m4330.cf>
++# define MacroFile m4330.cf
++# undef  M4330
++# define M4330Architecture
+ #endif /* M4330 */
+ 
+ #ifdef macII
+-#define MacroIncludeFile <macII.cf>
+-#define MacroFile macII.cf
+-#undef  macII
+-#define MacIIArchitecture
++# define MacroIncludeFile <macII.cf>
++# define MacroFile macII.cf
++# undef  macII
++# define MacIIArchitecture
+ #endif /* macII */
+ 
+-#ifdef __APPLE__
+-# define MacroIncludeFile <MacOSX.cf>
+-# define MacroFile MacOSX.cf
+-# define MacOSXArchitecture
+-# define DarwinArchitecture
+-#endif
+-
+ #ifdef _CRAY
+-#define MacroIncludeFile <cray.cf>
+-#define MacroFile cray.cf
+-#undef cray
+-#undef CRAY
+-#undef CRAY1
+-#undef CRAY2
+-#undef YMP
+-#define CrayArchitecture
++# define MacroIncludeFile <cray.cf>
++# define MacroFile cray.cf
++# undef cray
++# undef CRAY
++# undef CRAY1
++# undef CRAY2
++# undef YMP
++# define CrayArchitecture
+ #endif /* _CRAY */
+ 
+ #ifdef sgi
+-#define MacroIncludeFile <sgi.cf>
+-#define MacroFile sgi.cf
+-#undef sgi
+-#define SGIArchitecture
+-#undef mips
+-#define MipsArchitecture
++# define MacroIncludeFile <sgi.cf>
++# define MacroFile sgi.cf
++# undef sgi
++# define SGIArchitecture
++# undef mips
++# undef __mips
++# define MipsArchitecture
++# ifdef _SVR4
++#  undef _SVR4
++#  define SVR4Architecture
++# endif
++# ifdef _SYSTYPE_SVR4
++#  undef _SYSTYPE_SVR4
++#  define SVR4Architecture
++# endif
+ #endif /* sgi */
+ 
+ #ifdef stellar
+-#define MacroIncludeFile <stellar.cf>
+-#define MacroFile stellar.cf
+-#undef stellar
+-#define StellarArchitecture
++# define MacroIncludeFile <stellar.cf>
++# define MacroFile stellar.cf
++# undef stellar
++# define StellarArchitecture
+ #endif /* stellar */
+ 
+ #if defined(ibm) || defined(_IBMR2) || defined(ibm032) || defined(aix)
+-#define MacroIncludeFile <ibm.cf>
+-#define MacroFile ibm.cf
+-#ifdef ibm
+-#undef ibm
+-#endif
+-#define IBMArchitecture
+-#ifdef i386
+-#undef i386
+-#define PS2Architecture
+-#endif
+-#ifdef ibm032
+-#undef ibm032
+-#define RtArchitecture
+-#endif
+-#ifdef aix
+-#undef aix
+-#define AIXArchitecture
+-#endif
+-#ifdef _IBMR2
+-#undef _IBMR2
+-#define RsArchitecture
+-#endif
++# define MacroIncludeFile <ibm.cf>
++# define MacroFile ibm.cf
++# ifdef ibm
++#  undef ibm
++# endif
++# define IBMArchitecture
++# ifdef i386
++#  undef i386
++#  define PS2Architecture
++# endif
++# ifdef ibm032
++#  undef ibm032
++#  define RtArchitecture
++# endif
++# ifdef aix
++#  undef aix
++#  define AIXArchitecture
++# endif
++# ifdef _IBMR2
++#  undef _IBMR2
++#  if (DefaultOSMajorVersion < 5)
++#   define RsArchitecture
++#  else
++#   define PpcArchitecture
++#  endif
++# endif
+ #endif /* ibm */
+ 
+ #ifdef luna
+-#undef luna
+-#define MacroIncludeFile <luna.cf>
+-#define MacroFile luna.cf
+-#define LunaArchitecture
+-#ifdef mc68000
+-#undef mc68000
+-#define Mc68000Architecture
+-#else
+-#undef mc88000
+-#define Mc88000Architecture
+-#endif
++# undef luna
++# define MacroIncludeFile <luna.cf>
++# define MacroFile luna.cf
++# define LunaArchitecture
++# ifdef mc68000
++#  undef mc68000
++#  define Mc68000Architecture
++# else
++#  undef mc88000
++#  define Mc88000Architecture
++# endif
+ #endif /* luna */
+ 
+ #ifdef Mips
+@@ -317,9 +624,14 @@
+ # endif
+ #endif /* MOTOROLA */
+ 
+-#ifdef SVR4
++#if defined(SVR4) && !defined(DGUX)
+ # ifdef i386
+ #  define i386Architecture
++#  undef i386
++# endif
++# ifdef PC98
++#  define PANIX98Architecture
++#  undef PC98
+ # endif
+ # define SVR4Architecture
+ # define MacroIncludeFile <svr4.cf>
+@@ -329,13 +641,42 @@
+ 
+ #ifdef SYSV
+ # ifdef i386
+-#  define MacroIncludeFile <x386.cf>
+-#  define MacroFile x386.cf
+-#  define i386SVR3Architecture
+-# endif
++# undef i386
++#  ifdef ISC
++#   define i386Architecture	
++#   define i386SVR3Architecture	
++#   define MacroIncludeFile <isc.cf>
++#   define MacroFile isc.cf
++#   define i386IscArchitecture
++#   undef ISC
++#   ifdef ISC202
++#    define IscVersion 202
++#    undef ISC202
++#   else
++#    ifdef ISC30
++#     define IscVersion 300
++#     undef ISC30
++#    else
++#     ifdef ISC40
++#      define IscVersion 400
++#      undef ISC40
++#     else
++#      define IscVersion 221
++#     endif /* ISC40 */
++#    endif /* ISC30 */
++#   endif /* ISC202 */
++#  endif /* ISC */
++#  ifndef MacroFile
++#   define i386SVR3Architecture
++#   define MacroIncludeFile <x386.cf>
++#   define MacroFile x386.cf
++#  endif /* MacroFile */
++# endif /* i386 */
+ #endif /* SYSV */
+ 
++/* SYSV386 is here for backward compatibility only */
+ #ifdef SYSV386
++# undef i386
+ # ifdef SVR4
+ #  define i386Architecture
+ #  define SVR4Architecture
+@@ -343,18 +684,46 @@
+ #  define MacroIncludeFile <svr4.cf>
+ #  define MacroFile svr4.cf
+ #  undef SVR4
+-# else
+-#  define MacroIncludeFile <x386.cf>
+-#  define MacroFile x386.cf
+-#  define i386SVR3Architecture
+-# endif
++# else /* ! SVR4 */
++#  ifdef ISC
++#   define i386Architecture	
++#   define i386SVR3Architecture	
++#   define MacroIncludeFile <isc.cf>
++#   define MacroFile isc.cf
++#   define i386IscArchitecture
++#   undef ISC
++#   ifdef ISC202
++#    define IscVersion 202
++#    undef ISC202
++#   else
++#    ifdef ISC30
++#     define IscVersion 300
++#     undef ISC30
++#    else
++#     ifdef ISC40
++#      define IscVersion 400
++#      undef ISC40
++#     else
++#      define IscVersion 221
++#     endif /* ISC40 */
++#    endif /* ISC30 */
++#   endif /* ISC202 */
++#  endif /* ISC */
++#  ifndef MacroFile
++#   define i386SVR3Architecture
++#   define MacroIncludeFile <x386.cf>
++#   define MacroFile x386.cf
++#  endif /* MacroFile */
++# endif /* ! SVR4 */
+ #endif /* SYSV386 */
+ 
+ #ifdef DGUX
+-#define MacroIncludeFile <DGUX.cf>
+-#define MacroFile DGUX.cf
+-#undef DGUX
+-#define DguxArchitecture
++# define i386Architecture
++# define SVR4Architecture
++# define MacroIncludeFile <DGUX.cf>
++# define MacroFile DGUX.cf
++# undef DGUX
++# define DguxArchitecture
+ #endif /* DGUX */
+ 
+ #ifdef __convex__
+@@ -366,101 +735,446 @@
+ # define ConvexArchitecture
+ #endif /* _convex_ */
+ 
+-/*  GF. #ifdef __osf__ */
+-#if defined(__osf__) || defined(__alpha)
+-#define MacroIncludeFile <osf1.cf>
+-#define MacroFile osf1.cf
+-#define OSF1Architecture
+-#undef __osf__
+-#ifdef __mips__
+-#undef __mips__
+-#define MipsArchitecture
+-#endif
+-#ifdef __alpha
+-#undef __alpha
+-#define AlphaArchitecture
+-#endif
++#ifdef __osf__
++# define MacroIncludeFile <osf1.cf>
++# define MacroFile osf1.cf
++# define OSF1Architecture
++# undef __osf__
++# ifdef __mips__
++#  undef __mips__
++#  define MipsArchitecture
++#  define MipselArchitecture
++# endif
++# ifdef __alpha
++#  undef __alpha
++#  define AlphaArchitecture
++# endif
+ #endif /* __osf__ */
+ 
+ #ifdef Oki
+-#define MacroIncludeFile <Oki.cf>
+-#define MacroFile Oki.cf
+-#undef Oki
+-#define i860SVR4Architecture
++# define MacroIncludeFile <Oki.cf>
++# define MacroFile Oki.cf
++# undef Oki
++# define i860SVR4Architecture
++# define SVR4Architecture
++# undef SVR4
+ #endif /* Oki */
+ 
+-#ifdef WIN32
+-#define MacroIncludeFile <Win32.cf>
+-#define MacroFile Win32.cf
+-#define Win32Architecture
++#if defined(WIN32) && !defined(__GNUC__)
++# define MacroIncludeFile <Win32.cf>
++# define MacroFile Win32.cf
++# define Win32Architecture
+ #endif /* WIN32 */
+ 
+-#ifdef linux 
+-#ifdef  PPC
+-#define MacroIncludeFile <linux-pmac.cf>
+-#define MacroFile       linux-pmac.cf
+-#undef linux
+-#undef PPC
+-#define LinuxArchitecture
+-#define PPCArchitecture
+-#elif _LP64
+-#define MacroIncludeFile <linux-lp64.cf>
+-#define MacroFile linux-lp64.cf
+-#undef linux
+-#undef _LP64
+-#define LinuxArchitecture
+-#else
+-#define MacroIncludeFile <linux.cf>
+-#define MacroFile linux.cf
+-#undef linux
+-#define LinuxArchitecture
++#if defined(WIN32) && defined(__GNUC__)
++#define MacroIncludeFile <mingw.cf>
++#define MacroFile mingw.cf
++#define Win32Architecture
++#define mingwArchitecture
+ #define i386Architecture
+-#endif
+-#endif /* linux */
++#undef i386
++#undef i486
++#undef i586
++#undef i686
++#undef __i386__
++#undef _X86_
++#undef __MINGW32__
++#endif /* CYGWIN */
++
++#if defined(linux) || defined(__GLIBC__)
++# define MacroIncludeFile <linux.cf>
++# define MacroFile linux.cf
++# undef linux
++# ifdef __linux__
++#  define LinuxArchitecture
++# endif
++# ifdef __GLIBC__
++#  define GNUArchitecture
++# endif
++# ifdef i386
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef i386
++XCOMM Keep cpp from replacing path elements containing i486/i586/i686
++#  ifdef i486
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#   undef i486
++#  endif
++#  ifdef i586
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#   undef i586
++#  endif
++#  ifdef i686
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#   undef i686
++#  endif
++#  ifdef k6
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#   undef k6
++#  endif
++# endif /* k6 */
++# ifdef __i386__
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i386__
++# endif /* __i386__ */
++# ifdef __i486__
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i486__
++# endif /* __i486__ */
++# ifdef __i586__
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i586__
++# endif /* __i586__ */
++# ifdef __i686__
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i686__
++# endif /* __i686__ */
++# ifdef __k6__
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __k6__
++# endif /* __k6__ */
++# ifdef __i386
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i386
++# endif /* __i386 */
++# ifdef __i486
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i486
++# endif /* __i486 */
++# ifdef __i586
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i586
++# endif /* __i586 */
++# ifdef __i686
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i686
++# endif /* __i686 */
++# ifdef __k6
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __k6
++# endif /* __k6 */
++/* Keep this order! s390x has also __s390__ defined */
++# if defined(__s390x__)
++#  define s390xArchitecture
++#  undef __s390x__
++#  undef __s390__
++# endif
++# ifdef __s390__
++#   define s390Architecture
++#  undef __s390__
++# endif /* s390 */
++# ifdef __alpha
++#  define AlphaArchitecture
++#  undef __alpha
++# endif /* __alpha */
++# ifdef __alpha__
++#  ifndef AlphaArchitecture
++#   define AlphaArchitecture
++#  endif
++#  undef __alpha__
++# endif /* __alpha__ */
++# ifdef __arm__
++#  define Arm32Architecture
++#  undef arm
++#  undef __arm
++#  undef __arm__
++#  if defined(__ARMEB__)
++#   define Arm32ebArchitecture
++#  endif
++#  undef __ARMEB__
++# endif
++# ifdef mc68000
++#  define Mc68020Architecture
++#  undef mc68000
++# endif /* mc68000 */
++# if defined (powerpc) && !defined(__powerpc64__) && !defined (powerpc64)
++#  define PpcArchitecture
++#  undef powerpc
++# endif
++# if defined (__powerpc__) && !defined(__powerpc64__) && !defined (powerpc64)
++#  ifndef PpcArchitecture
++#   define PpcArchitecture
++#  endif
++#  undef __powerpc__
++# endif
++# ifdef __powerpc64__
++#  ifndef Ppc64Architecture
++#   define Ppc64Architecture
++#  endif
++#  undef __powerpc64__
++# endif
++# ifdef sparc
++#  define SparcArchitecture
++#  undef sparc
++# endif
++# ifdef __sparc__
++#  ifndef SparcArchitecture
++#   define SparcArchitecture
++#  endif
++#  undef __sparc__
++# endif
++# ifdef ia64 
++#  define ia64Architecture
++#  undef ia64 
++# endif
++# ifdef __ia64__
++#  ifndef ia64Architecture
++#   define ia64Architecture
++#  endif
++#  undef __ia64__
++# endif
++# if defined(mips) || defined(__mips__)
++#  define MipsArchitecture
++#  undef mips
++#  undef __mips__
++#  if defined(MIPSEL) || defined(_MIPSEL)
++#   define MipselArchitecture
++#  endif
++#  undef MIPSEL
++#  undef _MIPSEL
++# endif
++# ifdef __hppa__
++#  ifndef HPArchitecture
++#   define HPArchitecture
++#  endif
++#  undef __hppa__
++# endif /* __hppa__ */
++# ifdef __sh__
++#  ifndef SuperHArchitecture
++#   define SuperHArchitecture
++#  endif
++#  ifdef __BIG_ENDIAN__
++#   ifndef SuperHebArchitecture
++#    define SuperHebArchitecture
++#   endif
++#  endif
++#  undef __sh__
++# endif /* __sh__ */
++# if defined(__SH3__) || defined(__sh3__)
++#  ifndef SuperH3Architecture
++#   define SuperH3Architecture
++#  endif
++#  undef __SH3__
++#  undef __sh3__
++# endif /* __SH3__ or __sh3__ */
++# ifdef __SH4__
++#  ifdef __SH4_NOFPU__
++#   ifndef SuperH4NOFPUArchitecture
++#    define SuperH4NOFPUArchitecture
++#   endif
++#   undef __SH4_NOFPU__
++#  else
++#   ifndef SuperH4Architecture
++#    define SuperH4Architecture
++#   endif
++#  endif
++#  undef __SH4__
++# endif /* __SH4__ */
++/* for compatibility with 3.3.x */
++# ifdef PpcArchitecture
++#  define PowerPCArchitecture
++# endif
++# if defined(__s390x__)
++#  define s390xArchitecture
++#  undef __s390x__
++# endif
++# if defined(__amd64__) || defined (__x86_64__)
++#  undef __amd64__
++#  undef __x86_64__
++#  define AMD64Architecture
++# endif
++# if defined(amd64__) || defined (x86_64__)
++#  undef amd64__
++#  undef x86_64__
++#  ifndef AMD64Architecture
++#   define AMD64Architecture
++#  endif
++# endif
++#endif /* linux || __GLIBC__ */
++
++#if (defined(__Lynx__) || defined(Lynx)) && (defined(i386) || defined(__i386__) || defined(__x86__) || defined(__powerpc__) || defined(__sparc__) || defined(sparc))
++# define MacroIncludeFile <lynx.cf>
++# define MacroFile lynx.cf
++# define LynxOSArchitecture
++# undef __Lynx__
++# undef Lynx
++# undef lynx
++# if defined(i386) || defined(__i386__) || defined(__x86__)
++#  define i386Architecture
++#  undef i386
++#  undef __i386__
++#  undef __x86__
++# endif
++# ifdef __powerpc__
++#  define PpcArchitecture
++#  undef __powerpc__
++# endif
++# if defined(sparc) || defined(__sparc__)
++#  define SparcArchitecture
++#  undef sparc
++#  undef __sparc__
++# endif
++/* for compatibility with 3.3.x */
++# ifdef PpcArchitecture
++#  define PowerPCArchitecture
++# endif
++#endif /* LynxOS AT/PPC/microSPARC */
+ 
+ #ifdef __uxp__
+-#define MacroIncludeFile <fujitsu.cf>
+-#define MacroFile fujitsu.cf
+-#undef __uxp__
+-#ifdef sparc
+-#undef sparc
+-#define SparcArchitecture
+-#endif
++# define MacroIncludeFile <fujitsu.cf>
++# define MacroFile fujitsu.cf
++# define FujitsuArchitecture
++# undef __uxp__
++# define UXPArchitecture
++# define SVR4Architecture
++# ifdef sparc
++#  undef sparc
++#  define SparcArchitecture
++# endif
+ #endif /* __uxp__ */
+ 
+ #ifdef __sxg__
+-#define MacroIncludeFile <fujitsu.cf>
+-#define MacroFile fujitsu.cf
+-#undef __sxg__
+-#define mc68000Architecture
++# define MacroIncludeFile <fujitsu.cf>
++# define MacroFile fujitsu.cf
++# define FujitsuArchitecture
++# undef __sxg__
++# define mc68000Architecture
+ #endif /* __sxg__ */
+ 
+-#if defined(sequent) || defined(_SEQUENT_)
++#ifdef _SEQUENT_
++/* undefine assignments resulting from -DSVR4 */
++# undef MacroIncludeFile
+ # define MacroIncludeFile <sequent.cf>
++# undef MacroFile
+ # define MacroFile sequent.cf
+-# ifdef sequent
+-#  undef sequent
+-#  define Dynix3Architecture
+-# endif
+-# ifdef _SEQUENT_
+-#  undef _SEQUENT_
+-#  define DynixPtxArchitecture
+-# endif
++# undef _SEQUENT_
++# define DynixPtxArchitecture
+ # define SequentArchitecture
+ #endif
+ 
+ #if defined(_nec_ews_svr4) || defined(nec_ews_svr4) || defined(nec_ews_svr2) || defined(SX) || defined(_nec_up) || defined(_nec_ft) || defined(PC_UX)
+-#ifdef nec
+-#undef nec
++# ifdef nec
++#  undef nec
++# endif
++# define MacroIncludeFile <nec.cf>
++# define MacroFile nec.cf
++# define NecArchitecture
++#endif
++
++#ifdef minix 
++#define MacroIncludeFile <minix.cf>
++#define MacroFile minix.cf
++#undef minix
++#define MinixArchitecture
++#define i386Architecture
++#endif /* minix */
++
++/* Systems with GNU libc and userland */
++#if defined(__GNU__)
++#define GNUArchitecture
++#define MacroIncludeFile <gnu.cf>
++#define MacroFile gnu.cf
++#ifdef __i386__
++#define i386Architecture
+ #endif
+-#define MacroIncludeFile <nec.cf>
+-#define MacroFile nec.cf
+-#define NecArchitecture
+ #endif
+ 
++#ifdef MACH
++#ifdef __GNU__
++/* Mach-based GNU system */
++#define GNUMachArchitecture
++#else
++#define MacroIncludeFile <mach.cf>
++#define MacroFile mach.cf
++#endif
++#undef MACH
++#ifdef	i386
++#define i386MachArchitecture
++#define i386Architecture
++#endif	/* i386 */
++#undef i386
++#endif /* MACH */
++
++/* On NetBSD, `unix' is not defined, and cpp emits a warning every time
++ * it sees a test using the `unix' symbol */
++#if !defined(NetBSDArchitecture) || (defined(NetBSDArchitecture) && DefaultOSMajorVersion == 1 && DefaultOSMinorVersion <= 3)
+ #ifdef unix
+ #undef unix
+-#endif /* unix */
++#endif
++#endif
++
++#ifdef emxos2
++#define MacroIncludeFile <os2.cf>
++#define MacroFile os2.cf
++#define OS2Architecture
++#define i386Architecture
++#endif /* emxos2 */
++
++#if defined(__QNX__) && !defined(__QNXNTO__)
++#define MacroIncludeFile <QNX4.cf>
++#define MacroFile QNX4.cf
++#define QNX4Architecture
++#define i386Architecture
++#endif /* QNX4 */
++
++#ifdef __QNXNTO__
++#define MacroIncludeFile <nto.cf>
++#define MacroFile nto.cf
++#define NTOArchitecture
++# ifdef PPC
++#  define PPCArchitecture
++#  undef PPC
++# endif
++# ifdef MIPS
++#  define mipsArchitecture
++#  undef MIPS
++# endif
++# ifdef i386
++#  define i386Architecture
++#  undef i386
++# endif /* i386 */
++# ifdef __i386__
++#  ifndef i386Architecture
++#   define i386Architecture
++#  endif
++#  undef __i386__
++# endif /* __i386__ */
++#endif /* QNX/Neutrino */
++
++#ifdef SparcArchitecture
++# if defined(__sparc_v9) || defined(__arch64__)
++#  define Sparc64Architecture
++# endif
++#endif
+ 
+ #ifndef MacroIncludeFile
+ XCOMM WARNING:  Imake.cf not configured; guessing at definitions!!!
+diff -urNad cernlib-2006.dfsg.2~/src/config/linux-lp64.cf cernlib-2006.dfsg.2/src/config/linux-lp64.cf
+--- cernlib-2006.dfsg.2~/src/config/linux-lp64.cf	2006-12-20 06:21:03.000000000 -0800
++++ cernlib-2006.dfsg.2/src/config/linux-lp64.cf	2008-03-14 10:03:13.000000000 -0700
+@@ -153,7 +153,7 @@
+ # define XargsCmd               xargs
+ # define FortranSaveFlags       -fno-automatic
+ # define OptimisedFortranFlags  -O0 -g -funroll-loops -fomit-frame-pointer
+-# define DefaultFCOptions       -fno-second-underscore
++# define DefaultFCOptions       -fno-automatic -fno-second-underscore
+ # define NoOpFortranDebugFlags  -O0
+ # define CernlibSystem          -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_GFORTRAN -DCERNLIB_QMLXIA64
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/config/linux.cf cernlib-2006.dfsg.2/src/config/linux.cf
+--- cernlib-2006.dfsg.2~/src/config/linux.cf	2006-09-15 02:34:48.000000000 -0700
++++ cernlib-2006.dfsg.2/src/config/linux.cf	2008-03-14 10:08:50.000000000 -0700
+@@ -68,20 +68,20 @@
+ #define OSVendor		/**/
+ #define OSMajorVersion		2
+ #define OSMinorVersion		4
+-#define OSTeenyVersion		2020
++#define OSTeenyVersion		21
+ 
+ #undef unix			/* GF. this is not needed anywhere */
+ 
+ #ifndef UseElfFormat
+-#define UseElfFormat		NO
++#define UseElfFormat		YES
+ #endif
+ #define HasGcc2ForCplusplus	YES
+ #define GccUsesGas		YES
+ #define UseGas			YES
+ #define GnuCpp			YES
+-#define HasShadowPasswd		NO
++#define HasShadowPasswd		YES
+ #ifndef HasLibCrypt
+-# define HasLibCrypt		NO
++# define HasLibCrypt		YES
+ #endif
+ #define HasPutenv		YES
+ #define HasShm			YES
+@@ -97,38 +97,308 @@
+ #define NeedVarargsPrototypes	YES
+ #define NeedWidePrototypes	NO
+ 
++/* The following modified to match (more or less) linux.cf in XFree86 4.3.0.
++   -- Kevin McCarty
++*/
++
+ #if UseElfFormat
+-#define CcCmd			gcc -b i486-linuxelf
+-#define AsCmd			/usr/i486-linuxelf/bin/as
+-#define LdCmd			ld -m elf_i386
+-#define AsmDefines		-D__ELF__
+-#define CplusplusCmd		g++ -b i486-linuxelf
+-#else
+-#define CcCmd			gcc
++#ifdef MipsArchitecture
++#ifndef AsCmd
++#define AsCmd			gcc -c -x assembler-with-cpp
++#endif
++#endif /* MipsArchitecture */
++#ifndef CcCmd
++#define CcCmd			gcc -g
++#endif
++#ifndef AsCmd
+ #define AsCmd			as
++#endif
++#ifndef LdCmd
+ #define LdCmd			ld
+-#define AsmDefines		-DUSE_GAS
+ #endif
++#define AsmDefines		-D__ELF__
++#define CplusplusCmd		c++ -g
++#else /* no UseElfFormat */
++#define CcCmd			gcc -g
++#define AsCmd			as
++#define LdCmd			ld
++#define AsmDefines		-DUSE_GAS -U__ELF__
++#define CplusplusCmd		g++ -g
++#endif /* UseElfFormat */
++
++#ifndef CppCmd
+ #define CppCmd			/lib/cpp
++#endif
+ #define YaccCmd			bison -y
+ #define LexCmd			flex -l
+ #define LexLib			-lfl
+ #define PreProcessCmd		CcCmd -E
+ #define PostIncDir		`CcCmd --print-libgcc-file-name | sed 's/libgcc.a/include/'`
+ #define LdCombineFlags		-r
+-#define OptimizedCDebugFlags	-O2 -m486 -fno-strength-reduce\
+-					-fomit-frame-pointer
+-#define StandardDefines		-Dlinux -D__i386__ -D_POSIX_SOURCE \
+-				-D_BSD_SOURCE -D_GNU_SOURCE -DX_LOCALE
++#define LinuxSourceDefines	-D_POSIX_SOURCE -D_BSD_SOURCE -D_GNU_SOURCE \
++				-DX_LOCALE
+ #define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+ #define HasWChar32		YES
+ #define StandardCppDefines	-traditional StandardDefines
+-#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME
++#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+ #define ExtensionOSDefines	-DXTESTEXT1
+-#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
++/* #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines */
+ #define ConnectionFlags		-DUNIXCONN -DTCPCONN
+ #define InstUidFlags		-s -m 4755
+ 
++/* Arch-specific flags here copied from linux.cf for XFree86 4.3.0,
++   Debian patched (version 4.3.0.dfsg.1-4), plus additional
++   OptimizationLevel macro.
++   
++   Additional CERNLIB-specific per-architecture flags also added.
++   --Kevin McCarty */
++
++/* Note: we are now using CERNLIB_PPC as an endianness test (which is about
++   all that the CERNLIB source uses it for); I introduced a new define
++   CERNLIB_POWERPC for the three occasions when we specifically want to
++   test for powerpc chips.
++*/
++
++#ifdef i386Architecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel -fno-strength-reduce
++# endif
++# define LinuxMachineDefines    -D__i386__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++#endif /* i386Architecture */
++
++#ifdef s390Architecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__s390__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++# define CernlibMachineDefines	-DCERNLIB_PPC
++# define CERNLIB_PPC
++#endif /* s390Architecture */
++
++#ifdef s390xArchitecture
++/*#define DefaultCCOptions      -fsigned-char */
++#ifndef OptimizationLevel
++#define OptimizationLevel	-O3
++#endif
++#define OptimizedCDebugFlags    OptimizationLevel
++#define LinuxMachineDefines     -D__s390x__
++#define ServerOSDefines         XFree86ServerOSDefines -DDDXTIME -DPART_NET
++#define ServerExtraDefines      -DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
++#define CernlibMachineDefines	-DCERNLIB_PPC -DCERNLIB_QMLXIA64
++#define CERNLIB_PPC
++#define CERNLIB_QMLXIA64
++#endif /* s390xArchitecture */
++
++#ifdef AlphaArchitecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__alpha__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines -D_XSERVER64 -DJENSEN_SUPPORT
++# define CernlibMachineDefines  -DCERNLIB_QMLXIA64
++# define CERNLIB_QMLXIA64
++# ifdef UseCompaqMathLibrary
++#  define MathLibrary           -lcpml -lm
++# endif
++#endif /* AlphaArchitecture */
++
++#ifdef Arm32Architecture
++# define DefaultCCOptions       -fsigned-char
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O2
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__arm__ -D__arm32__ -U__arm -Uarm
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++# if defined(__ARMEB__) || defined(Arm32ebArchitecture)
++  /* test for big-endianness */
++#  define CernlibMachineDefines	-DCERNLIB_PPC
++#  define CERNLIB_PPC
++# endif
++#endif /* Arm32Achitecture */
++
++#ifdef ia64Architecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O2
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__ia64__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
++# define CernlibMachineDefines  -DCERNLIB_QMLXIA64
++# define CERNLIB_QMLXIA64
++#endif /* ia64Architecture */
++
++#ifdef Mc68020Architecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define DefaultCCOptions       -malign-int
++# define DefaultFCOptions       -malign-int -fno-automatic \
++                                -fno-second-underscore
++# define LinuxMachineDefines    -D__mc68000__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++# define CernlibMachineDefines	-DCERNLIB_PPC
++# define CERNLIB_PPC
++# define CERNLIB_M68K
++/* # define PositionIndependentCplusplusFlags -fpic */
++#endif /* Mc68020Architecture */
++
++#if defined(PpcArchitecture) || defined(Ppc64Architecture)
++# define DefaultCCOptions       -fsigned-char
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__powerpc__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# ifdef Ppc64Architecture
++#  define ServerExtraDefines    -DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
++#  define CernlibMachineDefines	-DCERNLIB_PPC -DCERNLIB_POWERPC \
++				-DCERNLIB_QMLXIA64
++#  define CERNLIB_QMLXIA64
++# else
++#  define CernlibMachineDefines	-DCERNLIB_PPC -DCERNLIB_POWERPC
++#  define ServerExtraDefines    -DGCCUSESGAS XFree86ServerDefines
++# endif
++# define CERNLIB_PPC
++# define CERNLIB_POWERPC
++#endif /* PpcArchitecture || Ppc64Architecture */
++
++#ifdef SparcArchitecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__sparc__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++# define AsVISOption            -Av9a
++# ifdef Sparc64Architecture
++#  define AsOutputArchSize      64
++#  define CernlibMachineDefines -DCERNLIB_PPC -DCERNLIB_QMLXIA64
++#  define CERNLIB_QMLXIA64
++# else
++#  define AsOutputArchSize      32
++#  define CernlibMachineDefines	-DCERNLIB_PPC
++# endif
++# define CERNLIB_PPC
++#endif
++
++#ifdef MipsArchitecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O0 /* Needed for http://gcc.gnu.org/PR35662 */
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__mips__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++# if !defined(MipselArchitecture) /* then big-endian, i.e. mips */
++#  define CernlibMachineDefines	-DCERNLIB_PPC
++#  define CERNLIB_PPC
++# endif
++#endif
++
++#ifdef HPArchitecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# define OptimizedCDebugFlags   OptimizationLevel
++# define LinuxMachineDefines    -D__hppa__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++# define CernlibMachineDefines	-DCERNLIB_PPC
++# define CERNLIB_PPC
++#endif
++
++#ifdef SuperHArchitecture
++# ifndef SuperHArchOptFlags
++#  ifdef SuperH4Architecture
++#   define SuperHArchOptFlags   -m4
++#  elif defined(SuperH4NOFPUArchitecture)
++#   define SuperHArchOptFlags   -m4-nofpu
++#  else
++#   define SuperHArchOptFlags   -m3
++#  endif
++# endif 
++# ifndef SuperHebArchitecture
++#  ifdef SuperHebArchitecture
++#   define SuperHEndianFlags    -mb
++#   define CernlibMachineDefines -DCERNLIB_PPC
++#   define CERNLIB_PPC
++#  else
++#   define SuperHEndianFlags    -ml
++#  endif
++# endif
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel SuperHArchOptFlags SuperHEndianFlags
++# endif
++# define LinuxMachineDefines    -D__sh__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines
++#endif
++
++#ifdef AMD64Architecture
++# ifndef OptimizationLevel
++#  define OptimizationLevel	-O3
++# endif
++# ifndef OptimizedCDebugFlags
++#  define OptimizedCDebugFlags  OptimizationLevel
++# endif
++# define LinuxMachineDefines    -D__x86_64__
++# define ServerOSDefines        XFree86ServerOSDefines -DDDXTIME -DPART_NET
++# define ServerExtraDefines     -DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
++# define CernlibMachineDefines  -DCERNLIB_QMLXIA64
++# define CERNLIB_QMLXIA64
++#endif /* AMD64Architecture */
++
++#ifndef StandardDefines
++# define StandardDefines        -Dlinux LinuxMachineDefines LinuxSourceDefines
++#endif
++
++#ifndef CernlibMachineDefines
++#define CernlibMachineDefines
++#endif
++
++#ifndef CernlibLocalDefines
++#define CernlibLocalDefines
++#endif
++
++#define CernlibDefaultDefines	-DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX \
++				-DCERNLIB_QMGLIBC
++
+ /* Some of these man page defaults are overriden in the above OS sections */
+ #ifndef ManSuffix
+ # define ManSuffix	1x
+@@ -163,7 +433,7 @@
+ #define FortranSaveFlags	/* */ /* Everything static !? */
+ #define OptimisedFortranFlags   -g -pc 64 -tp p6
+ #define DefaultFCOptions        -Msave -fpic -Kieee
+-#define CernlibSystem           -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_QFPGF77
++#define CernlibSystem           CernlibDefaultDefines -DCERNLIB_QFPGF77
+ 
+ #else
+ 
+@@ -174,19 +444,18 @@
+ #  undef StandardDefines
+ #  undef NeedFunctionPrototypes
+ #  undef NeedWidePrototypes
+-# define CcCmd			icc
+-# define DefaultCCOptions	
+-# define OptimizedCDebugFlags	-O
+-
+-# define FortranDoesCpp         NO
+-#define FortranCppCmd           /usr/bin/cpp -traditional -C
+-# define FortranCmd             ifc
+-# define XargsCmd               xargs
+-# define FortranSaveFlags	-save
+-# define OptimisedFortranFlags  -O -mp1 -fp_port
+-# define NoOpFortranDebugFlags  -O0
+-# define DefaultFCOptions       
+-# define CernlibSystem          -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC
++#  define CcCmd			icc
++#  define DefaultCCOptions	
++#  define OptimizedCDebugFlags	-O
++#  define FortranDoesCpp         NO
++#  define FortranCppCmd           /usr/bin/cpp -traditional -C
++#  define FortranCmd             ifort
++#  define XargsCmd               xargs
++#  define FortranSaveFlags	-save
++#  define OptimisedFortranFlags  -O -mp1 -fp_port
++#  define NoOpFortranDebugFlags  -O0
++#  define DefaultFCOptions       
++#  define CernlibSystem          CernlibDefaultDefines
+  
+ #else
+ 
+@@ -197,19 +466,18 @@
+ #  undef StandardDefines
+ #  undef NeedFunctionPrototypes
+ #  undef NeedWidePrototypes
+-# define CcCmd			ecc
+-# define DefaultCCOptions	-KPIC
+-# define OptimizedCDebugFlags	-O
+-
+-# define FortranDoesCpp         NO
+-#define FortranCppCmd           /lib/cpp -traditional -C
+-# define FortranCmd             efc
+-# define XargsCmd               xargs
+-# define FortranSaveFlags	-save
+-# define OptimisedFortranFlags  -O
+-# define DefaultFCOptions       -KPIC
+-# define CernlibSystem          -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC
+-# define CERNLIB_SHIFT NO
++#  define CcCmd			ecc
++#  define DefaultCCOptions	-KPIC
++#  define OptimizedCDebugFlags	-O
++#  define FortranDoesCpp         NO
++#  define FortranCppCmd           /lib/cpp -traditional -C
++#  define FortranCmd             efc
++#  define XargsCmd               xargs
++#  define FortranSaveFlags	-save
++#  define OptimisedFortranFlags  -O
++#  define DefaultFCOptions       -KPIC
++#  define CernlibSystem          CernlibDefaultDefines
++#  define CERNLIB_SHIFT NO
+ /*
+  *  Create a Make Variable to allow building with/out Motif
+  */
+@@ -222,25 +490,30 @@
+ #else
+ 
+ # ifdef Hasgfortran
+-#  undef CcCmd
+-#  undef DefaultCCOptions
+-#  undef OptimizedCDebugFlags
+ #  undef StandardDefines
+ #  undef NeedFunctionPrototypes
+ #  undef NeedWidePrototypes
+-# define CcCmd			gcc4
+-# define DefaultCCOptions	
+-# define OptimizedCDebugFlags	-O -g -fomit-frame-pointer
++# ifndef DefaultCCOptions
++# define DefaultCCOptions
++# endif
++# ifndef OptimizedCDebugFlags
++# define OptimizedCDebugFlags	OptimizationLevel DefaultCCOptions
++# endif
+ 
+ # define FortranDoesCpp         YES
+ # define f2cFortran             YES
+-# define FortranCmd             gfortran
++# define gFortran               YES
++# define FortranCmd             gfortran -g
+ # define XargsCmd               xargs
+ # define FortranSaveFlags       -fno-automatic
+-# define OptimisedFortranFlags  -O0 -g -funroll-loops -fomit-frame-pointer
+-# define DefaultFCOptions       -fno-second-underscore
++# define OptimisedFortranFlags  OptimizedCDebugFlags /* -funroll-loops */
++/* Remove -fomit-frame-pointer since -O implies it and it inhibits debugging */
++# ifndef DefaultFCOptions
++# define DefaultFCOptions       -fno-range-check -fno-automatic -fno-second-underscore
++# endif
+ # define NoOpFortranDebugFlags  -O0
+-# define CernlibSystem          -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_GFORTRAN
++# define CernlibSystem          CernlibDefaultDefines CernlibMachineDefines \
++                                CernlibLocalDefines -DCERNLIB_GFORTRAN
+ 
+ #define CERNLIB_GFORTRAN
+  
+@@ -249,17 +522,32 @@
+ /* Start CERNLIB changes A.Waananen 15. Apr. 1996 */
+ /*  Adapted to CERN style GF. 20-Sep-96 */
+ 
++/*
+ #  undef DefaultCCOptions
+ #  undef OptimizedCDebugFlags
+ #  undef StandardDefines
+ # define OptimizedCDebugFlags	-O1 -fomit-frame-pointer
++*/
++
++#ifndef DefaultCCOptions
++# define DefaultCCOptions
++#endif
++#ifndef OptimizedCDebugFlags
++# define OptimizedCDebugFlags	OptimizationLevel DefaultCCOptions
++#endif
+ 
+ #define f2cFortran	        YES
+-#define FortranCmd		g77
++#define FortranCmd		g77 -g
+ #define XargsCmd		xargs
+ #define FortranSaveFlags	/* */ /* Everything static !? */
+-#define DefaultFCOptions	-fno-automatic -fno-second-underscore -fugly-complex
+-#define CernlibSystem	        -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC
++#define OptimisedFortranFlags	OptimizedCDebugFlags -funroll-loops
++/* Remove -fomit-frame-pointer since -O implies it and it inhibits debugging */
++#ifndef DefaultFCOptions
++# define DefaultFCOptions	-fno-automatic -fno-second-underscore \
++				-fugly-complex
++#endif
++#define CernlibSystem	        CernlibDefaultDefines CernlibMachineDefines \
++				CernlibLocalDefines
+ 
+ # endif
+ # endif
+@@ -280,7 +568,7 @@
+ /*
+  *  Create a Make Variable to allow building with/out Motif
+  */
+-
++#define MotifDependantMakeVar(variable,value) variable=value
+ 
+ /* End  CERNLIB changes */
+ 

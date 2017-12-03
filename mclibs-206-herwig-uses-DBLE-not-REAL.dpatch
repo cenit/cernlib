@@ -1,0 +1,31 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 206-herwig-uses-DBLE-not-REAL.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Have libherwig use double precision consistently
+
+@DPATCH@
+diff -urNad mclibs-2006.dfsg~/src/mclibs/herwig/code/hwhiga.F mclibs-2006.dfsg/src/mclibs/herwig/code/hwhiga.F
+--- mclibs-2006.dfsg~/src/mclibs/herwig/code/hwhiga.F	2006-09-04 08:32:57.000000000 -0400
++++ mclibs-2006.dfsg/src/mclibs/herwig/code/hwhiga.F	2007-01-19 17:39:10.154251922 -0500
+@@ -72,7 +72,7 @@
+       TAMP(6)=HWHIG5(T,S,U,EMH2,EMQ2,2,0,5,0,0,0)
+       TAMP(7)=HWHIG5(U,T,S,EMH2,EMQ2,3,0,6,0,0,0)
+       DO 20 I=1,7
+-      TAMPI(I)= REAL(TAMP(I))
++      TAMPI(I)= DBLE(TAMP(I))
+ #if !defined(CERNLIB_GFORTRAN)
+   20  TAMPR(I)=-IMAG(TAMP(I))
+ #else
+diff -urNad mclibs-2006.dfsg~/src/mclibs/herwig/code/hwuli2.F mclibs-2006.dfsg/src/mclibs/herwig/code/hwuli2.F
+--- mclibs-2006.dfsg~/src/mclibs/herwig/code/hwuli2.F	2006-09-04 08:32:57.000000000 -0400
++++ mclibs-2006.dfsg/src/mclibs/herwig/code/hwuli2.F	2007-01-19 17:39:27.722516271 -0500
+@@ -18,7 +18,7 @@
+      &  1.644934066848226D0/
+       PROD(Y,Y2)=Y*(ONE+A1*Y*(ONE+A2*Y*(ONE+A3*Y2*(ONE+A4*Y2*(ONE+A5*Y2*
+      & (ONE+A6*Y2*(ONE+A7*Y2*(ONE+A8*Y2*(ONE+A9*Y2*(ONE+A10*Y2))))))))))
+-      XR=REAL(X)
++      XR=DBLE(X)
+ #if !defined(CERNLIB_GFORTRAN)
+       XI=IMAG(X)
+ #else

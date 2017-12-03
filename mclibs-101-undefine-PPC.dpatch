@@ -1,0 +1,27 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 101-undefine-PPC.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: If "PPC" is defined by compiler, undefine where it clashes with a
+## DP: local variable.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mclibs/cojets/code/bradlp.F /tmp/dpep.aeMGeJ/cernlib-2005.05.09/src/mclibs/cojets/code/bradlp.F
+--- cernlib-2005.05.09/src/mclibs/cojets/code/bradlp.F	1996-01-11 09:14:33.000000000 -0500
++++ /tmp/dpep.aeMGeJ/cernlib-2005.05.09/src/mclibs/cojets/code/bradlp.F	2005-06-08 17:00:48.403200778 -0400
+@@ -37,6 +37,15 @@
+ #include "cojets/zpar2.inc"
+ #include "cojets/zwpar.inc"
+ #include "cojets/weakon.inc"
++
++C     The following is necessary since PPC is defined in g77 on
++C     the powerpc architecture, but it's also a variable in this
++C     file.
++C       -- Kevin McCarty
++#ifdef PPC
++#undef PPC
++#endif
++
+       DIMENSION QP(4),QM(4),QK(4),QE(4),QN(4)
+       DIMENSION COEF(2,2),QQV(2)
+ C

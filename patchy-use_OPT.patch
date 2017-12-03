@@ -1,0 +1,69 @@
+--- cernlib-2006/patchy/fcasplit.f.use_OPT	2006-04-12 19:30:57.000000000 +0200
++++ cernlib-2006/patchy/fcasplit.f	2007-04-20 23:30:53.000000000 +0200
+@@ -23,7 +23,7 @@
+       PARAMETER   (CHIDA = ';DECK  I' )
+       PARAMETER   (CHOVER= 'UNKNOWN')
+  
+-      PARAMETER   (CHPOF = '-c -O2 -Nx800 -Nc200')
++      PARAMETER   (CHPOF = '-c -O2')
+       PARAMETER   (CHPOC = '-c -O2 -posix')
+       PARAMETER   (CHPOA = ' ')
+  
+@@ -37,7 +37,7 @@
+       PARAMETER   (CHWHA = 'as  ')
+  
+       PARAMETER   (MLMKLN=100)
+-      PARAMETER   (MXLENG=128, MXMKLN=64)
++      PARAMETER   (MXLENG=256, MXMKLN=128)
+       CHARACTER    CHHOLD*(MXLENG)
+       CHARACTER    CHOPT(7)*(MXLENG)
+       DIMENSION    NCHOPT(7)
+--- cernlib-2006/patchy/p4boot.sh.use_OPT	2006-04-12 19:30:57.000000000 +0200
++++ cernlib-2006/patchy/p4boot.sh	2007-04-20 23:30:53.000000000 +0200
+@@ -5,6 +5,8 @@
+  set  TARG =   /usr/local/bin      # target directory
+  set  FOPT  = "-O2"                # Fortran compiler options
+  set  FOPTC = "-c $FOPT -posix"
++ set  COPT  = "-O2"                # C compiler options
++ set  COPTC =  "-c $COPT -posix"
+  
+ # *******************************************************************
+ # *                                                                 *
+@@ -151,7 +153,7 @@
+  mkdir p4sub
+  cd p4sub                    # operate in the sub-directory p4sub
+  
+- fcasplit  ../p4comp.fca  "$FOPTC"
++ fcasplit  ../p4comp.fca  "$FOPTC" "$COPTC"
+  
+  csh  -v p4comp.shfca
+  
+@@ -177,17 +179,17 @@
+  echo ' -----------   ---->  Make the new Patchy executable files'
+  set  CLD  = "f77"
+  
+- $CLD   -o ypatchy  ypatch.o   libp4lib.a
+- $CLD   -o ytobcd   ytobcd.o   libp4lib.a
+- $CLD   -o ytobin   ytobin.o   libp4lib.a
+- $CLD   -o ytoceta  ytocet.o   libp4lib.a
+- $CLD   -o yfrceta  yfrcet.o   libp4lib.a
+- $CLD   -o ycompar  ycompa.o   libp4lib.a
+- $CLD   -o yedit    yedit.o    libp4lib.a
+- $CLD   -o yindexb  yindex.o   libp4lib.a
+- $CLD   -o ylistb   ylist.o    libp4lib.a
+- $CLD   -o ysearch  ysearc.o   libp4lib.a
+- $CLD   -o yshift   yshift.o   libp4lib.a
++ $CLD $FOPT  -o ypatchy  ypatch.o   libp4lib.a
++ $CLD $FOPT  -o ytobcd   ytobcd.o   libp4lib.a
++ $CLD $FOPT  -o ytobin   ytobin.o   libp4lib.a
++ $CLD $FOPT  -o ytoceta  ytocet.o   libp4lib.a
++ $CLD $FOPT  -o yfrceta  yfrcet.o   libp4lib.a
++ $CLD $FOPT  -o ycompar  ycompa.o   libp4lib.a
++ $CLD $FOPT  -o yedit    yedit.o    libp4lib.a
++ $CLD $FOPT  -o yindexb  yindex.o   libp4lib.a
++ $CLD $FOPT  -o ylistb   ylist.o    libp4lib.a
++ $CLD $FOPT  -o ysearch  ysearc.o   libp4lib.a
++ $CLD $FOPT  -o yshift   yshift.o   libp4lib.a
+  
+  chmod a+x  ypatchy
+  chmod a+x  ytobcd

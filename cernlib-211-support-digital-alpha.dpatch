@@ -1,0 +1,34 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 211-support-digital-alpha.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Try to also support alpha architecture in chkloc()
+
+@DPATCH@
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c	2006-09-06 20:48:39.151588934 -0400
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c	2006-09-06 20:53:30.206708584 -0400
+@@ -35,13 +35,20 @@
+      data segments upwards. All addresses here are expected to be in
+      the data segment area.                                                   */
+ 
++  /* K. McCarty: On Alpha, on the other hand, I couldn't find any docs for the
++     Linux segmentation for virtual memory.  Judging by a test machine
++     (escher.debian.org), the data section starts slightly above 0x120010000.
++     On the other hand the stack grows downward from 0x120000000. */
++
+    const unsigned long mask=0xffffffff00000000;
+    static unsigned long limit=0x00000000ffffffff;
+    unsigned long jadr=((unsigned long) iadr & mask);
+-#if !defined (__ia64__)
+-    if ( jadr != 0x0000000000000000) {
+-#else
++#if defined (__ia64__)
+     if ( jadr != 0x6000000000000000) {
++#elif defined (__alpha__)
++    if ( jadr != 0x0000000100000000) {
++#else  /* amd64 or ppc64 */
++    if ( jadr != 0) {
+ #endif
+       fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+       fprintf(stderr, "LOCB/LOCF: address %p exceeds the 32 bit address space\n", iadr);

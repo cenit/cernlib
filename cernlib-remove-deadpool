@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+cd .
+
+file=2006_src.tar.gz
+result=2006_src-free.tar.gz
+echo Unpacking compressed source from $file...
+tar xzf $file
+for dir in `tr '/' ' ' < ./cernlib-deadpool.txt | awk '{print $1}' \
+	| sed -e 's/#.*//g' -e '/$^/d' | sort | uniq` ; do
+#	version=`ls -1 | head -n 1`
+	version=2006
+	echo Removing files with bad copyright from $dir module...
+	for badfile in `grep '^'$dir ./cernlib-deadpool.txt \
+			| sed 's/\#.*$//g'` ; do
+		path=$version/src/$badfile
+		[ -e "$path" ] || echo "Skipping non-existent $path ..."
+		rm -rf $version/src/$badfile
+	done
+done
+echo Repacking $result.
+rm -f $result
+tar czf $result $version
+rm -rf $version
+echo Done.
+
+exit 0
+

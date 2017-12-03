@@ -1,0 +1,371 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 210-improve-cfortran-header-files.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Protect against multiple inclusion and add explicit dependency on
+## DP: cfortran.h to the CERNLIB C headers.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/cfortran/comis.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/comis.h
+--- cernlib-2005.05.09/src/cfortran/comis.h	1999-10-29 07:41:26.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/comis.h	2005-06-10 12:51:30.985999665 -0400
+@@ -1,3 +1,11 @@
++#ifndef _COMIS_H
++#define _COMIS_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFFUN1(INT,CSADDR,csaddr,STRING)
+ #define	CSADDR(CHFILE) CCALLSFFUN1(CSADDR,csaddr,STRING,CHFILE)
+ 
+@@ -30,3 +38,9 @@
+ 
+ PROTOCCALLSFSUB2(CSTYPE,cstype,INT,PSTRING)
+ #define CSTYPE(CADR,CHTYPE) CCALLSFSUB2(CSTYPE,cstype,INT,PSTRING,CADR,CHTYPE)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _COMIS_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/cspack.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/cspack.h
+--- cernlib-2005.05.09/src/cfortran/cspack.h	1999-10-29 07:42:56.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/cspack.h	2005-06-10 12:51:31.013993690 -0400
+@@ -1,5 +1,19 @@
++#ifndef _CSPACK_H
++#define _CSPACK_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFSUB2(CZPUTA,czputa,STRING,PINT)
+ #define CZPUTA(CHMAIL,ISTAT) CCALLSFSUB2(CZPUTA,czputa,STRING,PINT,CHMAIL,ISTAT)
+ 
+ PROTOCCALLSFSUB2(CZGETA,czgeta,PSTRING,PINT)
+ #define CZGETA(CHMAIL,ISTAT) CCALLSFSUB2(CZGETA,czgeta,PSTRING,PINT,CHMAIL,ISTAT)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _CSPACK_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/geant315.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/geant315.h
+--- cernlib-2005.05.09/src/cfortran/geant315.h	1996-05-15 05:24:06.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/geant315.h	2005-06-10 12:51:31.080979393 -0400
+@@ -1,3 +1,11 @@
++#ifndef _GEANT315_H
++#define _GEANT315_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ /*------------------------------------------------------------------
+ fortran filename   : /cern/new/src/cfs/geant315/abbrch.f
+ ------------------------------------------------------------------*/
+@@ -4797,3 +4805,9 @@
+ 
+ #define ZEREGS() CCALLSFSUB0(ZEREGS,zeregs)
+ 
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _GEANT315_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/geant321.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/geant321.h
+--- cernlib-2005.05.09/src/cfortran/geant321.h	1996-05-15 05:24:07.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/geant321.h	2005-06-10 12:51:31.148964883 -0400
+@@ -1,3 +1,11 @@
++#ifndef _GEANT321_H
++#define _GEANT321_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ /*------------------------------------------------------------------
+ fortran filename   : abbrch.f
+ ------------------------------------------------------------------*/
+@@ -6099,3 +6107,9 @@
+  PROTOCCALLSFFUN3(DOUBLE,XSEPRO,xsepro,DOUBLE,DOUBLE,DOUBLE)
+ #define XSEPRO(A2,A3,A4)  CCALLSFFUN3(XSEPRO,xsepro,DOUBLE,DOUBLE,DOUBLE,A2,A3,A4)
+ 
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _GEANT321_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/gen.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/gen.h
+--- cernlib-2005.05.09/src/cfortran/gen.h	2005-06-10 12:51:00.965407158 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/gen.h	2005-06-10 12:51:31.190955921 -0400
+@@ -1,3 +1,11 @@
++#ifndef _GEN_H
++#define _GEN_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ /* Subroutines/Functions with COMPLEX not supported ***
+ 
+ #define CBSJA(A1,A2,A3,A4,A5)  CCALLSFSUB5(CBSJA,cbsja,COMPLEX,FLOAT,INT,INT,PCOMPLEX,A1,A2,A3,A4,A5)
+@@ -1489,3 +1497,9 @@
+ 
+ PROTOCCALLSFSUB6(ZEROX,zerox,FLOAT,FLOAT,FLOAT,INT,FLOAT,INT)
+ #define ZEROX(A1,A2,A3,A4,A5,A6)  CCALLSFSUB6(ZEROX,zerox,FLOAT,FLOAT,FLOAT,INT,FLOAT,INT,A1,A2,A3,A4,A5,A6)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _GEN_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/graflib.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/graflib.h
+--- cernlib-2005.05.09/src/cfortran/graflib.h	1998-01-29 05:49:27.000000000 -0500
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/graflib.h	2005-06-10 12:51:31.220949519 -0400
+@@ -1,2 +1,16 @@
+-#include "higz.h"
+-#include "hplot.h"
++#ifndef _GRAFLIB_H
++#define _GRAFLIB_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include <higz.h>
++#include <hplot.h>
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _GRAFLIB_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/jetset74.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/jetset74.h
+--- cernlib-2005.05.09/src/cfortran/jetset74.h	1999-10-29 12:55:45.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/jetset74.h	2005-06-10 12:51:31.250943117 -0400
+@@ -1,3 +1,11 @@
++#ifndef _JETSET74_H
++#define _JETSET74_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFFUN2(INT,KLU,klu,INT,INT)
+ #define KLU(A2,A3)  CCALLSFFUN2(KLU,klu,INT,INT,A2,A3)
+ 
+@@ -327,3 +335,9 @@
+ 
+ PROTOCCALLSFSUB11(STRUCTM,structm,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,PDOUBLE)
+ #define STRUCTM(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)  CCALLSFSUB11(STRUCTM,structm,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,PDOUBLE,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _JETSET74_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/kernlib.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/kernlib.h
+--- cernlib-2005.05.09/src/cfortran/kernlib.h	2000-03-16 11:58:18.000000000 -0500
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/kernlib.h	2005-06-10 12:51:31.291934368 -0400
+@@ -1,3 +1,11 @@
++#ifndef _KERNLIB_H
++#define _KERNLIB_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFFUN1(FLOAT,ALOGAM,alogam,FLOAT)
+ #define ALOGAM(A2)  CCALLSFFUN1(ALOGAM,alogam,FLOAT,A2)
+ 
+@@ -1512,3 +1520,9 @@
+ 
+ PROTOCCALLSFSUB1(WORDSEP,wordsep,STRING)
+ #define WORDSEP(A1)  CCALLSFSUB1(WORDSEP,wordsep,STRING,A1)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _KERNLIB_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/kuip.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/kuip.h
+--- cernlib-2005.05.09/src/cfortran/kuip.h	2000-10-05 10:27:54.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/kuip.h	2005-06-10 12:51:31.319928394 -0400
+@@ -1,3 +1,11 @@
++#ifndef _KUIP_H
++#define _KUIP_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFSUB3(KUCLOS,kuclos,INT,STRING,INT)
+ #define KUCLOS(A1,A2,A3)    CCALLSFSUB3(KUCLOS,kuclos,INT,STRING,INT,A1,A2,A3)
+ 
+@@ -6,3 +14,9 @@
+ 
+ PROTOCCALLSFSUB0(KUWHAG,kuwhag)
+ #define KUWHAG() CCALLSFSUB0(KUWHAG,kuwhag)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _KUIP_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/lapack.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/lapack.h
+--- cernlib-2005.05.09/src/cfortran/lapack.h	2000-06-23 06:13:58.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/lapack.h	2005-06-10 12:51:31.348922205 -0400
+@@ -1,2 +1,16 @@
++#ifndef _LAPACK_H
++#define _LAPACK_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFSUB11(DGELS,dgels,STRING,INT,INT,INT,DOUBLEV,INT,DOUBLEV,INT,DOUBLEV,INT,PINT)
+ #define DGELS(TRANS,M,N,NRHS,A,LDA,B,LDB,WORK,LWORK,INFO) CCALLSFSUB11(DGELS,dgels,STRING,INT,INT,INT,DOUBLEV,INT,DOUBLEV,INT,DOUBLEV,INT,PINT,TRANS,M,N,NRHS,A,LDA,B,LDB,WORK,LWORK,INFO)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _LAPACK_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/lepto62.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/lepto62.h
+--- cernlib-2005.05.09/src/cfortran/lepto62.h	1999-10-29 12:55:45.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/lepto62.h	2005-06-10 12:51:31.378915804 -0400
+@@ -1,3 +1,11 @@
++#ifndef _LEPTO62_H
++#define _LEPTO62_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFFUN2(FLOAT,DCROSS,dcross,FLOAT,FLOAT)
+ #define DCROSS(A2,A3)  CCALLSFFUN2(DCROSS,dcross,FLOAT,FLOAT,A2,A3)
+ 
+@@ -174,3 +182,9 @@
+ 
+ PROTOCCALLSFSUB0(RIWIBD,riwibd)
+ #define RIWIBD() CCALLSFSUB0(RIWIBD,riwibd)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _LEPTO62_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/minuit.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/minuit.h
+--- cernlib-2005.05.09/src/cfortran/minuit.h	1999-10-27 11:30:23.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/minuit.h	2005-06-10 12:51:31.407909615 -0400
+@@ -1,3 +1,11 @@
++#ifndef _MINUIT_H
++#define _MINUIT_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ /*
+  *  Interface to minuit using cfortran.h
+  *
+@@ -190,3 +198,9 @@
+ 
+ PROTOCCALLSFSUB0(STAND,stand)
+ #define STAND() CCALLSFSUB0(STAND,stand)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _MINUIT_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/packlib.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/packlib.h
+--- cernlib-2005.05.09/src/cfortran/packlib.h	1998-01-29 11:17:45.000000000 -0500
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/packlib.h	2005-06-10 12:51:31.436903427 -0400
+@@ -1,4 +1,18 @@
+-#include "hbook.h"
+-#include "minuit.h"
+-#include "kuip.h"
+-#include "zebra.h"
++#ifndef _PACKLIB_H
++#define _PACKLIB_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include <hbook.h>
++#include <minuit.h>
++#include <kuip.h>
++#include <zebra.h>
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _PACKLIB_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/paw.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/paw.h
+--- cernlib-2005.05.09/src/cfortran/paw.h	2000-10-05 10:27:55.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/paw.h	2005-06-10 12:51:31.464897452 -0400
+@@ -1,6 +1,20 @@
++#ifndef _PAW_H
++#define _PAW_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFSUB2(PAW,paw,INT,INT)
+ #define PAW(A1,A2)  CCALLSFSUB2(PAW,paw,INT,INT,A1,A2)
+ 
+ PROTOCCALLSFSUB0(PAEXIT,paexit)
+ #define PAEXIT() CCALLSFSUB0(PAEXIT,paexit)
+ 
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _PAW_H */
+diff -urNad cernlib-2005.05.09/src/cfortran/zebra.h /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/zebra.h
+--- cernlib-2005.05.09/src/cfortran/zebra.h	1999-10-29 07:35:47.000000000 -0400
++++ /tmp/dpep.Al0dBQ/cernlib-2005.05.09/src/cfortran/zebra.h	2005-06-10 12:51:31.496890624 -0400
+@@ -1,5 +1,19 @@
++#ifndef _ZEBRA_H
++#define _ZEBRA_H
++#include <cfortran/cfortran.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ PROTOCCALLSFSUB1(MZEBRA,mzebra,INT)
+ #define MZEBRA(A1)    CCALLSFSUB1(MZEBRA,mzebra,INT,A1)
+ 
+ PROTOCCALLSFSUB2(MZPAW,mzpaw,INT,STRING)
+ #define MZPAW(A1,A2)  CCALLSFSUB2(MZPAW,mzpaw,INT,STRING,A1,A2)
++
++#ifdef __cplusplus
++} /* extern "C" */
++#endif
++
++#endif /* #ifndef _ZEBRA_H */

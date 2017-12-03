@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 221-use-double-in-hepevt.dpatch by Kevin B. McCarty <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Use double-precision values in hepevt.inc.
+
+@DPATCH@
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/isajet/isajet/hepevt.inc mclibs-2006.dfsg.2/src/mclibs/isajet/isajet/hepevt.inc
+--- mclibs-2006.dfsg.2~/src/mclibs/isajet/isajet/hepevt.inc	1998-04-02 06:47:34.000000000 -0800
++++ mclibs-2006.dfsg.2/src/mclibs/isajet/isajet/hepevt.inc	2008-02-06 12:56:20.000000000 -0800
+@@ -9,7 +9,7 @@
+       COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+      $JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+       INTEGER NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+-      REAL PHEP,VHEP
++      DOUBLE PRECISION PHEP,VHEP
+       SAVE /HEPEVT/
+ C...      NEVHEP       - event number
+ C...      NHEP         - number of entries in this event

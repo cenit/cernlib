@@ -1,0 +1,103 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 106-fix-paw++-menus-in-lesstif.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix odd behavior of Paw++ menus when compiled against Lesstif.  The
+## DP: problem is that Paw++ Motif code does some awfully weird things that
+## DP: Lesstif doesn't support; cf. http://bugs.debian.org/270862 .
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_motif/mkuip.c /tmp/dpep.KorIaA/cernlib-2005.05.09/src/packlib/kuip/code_motif/mkuip.c
+--- cernlib-2005.05.09/src/packlib/kuip/code_motif/mkuip.c	2005-06-09 14:41:14.451377612 -0400
++++ /tmp/dpep.KorIaA/cernlib-2005.05.09/src/packlib/kuip/code_motif/mkuip.c	2005-06-09 14:41:22.929573007 -0400
+@@ -1066,7 +1066,7 @@
+ {
+     int narg;
+     Arg arglist[2];
+-    Widget id_pdm;
++    Widget id_pdm, id_pdm_shell;
+     Widget PdMenu[15];
+ 
+     /*
+@@ -1076,8 +1076,19 @@
+     UxKuipBrowserContext = (_UxCkuipBrowser *)UxGetContext(parent);
+ 
+     /*  create pulldown_menu */
+-    id_pdm = XmCreatePulldownMenu (browserMenu,"OptionsPdMenu",arglist,0);
+-
++    id_pdm_shell = XtVaCreatePopupShell ("OptionsPdMenu_shell",
++	xmMenuShellWidgetClass, browserMenu,
++	XmNwidth, 1,
++	XmNheight, 1,
++	XmNallowShellResize, TRUE,
++	XmNoverrideRedirect, TRUE,
++	NULL );
++    id_pdm = XtVaCreateWidget( "OptionsPdMenu",
++	xmRowColumnWidgetClass,
++	id_pdm_shell,
++	XmNrowColumnType, XmMENU_PULLDOWN,
++	NULL );
++/*  id_pdm = XmCreatePulldownMenu (browserMenu,"OptionsPdMenu",arglist,0); */
+ 
+     /* create pulldown_menu_entry "Options" */
+     XtVaCreateManagedWidget( "optionsMenu",
+@@ -1091,7 +1102,7 @@
+ /*  create list of push_buttons and separators for menu "Option"             */
+ /*  create pulldown_menu for "Raise Window" (with list of appl. shells)       */
+     narg = 0;
+-#if XmREVISION == 99 /* problem with REVISION 2 ! */
++#if XmVERSION > 1 || XmREVISION >= 2
+     XtSetArg(arglist[narg], XmNtearOffModel, XmTEAR_OFF_ENABLED); narg++;
+ #endif
+     kuipControlShellM = XmCreatePulldownMenu
+@@ -1312,9 +1323,7 @@
+ static void create_command_menu(parent)
+    Widget parent;
+ {
+-    Widget id_pdme, id_pdm;
+-    Arg    arglist[2];
+-    int    narg;
++    Widget id_pdme, id_pdm, id_pdm_shell;
+ 
+     /*
+      *   find and restore the context for Browser
+@@ -1323,12 +1332,26 @@
+     UxKuipBrowserContext = (_UxCkuipBrowser *)UxGetContext(parent);
+ 
+     /* create pulldown_menu_entry "Commands" for all commands */
+-    narg = 0;
++
++    id_pdm_shell = XtVaCreatePopupShell ("CommandsPdMenu_shell",
++	xmMenuShellWidgetClass, browserMenu,
++	XmNwidth, 1,
++	XmNheight, 1,
++	XmNallowShellResize, TRUE,
++	XmNoverrideRedirect, TRUE,
++	NULL );
++    
++    id_pdm = XtVaCreateWidget( "CommandsPdMenu",
++	xmRowColumnWidgetClass,
++	id_pdm_shell,
++	XmNrowColumnType, XmMENU_PULLDOWN,
+ #if XmVERSION > 1 || XmREVISION >= 2
+-    XtSetArg(arglist[narg], XmNtearOffModel, XmTEAR_OFF_ENABLED); narg++;
++	XmNtearOffModel, XmTEAR_OFF_ENABLED,
+ #endif
+-    id_pdm = XmCreatePulldownMenu
+-                     (browserMenu, "CommandsPdMenu", arglist, narg);
++	NULL );
++      
++/*      XmCreatePulldownMenu
++                     (browserMenu, "CommandsPdMenu", arglist, narg); */
+ 
+     id_pdme = XtVaCreateManagedWidget( "id_pdme",
+                         xmCascadeButtonGadgetClass, browserMenu,
+@@ -1927,7 +1950,7 @@
+    if (kuipControlShellM != NULL) XtDestroyWidget (kuipControlShellM);
+ 
+    narg = 0;
+-#if XmREVISION == 99 /* problem with REVISION 2 ! */
++#if XmVERSION > 1 || XmREVISION >= 2
+    XtSetArg(arglist[narg], XmNtearOffModel, XmTEAR_OFF_ENABLED); narg++;
+ #endif
+    kuipControlShellM = XmCreatePulldownMenu

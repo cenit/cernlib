@@ -1,0 +1,34 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 102-dont-optimize-some-code.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Don't allow the compiler to optimize several files that cause trouble
+## DP: (either compiler crash or broken code generation).
+
+@DPATCH@
+diff -urNad mclibs-2006.dfsg~/src/mclibs/isajet/isatape/Imakefile mclibs-2006.dfsg/src/mclibs/isajet/isatape/Imakefile
+--- mclibs-2006.dfsg~/src/mclibs/isajet/isatape/Imakefile	1996-05-06 11:19:44.000000000 -0400
++++ mclibs-2006.dfsg/src/mclibs/isajet/isatape/Imakefile	2007-01-19 17:35:47.210374125 -0500
+@@ -4,4 +4,8 @@
+ 
+ FORTRANSAVEOPTION = FortranSaveFlags
+ 
++#if defined(CERNLIB_LINUX)
++SpecialFortranLibObjectRule(isawev,isawev,-O0,NullParameter)
++#endif
++
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad mclibs-2006.dfsg~/src/mclibs/pdf/spdf/Imakefile mclibs-2006.dfsg/src/mclibs/pdf/spdf/Imakefile
+--- mclibs-2006.dfsg~/src/mclibs/pdf/spdf/Imakefile	2006-09-04 08:32:57.000000000 -0400
++++ mclibs-2006.dfsg/src/mclibs/pdf/spdf/Imakefile	2007-01-19 17:35:47.211373912 -0500
+@@ -101,4 +101,10 @@
+ #ifdef CERNLIB_HPUX
+ FORTRANOPTIONS += '-WF,-P'
+ #endif
++
++#if defined(CERNLIB_LINUX)
++/* -O2 optimization on ARM breaks in g77 3.3.3 */
++SpecialFortranLibObjectRule(structm,structm,-O0,NullParameter)
++#endif
++
+ SubdirLibraryTarget(NullParameter,NullParameter)

@@ -1,0 +1,1026 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 211-support-amd64-and-itanium.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Large patch from Harald Vogt <hvogt@ifh.de> to make CERNLIB work better
+## DP: (at least when statically linked) on 64-bit architectures.
+## DP: Slightly modified in an attempt to keep ABI compatibility of the
+## DP: dynamic libraries; not that it matters much as they don't work well
+## DP: when dynamically linked on 64-bit anyway.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/cfortran/hbook.h cernlib-2006.dfsg.2/src/cfortran/hbook.h
+--- cernlib-2006.dfsg.2~/src/cfortran/hbook.h	1999-11-15 17:01:12.000000000 +0000
++++ cernlib-2006.dfsg.2/src/cfortran/hbook.h	2007-12-14 21:41:27.000000000 +0000
+@@ -489,6 +489,10 @@
+ #define HBALLOC(IDN,CHDIR,VAR,BLOCK,ITYPE,ISIZE,IFIRST,NELEM,IBASE,IOFF,NUSE)\
+         CCALLSFSUB11(HBALLOC,hballoc,INT,STRING,STRING,STRING,INT,INT,INT,INT,INTV,PINT,PINT,IDN,CHDIR,VAR,BLOCK,ITYPE,ISIZE,IFIRST,NELEM,IBASE,IOFF,NUSE)
+ 
++PROTOCCALLSFSUB11(HBALLOC64,hballoc64,INT,STRING,STRING,STRING,INT,INT,INT,INT,INTV,PLONG,PINT)
++#define HBALLOC64(IDN,CHDIR,VAR,BLOCK,ITYPE,ISIZE,IFIRST,NELEM,IBASE,IOFF,NUSE)\
++        CCALLSFSUB11(HBALLOC64,hballoc64,INT,STRING,STRING,STRING,INT,INT,INT,INT,INTV,PLONG,PINT,IDN,CHDIR,VAR,BLOCK,ITYPE,ISIZE,IFIRST,NELEM,IBASE,IOFF,NUSE)
++
+ PROTOCCALLSFSUB1(HBFREE,hbfree,INT)
+ #define HBFREE(LUN) CCALLSFSUB1(HBFREE,hbfree,INT,LUN)
+ 
+@@ -508,6 +512,13 @@
+ #define HGNTBF(IDN,VAR,IOFFST,NVAR,IDNEVT,IERROR)\
+         CCALLSFSUB6(HGNTBF,hgntbf,INT,ZTRINGV,INTV,INT,INT,PINT,IDN,VAR,IOFFST,NVAR,IDNEVT,IERROR)
+ 
++PROTOCCALLSFSUB6(HGNTBF64,hgntbf64,INT,ZTRINGV,LONGV,INT,INT,PINT)
++/* fix the element length of VAR to 32 */
++#define hgntbf64_ELEMS_2          ZTRINGV_ARGS(4)
++#define hgntbf64_ELEMLEN_2        ZTRINGV_NUM(32)
++#define HGNTBF64(IDN,VAR,IOFFST,NVAR,IDNEVT,IERROR)\
++        CCALLSFSUB6(HGNTBF64,hgntbf64,INT,ZTRINGV,LONGV,INT,INT,PINT,IDN,VAR,IOFFST,NVAR,IDNEVT,IERROR)
++
+ PROTOCCALLSFSUB1(HGTDIR,hgtdir,PSTRING)
+ #define HGTDIR(CHDIR) CCALLSFSUB1(HGTDIR,hgtdir,PSTRING,CHDIR)
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/cspack/cspack/hcntpar.inc cernlib-2006.dfsg.2/src/packlib/cspack/cspack/hcntpar.inc
+--- cernlib-2006.dfsg.2~/src/packlib/cspack/cspack/hcntpar.inc	1996-03-08 15:44:16.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/cspack/cspack/hcntpar.inc	2007-12-14 21:41:27.000000000 +0000
+@@ -22,7 +22,7 @@
+      +          ZIFREA=7,  ZNWTIT=8,  ZITIT1=9,  ZNCHRZ=13, ZIFBIT=8,
+      +          ZDESC=1,   ZLNAME=2,  ZNAME=3,   ZRANGE=4,  ZNADDR=12,
+      +          ZARIND=11, ZIBLOK=8,  ZNBLOK=10, ZIBANK=9,  ZIFTMP=11,
+-     +          ZITMP=10,  ZNTMP=5,   ZNTMP1=3,  ZLINK=6)
++     +          ZITMP=10,  ZNTMP=5,   ZNTMP1=4,  ZLINK=6)
+ *
+ 
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/cspack/sysreq/netreq.c cernlib-2006.dfsg.2/src/packlib/cspack/sysreq/netreq.c
+--- cernlib-2006.dfsg.2~/src/packlib/cspack/sysreq/netreq.c	2007-12-14 21:41:17.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/cspack/sysreq/netreq.c	2007-12-14 21:41:27.000000000 +0000
+@@ -341,7 +341,7 @@
+                 return(-errno);
+         }
+ 	TRACE(2, "sysreq", "recv reply length");
+-        if ((int)(p = RecvStr(s, &replylen)) <0)     {
++        if ((long)(p = RecvStr(s, &replylen)) <0)     {
+ 		TRACE(2, "sysreq", "RecvStr(RepLen): (errno=%d)", errno);
+                 (void) close(s);
+ 		END_TRACE();
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hbook/hcntpar.inc cernlib-2006.dfsg.2/src/packlib/hbook/hbook/hcntpar.inc
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hbook/hcntpar.inc	1996-01-16 17:07:52.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hbook/hcntpar.inc	2007-12-14 21:41:27.000000000 +0000
+@@ -24,7 +24,7 @@
+      +          ZIFREA=7,  ZNWTIT=8,  ZITIT1=9,  ZNCHRZ=13, ZIFBIT=8,
+      +          ZDESC=1,   ZLNAME=2,  ZNAME=3,   ZRANGE=4,  ZNADDR=12,
+      +          ZARIND=11, ZIBLOK=8,  ZNBLOK=10, ZIBANK=9,  ZIFTMP=11,
+-     +          ZID=12,    ZITMP=10,  ZNTMP=6,   ZNTMP1=3,  ZLINK=6)
++     +          ZID=12,    ZITMP=10,  ZNTMP=6,   ZNTMP1=4,  ZLINK=6)
+ *
+ 
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hmmap/hcreatem.F cernlib-2006.dfsg.2/src/packlib/hbook/hmmap/hcreatem.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hmmap/hcreatem.F	1996-03-13 10:13:20.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hmmap/hcreatem.F	2007-12-14 21:41:27.000000000 +0000
+@@ -39,11 +39,11 @@
+ ************************************************************************
+ *
+       CHARACTER*(*) MFILE
+-#if !defined(CERNLIB_ALPHA_OSF)
++#if !defined(CERNLIB_ALPHA_OSF) && !defined(CERNLIB_QMLXIA64)
+       INTEGER       ICOMAD(1), ISIZE, IBASE(1), HCREATEI
+       SAVE ICOMAD
+ #endif
+-#if defined(CERNLIB_ALPHA_OSF)
++#if defined(CERNLIB_ALPHA_OSF) || defined(CERNLIB_QMLXIA64)
+       INTEGER       ISIZE, IBASE(1), HCREATEI
+       INTEGER*8     ICOMAD(1)
+       SAVE ICOMAD
+@@ -63,6 +63,10 @@
+ ************************************************************************
+       ICOMAD(1) = 0
+ #endif
++#if defined(CERNLIB_QMLXIA64)
++C this should be a reasonable range for IA64 architectures
++      ICOMAD(1) = 2**30
++#endif
+ #if (defined(CERNLIB_DECS))&&(!defined(CERNLIB_ALPHA))
+       ICOMAD(1) = 4*LOCF(ICOMAD(1)) + MFEN
+       ICOMAD(1) = ((ICOMAD(1)+4095)/4096)*4096
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hmmap/hmapm.F cernlib-2006.dfsg.2/src/packlib/hbook/hmmap/hmapm.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hmmap/hmapm.F	2001-10-02 09:06:15.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hmmap/hmapm.F	2007-12-14 21:41:27.000000000 +0000
+@@ -54,11 +54,11 @@
+ ************************************************************************
+ *
+       CHARACTER*(*) MFILE
+-#if !defined(CERNLIB_ALPHA_OSF)
++#if !defined(CERNLIB_ALPHA_OSF) && !defined(CERNLIB_QMLXIA64)
+       INTEGER       ICOMAD(1), IBASE(1), HMAPI
+       SAVE ICOMAD
+ #endif
+-#if defined(CERNLIB_ALPHA_OSF)
++#if defined(CERNLIB_ALPHA_OSF) || defined(CERNLIB_QMLXIA64)
+       INTEGER       IBASE(1), HMAPI
+       INTEGER*8     ICOMAD(1)
+       SAVE ICOMAD
+@@ -81,6 +81,10 @@
+       CALL UCTOH(MFILE2,MKEY,4,4)
+       ICOMAD(1) = 0
+ #endif
++#if defined(CERNLIB_QMLXIA64)
++C this should be a reasonable range for IA64 architectures
++      ICOMAD(1) = 2**30
++#endif
+ #if defined(CERNLIB_DECS)
+       ICOMAD(1) = 4*LOCF(ICOMAD(1)) + MFEN
+       ICOMAD(1) = ((ICOMAD(1)+4095)/4096)*4096
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hballoc.F cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hballoc.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hballoc.F	1996-01-16 17:07:56.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hballoc.F	2007-12-14 21:41:27.000000000 +0000
+@@ -42,3 +42,26 @@
+       ENDIF
+ *
+       END
++*
++*     64-bit version (separate to preserve ABI compatibility)
++      SUBROUTINE HBALLOC64(IDN,CHDIR,VAR,BLOCK,ITYPE,ISIZE,IFIRST,NELEM,
++     +                     IBASE,IOFF,NUSE)
++*
++      CHARACTER*(*)  CHDIR, VAR, BLOCK
++      INTEGER        IDN, ITYPE, ISIZE, NELEM, NUSE, IFIRST, IBASE(1)
++      INTEGER*8      IBUF(1), IOFF
++*
++      LC = LENOCC(CHDIR)
++      LV = LENOCC(VAR)
++      LB = LENOCC(BLOCK)
++*
++      CALL HBALLO1(IDN, CHDIR, LC, VAR, LV, BLOCK, LB, ITYPE, ISIZE,
++     +             IFIRST, NELEM, IBUF, NUSE)
++*
++      IF (NUSE .EQ. 0) THEN
++         IOFF = 0
++      ELSE
++         IOFF = IBUF(1) - LOC(IBASE(1))/4
++      ENDIF
++*
++      END
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hbnt.F cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hbnt.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hbnt.F	1996-01-16 17:07:56.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hbnt.F	2007-12-14 21:41:27.000000000 +0000
+@@ -269,11 +269,13 @@
+  ************************************************************************
+  *      *         *                                                     *
+  *   1  *         *     Number of variables to be read out              *
+- *      *         *     *** For every variable 3 words (ZNTMP1) ***     *
++ *      *         *     *** For every variable 4 words (ZNTMP1) ***     *
+  *   2  *         *     Index of variable in LNAME bank                 *
+  *   3  *         *     Offset of variable in LNAME bank (INDX-1)*ZNADDR*
+  *   4  *         *     Offset in dynamically allocated buffer (only    *
+  *      *         *     used via HGNTBF) otherwise 0                    *
++ *   5  *         *     spare (used in 64 bit architectures for upper   *
++ *      *         *     address part)                                   *
+  ************************************************************************
+ #endif
+ *
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hgnt2.F cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hgnt2.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hgnt2.F	1999-03-05 15:42:35.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hgnt2.F	2007-12-14 21:41:27.000000000 +0000
+@@ -34,7 +34,13 @@
+ #include "hbook/hcrecv.inc"
+ *
+       CHARACTER*(*) VAR1(*)
++#if defined(CERNLIB_QMLXIA64)
++      INTEGER*8     IVOFF(*), IOFFST, IOFFSTT
++      INTEGER       IOFFSTV(2)
++      EQUIVALENCE   (IOFFSTV, IOFFSTT)
++#else
+       INTEGER       IVOFF(*)
++#endif
+       CHARACTER*32  VAR
+       INTEGER       ILOGIC, HNMPTR
+       LOGICAL       LOGIC, INDVAR, ALLVAR, USEBUF, CHKOFF
+@@ -452,12 +458,21 @@
+          IQ(LTMP1+JTMP+1)      = IOFF
+          IF (USEBUF) THEN
+             IF (IEDIF .EQ. 0) THEN
+-               IQ(LTMP1+JTMP+2) = IOFFST
++               IOFFSTT = IOFFST
+             ELSE
+-               IQ(LTMP1+JTMP+2) = IOFFST + (IEDIF*ISHFT(ISIZE,-2))
++               IOFFSTT = IOFFST + (IEDIF*ISHFT(ISIZE,-2))
+             ENDIF
++            IQ(LTMP1+JTMP+2) = IOFFSTT
++#if defined(CERNLIB_QMLXIA64)
++*           store upper part of 64 bit address
++            IQ(LTMP1+JTMP+3) = IOFFSTV(2)
++#endif
+          ELSE
+             IQ(LTMP1+JTMP+2)   = 0
++#if defined(CERNLIB_QMLXIA64)
++*           reset upper part of 64 bit address
++            IQ(LTMP1+JTMP+3)   = 0
++#endif
+          ENDIF
+          LQ(LTMP1-IQ(LTMP1+1)) = LBLOK
+ *
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hgntbf.F cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hgntbf.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hgntbf.F	1996-01-16 17:07:57.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hgntbf.F	2007-12-14 21:41:27.000000000 +0000
+@@ -26,3 +26,13 @@
+       CALL HGNT1(IDN, '*', VAR, IOFFST, NVAR1, IDNEVT, IERROR)
+ *
+       END
++*
++*     64-bit version (separate to preserve ABI compatibility)
++      SUBROUTINE HGNTBF64(IDN,VAR,IOFFST,NVAR,IDNEVT,IERROR)
++      CHARACTER*(*) VAR(*)
++      INTEGER*8     IOFFST(*)
++*
++      NVAR1 = -NVAR
++      CALL HGNT1(IDN, '*', VAR, IOFFST, NVAR1, IDNEVT, IERROR)
++*
++      END
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hgntf.F cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hgntf.F
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/hntup/hgntf.F	1999-03-05 15:42:35.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/hbook/hntup/hgntf.F	2007-12-14 21:41:27.000000000 +0000
+@@ -37,6 +37,13 @@
+       INTEGER       ILOGIC
+       LOGICAL       LOGIC, INDVAR, USEBUF
+       EQUIVALENCE  (LOGIC, ILOGIC)
++
++#if defined(CERNLIB_QMLXIA64)
++      INTEGER*8     IOFFST, IOFFSTT
++      INTEGER       IOFFSTV(2)
++      EQUIVALENCE   (IOFFSTV, IOFFSTT)
++#endif
++
+ *
+ #include "hbook/jbyt.inc"
+ *
+@@ -76,6 +83,12 @@
+          INDX   = IQ(LTMP1+JTMP)
+          IOFF   = IQ(LTMP1+JTMP+1)
+          IOFFST = IQ(LTMP1+JTMP+2)
++#if defined(CERNLIB_QMLXIA64)
++*        fetch full 64 bit address
++         IOFFSTV(1) = IQ(LTMP1+JTMP+2)
++         IOFFSTV(2) = IQ(LTMP1+JTMP+3)
++         IOFFST     = IOFFSTT
++#endif
+          IF (IOFFST .EQ. 0) THEN
+             USEBUF = .FALSE.
+          ELSE
+@@ -442,12 +455,21 @@
+ *
+          IF (USEBUF) THEN
+             IF (IEDIF .EQ. 0) THEN
+-               IQ(LTMP1+JTMP+2) = IOFFST
++               IOFFSTT = IOFFST
+             ELSE
+-               IQ(LTMP1+JTMP+2) = IOFFST + (IEDIF*ISHFT(ISIZE,-2))
++               IOFFSTT = IOFFST + (IEDIF*ISHFT(ISIZE,-2))
+             ENDIF
++            IQ(LTMP1+JTMP+2) = IOFFSTT
++#if defined(CERNLIB_QMLXIA64)
++*           store upper part of 64 bit address
++            IQ(LTMP1+JTMP+3) = IOFFSTV(2)
++#endif
+          ELSE
+             IQ(LTMP1+JTMP+2) = 0
++#if defined(CERNLIB_QMLXIA64)
++*           reset upper part of 64 bit address
++            IQ(LTMP1+JTMP+3) = 0
++#endif
+          ENDIF
+ *
+    40 CONTINUE
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/Imakefile cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/Imakefile	2002-09-19 16:44:52.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/Imakefile	2007-12-14 21:41:27.000000000 +0000
+@@ -11,6 +11,10 @@
+ 	sleepf.c signalf.c sigprnt.c sigunbl.c stati.c systei.c \ @@\
+ 	tminit.c unlini.c tmread.c
+ 
++#ifdef CERNLIB_QMLXIA64
++SRCS_C += chkloc.c
++#endif
++
+ #ifndef CERNLIB_OS9
+ SRCS_C += timel.c lstati.c
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/chkloc.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/chkloc.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/chkloc.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/chkloc.c	2007-12-14 21:41:27.000000000 +0000
+@@ -0,0 +1,10 @@
++/*
++ * Utility routine for locf and locb 
++ * H. Vogt (harald.vogt@desy.de)
++ *
++ */
++
++#if defined(CERNLIB_QMLXIA64)
++#include "lp64gs/chkloc.c"
++#endif
++
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/jumptn.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/jumptn.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/jumptn.c	2004-07-29 14:07:43.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/jumptn.c	2007-12-14 21:41:27.000000000 +0000
+@@ -20,8 +20,10 @@
+  */
+ #include "kerngen/pilot.h"
+ 
+-#if defined(CERNLIB_QMLXIA64)||defined(CERNLIB_QMVAOS)
+-#include "vaogs/jumptn.c"
++#if defined(CERNLIB_QMVAOS)
++#include "vaogs/jumptn.c"  
++#elif defined(CERNLIB_QMLXIA64)
++#include "lp64gs/jumptn.c"
+ #else
+ /*>    ROUTINE JUMPTN
+   CERN PROGLIB# Z043    JUMPTN          .VERSION KERNFOR  4.40  940929
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/jumpxn.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/jumpxn.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/jumpxn.c	2004-07-29 14:07:43.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/jumpxn.c	2007-12-14 21:41:27.000000000 +0000
+@@ -20,8 +20,10 @@
+  */
+ #include "kerngen/pilot.h"
+ 
+-#if defined(CERNLIB_QMLXIA64)||defined(CERNLIB_QMVAOS)
++#if defined(CERNLIB_QMVAOS)
+ #include "vaogs/jumpxn.c"
++#elif defined(CERNLIB_QMLXIA64)
++#include "lp64gs/jumpxn.c"
+ #else
+ /*>    ROUTINE JUMPXN
+   CERN PROGLIB# Z042    JUMPXN          .VERSION KERNFOR  4.40  940929
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lenocc.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lenocc.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lenocc.c	1997-10-23 16:25:11.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lenocc.c	2007-12-14 21:41:27.000000000 +0000
+@@ -46,7 +46,7 @@
+ 
+ /*        look at the last ntail characters   */
+ 
+-      ntail = ((int)chcur & 3);
++      ntail = ((unsigned long)chcur & 3);
+       for (i = ntail; i > 0; i--)
+         { if (*--chcur != ' ')       goto exit; }
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/locb.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/locb.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/locb.c	1997-09-02 14:26:37.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/locb.c	2007-12-14 21:41:27.000000000 +0000
+@@ -26,6 +26,9 @@
+ # define DummyDef
+ #endif
+ 
++#if defined(CERNLIB_QMLXIA64)
++#include "lp64gs/locb.c"
++#else
+ 
+ /*>    ROUTINE LOCB
+   CERN PROGLIB# N101    LOCB            .VERSION KERNFOR  4.36  930602
+@@ -47,6 +50,8 @@
+    return( (int) iadr );
+ }
+ /*> END <----------------------------------------------------------*/
++#endif
+ #ifdef CERNLIB_TCGEN_LOCB
+ #undef CERNLIB_TCGEN_LOCB
+ #endif
++
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/locf.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/locf.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/locf.c	2004-07-29 14:06:07.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/locf.c	2007-12-14 21:41:27.000000000 +0000
+@@ -50,6 +50,8 @@
+ #include "irtdgs/locf.c"
+ #elif defined(CERNLIB_QMVAOS)
+ #include "vaogs/locf.c"
++#elif defined(CERNLIB_QMLXIA64)
++#include "lp64gs/locf.c"
+ #else
+ /*>    ROUTINE LOCF
+   CERN PROGLIB# N100    LOCF            .VERSION KERNFOR  4.36  930602
+@@ -68,25 +70,7 @@
+    DummyDef
+ #endif
+ {
+-#if defined(CERNLIB_QMLXIA64)
+-  const unsigned long long int mask=0x00000000ffffffff;
+-  static unsigned long long int base=1;
+-  unsigned long long int jadr=(unsigned long long int) iadr;
+-  unsigned long long int jadrl = ((mask & jadr) >> LADUPW);
+-
+-  if (base == 1) {
+-    base = (~mask & jadr);
+-  } else if(base != (~mask & jadr)) {
+-    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+-    printf("locf_() Warning: changing base from %lx to %lx!!!\n",
+-    	   base, (~mask & jadr));
+-    printf("This may result in program crash or incorrect results\n");
+-    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+-  }
+-  return ((unsigned) jadrl);
+-#else
+   return( ((unsigned) iadr) >> LADUPW );
+-#endif
+ }
+ #undef Dummy2LocPar
+ #undef DummyDef
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/chkloc.c	2007-12-14 21:41:27.000000000 +0000
+@@ -0,0 +1,58 @@
++/*
++ *
++ * Revision 1.1.1.1  2006/06/14
++ * Kernlib  utility for locf, locb on LP64 architectures  H. Vogt
++ * (AMD64/Intel EM64T and IA64) 
++ *
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++
++/*>    ROUTINE LOCF
++  CERN PROGLIB# N100    LOCF            .VERSION KERNFOR  4.36  930602
++*/
++/*>    ROUTINE LOCB
++  CERN PROGLIB# N101    LOCB            .VERSION KERNFOR  4.36  930602
++*/
++
++unsigned int chkloc(iadr)
++   char *iadr;
++{
++  /* 64 bit architectures may exceed the 32 bit address space !               */
++
++  /* AMD64/Intel EM64T architectures have the dynamic segments above
++     0x80000000000 and the stack immediately below this whereas the text and
++     data segments are staring from 0x400000. The implementations address
++     space is limited to 0x00007fffffffffff.
++     Allocated memory with malloc/calloc is starting from the end of text and
++     data segments upwards.                                                   
++
++     IA64 architectures have the dynamic segments are above 0x2000000000000000,
++     the stack is above 0x8000000000000000, the data segments starts at 
++     0x6000000000000000 and the text segments start at 0x4000000000000000   
++     Allocated memory with malloc/calloc is starting from the end of
++     data segments upwards. All addresses here are expected to be in
++     the data segment area.                                                   */
++
++   const unsigned long mask=0xffffffff00000000;
++   static unsigned long limit=0x00000000ffffffff;
++   unsigned long jadr=((unsigned long) iadr & mask);
++#if !defined (__ia64__)
++    if ( jadr != 0x0000000000000000) {
++#else
++    if ( jadr != 0x6000000000000000) {
++#endif
++      fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
++      fprintf(stderr, "LOCB/LOCF: address %p exceeds the 32 bit address space\n", iadr);
++      fprintf(stderr, "or is not in the data segments\n");
++      fprintf(stderr, "This may result in program crash or incorrect results\n");
++      fprintf(stderr, "Therefore we will stop here\n");
++      fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
++      exit (999);
++    }
++    jadr=((unsigned long) iadr & limit);
++    return ((unsigned) jadr);
++}
++/*> END <----------------------------------------------------------*/
++
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumptn.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumptn.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumptn.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumptn.c	2007-12-14 21:41:27.000000000 +0000
+@@ -0,0 +1,83 @@
++/*
++ * $Id: jumptn.c,v 1.1.1.1 1996/02/15 17:49:32 mclareni Exp $
++ *
++ * $Log: jumptn.c,v $
++ * Revision 1.1.1.1  1996/02/15 17:49:32  mclareni
++ * Kernlib
++ *
++ */
++/*>    ROUTINE JUMPTN
++  CERN PROGLIB# Z043    JUMPTN          .VERSION KERNLP64 1.00  060717
++  Copy of               JUMPTN          .VERSION KERNVMI  1.09  940531
++  ORIG. 21/04/88 JZ+FCA
++C
++C-    To transfer to the user routine TARGET (say) with 2 parameters
++C-    two steps are needed :
++
++C- 1) EXTERNAL TARGET              to get the address of TARGET
++C-    IADR = JUMPAD (TARGET)
++
++C- 3) CALL JUMPT2 (IADR,par1,par2)      to transfer
++*/
++#define jumpt0 jumpt0_
++#define jumpt1 jumpt1_
++#define jumpt2 jumpt2_
++#define jumpt3 jumpt3_
++#define jumpt4 jumpt4_
++
++extern int jumpad_();
++
++static void (*jumpto)();
++
++void jumpt0(iadr)
++     int *iadr;
++{
++    long func;
++    func = *iadr + (long)jumpad_;
++    jumpto = (void(*)()) func;
++    jumpto();
++    return;
++}
++
++void jumpt1(iadr,ipara)
++     int *iadr;
++     char *ipara;
++{
++    long func;
++    func = *iadr + (long)jumpad_;
++    jumpto = (void(*)()) func;
++    jumpto (ipara);
++    return;
++}
++
++void jumpt2(iadr, ipara, iparb)
++     int *iadr;
++     char *ipara, *iparb;
++{
++    long func;
++    func = *iadr + (long)jumpad_;
++    jumpto = (void(*)()) func;
++    jumpto (ipara, iparb);
++    return;
++}
++void jumpt3(iadr, ipara, iparb, iparc)
++     int *iadr;
++     char *ipara, *iparb, *iparc;
++{
++    long func;
++    func = *iadr + (long)jumpad_;
++    jumpto = (void(*)()) func;
++    jumpto (ipara, iparb, iparc);
++    return;
++}
++void jumpt4(iadr, ipara, iparb, iparc, ipard)
++     int *iadr;
++     char *ipara, *iparb, *iparc, *ipard;
++{
++    long func;
++    func = *iadr + (long)jumpad_;
++    jumpto = (void(*)()) func;
++    jumpto (ipara, iparb, iparc, ipard);
++    return;
++}
++/*> END <----------------------------------------------------------*/
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumpxn.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumpxn.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumpxn.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/jumpxn.c	2007-12-14 21:41:27.000000000 +0000
+@@ -0,0 +1,92 @@
++/*
++ * $Id: jumpxn.c,v 1.1.1.1 1996/02/15 17:49:32 mclareni Exp $
++ *
++ * $Log: jumpxn.c,v $
++ * Revision 1.1.1.1  1996/02/15 17:49:32  mclareni
++ * Kernlib
++ *
++ */
++/*>    ROUTINE JUMPXN
++  CERN PROGLIB# Z043    JUMPXN          .VERSION KERNLP64 1.00  060717
++  Copy of               JUMPXN          .VERSION KERNVMI  1.08  930527
++  ORIG. 21/04/88 JZ+FCA, adapted 11/05/93 AP+JZ
++C
++C-    To transfer to the user routine TARGET (say) with 2 parameters
++C-    three steps are needed :
++C-    Check that relative jump addresses fits into 32 bits
++
++C- 1) EXTERNAL TARGET              to get the address of TARGET
++C-    IADR = JUMPAD (TARGET)
++
++C- 2) CALL JUMPST (IADR)           to set the tranfer address
++
++C- 3) CALL JUMPX2 (par1,par2)      to transfer
++*/
++
++#include "stdio.h"
++#include <stdlib.h>
++
++static void (*tarsub)();
++
++/* ----   jumpad   ---------------------------------------------  */
++int jumpad_(ifun)
++    char *ifun;
++{
++    long temp;
++
++    temp = (long)ifun - (long)jumpad_;
++    if (labs(temp) > 0x3fffffff) {
++      printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
++      printf("JUMPAD: address %p exceeds the 32 bit address space\n", temp);
++      printf("This may result in program crash or incorrect results\n");
++      printf("Therefore we will stop here\n");
++      printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
++      exit (999);
++    }
++    return (int) temp;
++}
++
++/* ----   jumpst   ---------------------------------------------  */
++void jumpst_(iadr)
++    int  *iadr;
++{
++    long true;
++
++    true = (long)jumpad_;
++    true = true + *iadr;
++    tarsub = (void (*)())true;
++}
++
++/* ----   jumpxn   ---------------------------------------------  */
++void jumpx0_()
++{
++    (*tarsub)();
++    return;
++}
++
++void jumpx1_(ipara)
++    char *ipara;
++{
++    (*tarsub)(ipara);
++    return;
++}
++
++void jumpx2_(ipara, iparb)
++    char *ipara, *iparb;
++{
++    (*tarsub)(ipara, iparb);
++    return;
++}
++void jumpx3_(ipara, iparb, iparc)
++    char *ipara, *iparb, *iparc;
++{
++    (*tarsub)(ipara, iparb, iparc);
++    return;
++}
++void jumpx4_(ipara, iparb, iparc, ipard)
++    char *ipara, *iparb, *iparc, *ipard;
++{
++    (*tarsub)(ipara, iparb, iparc, ipard);
++    return;
++}
++/*> END <----------------------------------------------------------*/
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/locb.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/locb.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/locb.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/locb.c	2007-12-14 21:52:38.000000000 +0000
+@@ -0,0 +1,37 @@
++/*>    ROUTINE LOCB
++  CERN PROGLIB# N101    LOCB            .VERSION KERNFOR  4.36  930602
++*/
++
++unsigned int chkloc(char *address);
++
++unsigned int locb_(iadr)
++   char *iadr;
++{
++   return (chkloc(iadr));
++}
++
++#include <stdint.h>    /* for ptrdiff_t, size_t */
++#include <stdio.h>     /* for fprintf */
++#include <stdlib.h>    /* for exit    */
++
++int iptrdiff_(iadr1, iadr2)
++   char * iadr1, * iadr2;
++{
++  long diff = (long)iadr1 - (long)iadr2;
++  if (diff < (long)INT32_MIN || diff > (long)INT32_MAX) {
++      fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
++      fprintf(stderr, "IPTRDIFF: difference of addresses %p and %p\n", iadr1, iadr2);
++      fprintf(stderr, "cannot be stored in 32-bit signed integer!\n");
++      fprintf(stderr, "This may result in program crash or incorrect results\n");
++      fprintf(stderr, "Therefore we will stop here\n");
++      fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
++      exit (999);
++  }
++  else return (int)diff;
++}
++
++int iptrsame_(iadr1, iadr2)
++   char * iadr1, * iadr2;
++{
++  return (size_t)iadr1 == (size_t)iadr2 ? 1 : 0;
++}
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/locf.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/locf.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/lp64gs/locf.c	1970-01-01 00:00:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/lp64gs/locf.c	2007-12-14 21:41:27.000000000 +0000
+@@ -0,0 +1,10 @@
++/*>    ROUTINE LOCF
++  CERN PROGLIB# N100    LOCF            .VERSION KERNFOR  4.36  930602
++*/
++unsigned int chkloc(char *address);
++
++unsigned int locf_(iadr)
++   char *iadr;
++{
++   return ( (chkloc(iadr)) >> 2 );
++}
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/signalf.c cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/signalf.c
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/ccgen/signalf.c	1999-10-06 14:17:01.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/ccgen/signalf.c	2007-12-14 21:41:27.000000000 +0000
+@@ -45,6 +45,7 @@
+ C-        function value = adr of previous handler
+ */
+ #include <signal.h>
++typedef void (*sighandler_t)(int);
+ #if defined(CERNLIB_QX_SC)
+ int type_of_call signalf_(signum,funct,flag)
+ #endif
+@@ -58,7 +59,7 @@
+       int  *funct;
+ {
+       int  signo, istat;
+-      int  handler;
++      sighandler_t handler;
+       void *oldhand;
+ 
+       signo = *signum;
+@@ -67,14 +68,15 @@
+       if (*flag < 0)          handler = *funct;
+ #endif
+ #if !defined(CERNLIB_QCCINDAD)
+-      if (*flag < 0)          handler = (int)funct;
++      if (*flag < 0)          handler = (sighandler_t)funct;
+ #endif
+-        else if (*flag == 0)  handler = (int)SIG_DFL;
+-        else if (*flag == 1)  handler = (int)SIG_IGN;
+-        else                  handler = *flag;
++        else if (*flag == 0)  handler = (sighandler_t)SIG_DFL;
++        else if (*flag == 1)  handler = (sighandler_t)SIG_IGN;
++        else                  handler = (sighandler_t)(long)*flag;
+ 
+       oldhand = signal(signo,handler);
+-      istat   = (int)oldhand;
++      unsigned long myistat = (unsigned long)oldhand;
++      istat   = (int)myistat;
+ #ifndef __GNUC__
+       if (oldhand == SIG_ERR)  istat = -1;
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/code_kuip/kkern.c cernlib-2006.dfsg.2/src/packlib/kuip/code_kuip/kkern.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/code_kuip/kkern.c	1996-05-01 12:08:38.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/code_kuip/kkern.c	2007-12-14 21:41:27.000000000 +0000
+@@ -39,7 +39,8 @@
+   if( len >= (sizeof blanks) * 4 ) {
+ 
+     /* check single characters until next word boundary */
+-    switch( (int)&str[len] & ( (sizeof blanks) - 1 ) ) {
++    /* use type long here to be conform with 64 bit architectures*/
++    switch( (long)&str[len] & ( (sizeof blanks) - 1 ) ) {
+     case 7:
+       if( str[--len] != ' ' ) return len + 1;
+     case 6:
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/kmbrow.c cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/kmbrow.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/kmbrow.c	1996-03-08 15:33:08.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/kmbrow.c	2007-12-14 21:41:27.000000000 +0000
+@@ -278,7 +278,7 @@
+    char         *path, *title;
+    char          cval[MAX_string], cval1[MAX_string];
+    int           i, fitem, fcnt, dcnt, icon_type;
+-   int           browser_count = 0;
++   long          browser_count = 0;
+ 
+    BrObject *brobj;
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/kuxxt.c cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/kuxxt.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/kuxxt.c	1996-03-08 15:33:11.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/kuxxt.c	2007-12-14 21:41:27.000000000 +0000
+@@ -340,7 +340,7 @@
+ {
+         (void) XDeleteContext( XtDisplay( UxTopLevel ),
+                                (Window) wgt,
+-                               (XContext) client_data );
++                               (XContext) (long)client_data );
+ }
+ 
+ /******************************************************************************
+@@ -385,7 +385,7 @@
+                 return ( UX_ERROR );
+ 
+         XtAddCallback (wgt, XmNdestroyCallback,
+-                        UxDeleteContextCB, (XtPointer) xcontext_id);
++                        UxDeleteContextCB, (XtPointer) (long)xcontext_id);
+ 
+         return ( UX_NO_ERROR );
+ }
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/mkdcmp.c cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/mkdcmp.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/mkdcmp.c	1996-03-15 15:54:00.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/mkdcmp.c	2007-12-14 21:41:27.000000000 +0000
+@@ -1541,7 +1541,11 @@
+ 
+    Widget cpanel = stag->command_panel;
+    KmCommand *cmd = stag->cmd;
+-   int ipar = stag->index;
++   /* for 64 bit compatibility take long here
++    * int ipar = stag->index;
++    */
++   long ipar = stag->index;
++
+    KmParameter *par   = cmd->par[ipar];
+    KmParFile   *pfil  = par->ptype;
+ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/mkdgra.c cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/mkdgra.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/mkdgra.c	1996-03-08 15:33:07.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/mkdgra.c	2007-12-14 21:41:27.000000000 +0000
+@@ -289,11 +289,12 @@
+    km_graph_init_callbacks (km_graphicsDraw, graph_widget, wkid, 0);
+ }
+ 
+-void km_graph_init_callbacks (draw, graph_widget, wkid, flag)
++void km_graph_init_callbacks (draw, graph_widget, mywkid, flag)
+      Widget draw, graph_widget;
+-     int wkid, flag;
++     int mywkid, flag;
+ {
+    /* Add drawing area expose and resize callbacks */
++   long wkid = mywkid;
+    if (flag == 0) {
+        XtAddCallback(draw, XmNexposeCallback,
+                      (XtCallbackProc)drawing_area_callback, graph_widget);
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/mkuip.c cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/mkuip.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/code_motif/mkuip.c	2007-12-14 21:41:17.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/code_motif/mkuip.c	2007-12-14 21:41:27.000000000 +0000
+@@ -1687,7 +1687,7 @@
+             XmStringFree(xmstr);
+        } /* end for ... */
+        XtAddCallback (km_listSBox,XmNokCallback,
+-                      (XtCallbackProc)kuipList_OK, (XtPointer)flag);
++                      (XtCallbackProc)kuipList_OK, (XtPointer) (long)flag);
+        XtAddCallback (km_listSBox,XmNcancelCallback,
+                       (XtCallbackProc)destroy_list_id, NULL);
+        XtAddCallback (km_listSBox,XmNhelpCallback,
+@@ -1914,7 +1914,7 @@
+             PdMenu = XmCreatePushButtonGadget
+                          (kuipControlShellM,appShell_title[i],arglist,0);
+             XtAddCallback(PdMenu,XmNactivateCallback,
+-                          (XtCallbackProc)appShell_activate, (XtPointer)i);
++                          (XtCallbackProc)appShell_activate, (XtPointer) (long)i);
+             XtManageChild(PdMenu);
+             break;
+          } /* end ... if (appShell[i] == NULL) */
+@@ -1972,7 +1972,7 @@
+            PdMenu = XmCreatePushButtonGadget
+                         (kuipControlShellM,appShell_title[i],arglist,0);
+            XtAddCallback (PdMenu,XmNactivateCallback,
+-                          (XtCallbackProc)appShell_activate, (XtPointer)i);
++                          (XtCallbackProc)appShell_activate, (XtPointer) (long)i);
+            XtManageChild(PdMenu);
+         }
+     }
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/help.c cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/help.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/help.c	1996-03-08 15:33:04.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/help.c	2007-12-14 21:41:27.000000000 +0000
+@@ -309,7 +309,7 @@
+     int     *type;
+     XmAnyCallbackStruct *call_data;
+ {
+-   int t = (int)type;
++   long t = (long)type;
+ 
+    if (help[t])
+       XRaiseWindow(XtDisplay(help[t]), XtWindow(help[t]));
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/kxterm.c cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/kxterm.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/kxterm.c	2005-04-18 15:40:49.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/kxterm.c	2007-12-14 21:41:27.000000000 +0000
+@@ -1533,7 +1533,7 @@
+      XtPointer cbs;
+ {
+    Widget  text_w;
+-   int     i = (int) item;
++   unsigned long i = (unsigned long) item;
+    Boolean result = True;
+ 
+    text_w = get_selection_owner(widget);
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/uxxt.c cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/uxxt.c
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/uxxt.c	1996-03-08 15:33:04.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/uxxt.c	2007-12-14 21:41:27.000000000 +0000
+@@ -340,7 +340,7 @@
+ {
+         (void) XDeleteContext( XtDisplay( UxTopLevel ),
+                                (Window) wgt,
+-                               (XContext) client_data );
++                               (XContext) (long)client_data );
+ }
+ 
+ /******************************************************************************
+@@ -385,7 +385,7 @@
+                 return ( UX_ERROR );
+ 
+         XtAddCallback (wgt, XmNdestroyCallback,
+-                        UxDeleteContextCB, (XtPointer) xcontext_id);
++                        UxDeleteContextCB, (XtPointer) (long)xcontext_id);
+ 
+         return ( UX_NO_ERROR );
+ }
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zbook/code/zerror.F cernlib-2006.dfsg.2/src/packlib/zbook/code/zerror.F
+--- cernlib-2006.dfsg.2~/src/packlib/zbook/code/zerror.F	1996-03-08 12:01:12.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zbook/code/zerror.F	2007-12-14 21:41:27.000000000 +0000
+@@ -16,6 +16,10 @@
+ C     ******************************************************************
+ C
+       DIMENSION IZ(1),KEY(1),LAB(6),ID(1)
++#if defined(CERNLIB_QMLXIA64)
++      INTEGER*8 JUMPADR
++#endif
++
+ C
+ C     ------------------------------------------------------------------
+ C
+@@ -24,7 +28,7 @@
+       NEWERR = IERR
+       JZ     = IZ(1)
+       IF(IZ(JZ+19).EQ.0) CALL ZUSER(IZ,NEWERR,KEY,ID)
+-#if (defined(CERNLIB_SINGLE)||defined(CERNLIB_DOUBLE)||defined(CERNLIB_UNIVAC)||defined(CERNLIB_PDP10))&&(!defined(CERNLIB_VAX))&&(!defined(CERNLIB_BESM6))
++#if (defined(CERNLIB_SINGLE)||defined(CERNLIB_DOUBLE)||defined(CERNLIB_UNIVAC)||defined(CERNLIB_PDP10))&&(!defined(CERNLIB_VAX))&&(!defined(CERNLIB_BESM6))&&(!defined(CERNLIB_QMLXIA64))
+       IF(IZ(JZ+19).NE.0) CALL ZJUMP(IZ(JZ+19),IZ,NEWERR,KEY,ID)
+ #endif
+ #if defined(CERNLIB_VAX)
+@@ -33,6 +37,13 @@
+ #if defined(CERNLIB_BESM6)
+       IF(IZ(JZ+19).NE.0) CALL ZJUMP(IZ,NEWERR,KEY,ID,IZ(JZ+19))
+ #endif
++#if defined(CERNLIB_QMLXIA64)
++      IF(IZ(JZ+19).NE.0)  THEN
++        JUMPADR = IZ(JZ+19)
++          print '(a,z17)','JUMPADR is:', JUMPADR
++        CALL JUMPT4(JUMPADR,IZ,NEWERR,KEY,ID)
++      END IF
++#endif
+ C
+       IF (NEWERR.LE.0)RETURN
+ C
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zbook/code/zjump.c cernlib-2006.dfsg.2/src/packlib/zbook/code/zjump.c
+--- cernlib-2006.dfsg.2~/src/packlib/zbook/code/zjump.c	1996-03-08 12:01:12.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zbook/code/zjump.c	2007-12-14 21:41:27.000000000 +0000
+@@ -7,6 +7,9 @@
+  *
+  */
+ #include "zbook/pilot_c.h"
++#if defined(CERNLIB_QMLXIA64)
++static void (*target)();
++#endif
+ #if defined(CERNLIB_UNIX)
+ #if defined(CERNLIB_QX_SC)
+ zjump_(name,p1,p2,p3,p4)
+@@ -18,8 +21,23 @@
+ ZJUMP(name,p1,p2,p3,p4)
+ #endif
+ char *p1, *p2, *p3, *p4;
++
++/*  LP64 compatibility:
++    name is taken from a Fortran array and therefore its address is 32 bit
++    which has to be converted to a 64 bit address to satisfy void (*) (H. Vogt) */
++
++#if defined(CERNLIB_QMLXIA64)
++int *name;
++{
++  long jadr;
++  jadr   = *name;  /* convert int to long */
++  target = (void (*)())jadr;
++  (*target)(p1, p2, p3, p4);
++}
++#else
+ void (**name)();
+ {
+    (**name)(p1, p2, p3, p4);
+ }
+ #endif
++#endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zbook/code/ztrap.F cernlib-2006.dfsg.2/src/packlib/zbook/code/ztrap.F
+--- cernlib-2006.dfsg.2~/src/packlib/zbook/code/ztrap.F	1996-03-08 12:01:13.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zbook/code/ztrap.F	2007-12-14 21:41:27.000000000 +0000
+@@ -48,8 +48,10 @@
+ #if defined(CERNLIB_BESM6)
+       IZ(JZ+19) = LOCF(IUSER)
+ #endif
+-#if defined(CERNLIB_UNIX)
++#if defined(CERNLIB_UNIX) && !defined(CERNLIB_QMLXIA64)
+       IZ(JZ+19) = LOCB(IUSER)
++#else
++      IZ(JZ+19) = JUMPAD(IUSER)
+ #endif
+       END
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zebra/test/brztest/btest2.F cernlib-2006.dfsg.2/src/packlib/zebra/test/brztest/btest2.F
+--- cernlib-2006.dfsg.2~/src/packlib/zebra/test/brztest/btest2.F	1997-09-02 15:16:16.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/zebra/test/brztest/btest2.F	2007-12-14 21:41:27.000000000 +0000
+@@ -29,6 +29,15 @@
+ ********************************************************************************
+ *
+       COMMON/CRZT/IXSTOR,IXDIV,IFENCE(2),LEV,LEVIN,BLVECT(30000)
++
++*     LP64 compatibility:
++*     For 64-bit pointer systems put local variables referenced by LOCF
++*     in a dummy named common block to keep addresses in the program region.
++*     see also: packlib/ffread/test/main.F (H. Vogt)
++
++#if defined(CERNLIB_QMLXIA64)
++      COMMON /TEST64/LBANK
++#endif
+       DIMENSION LQ(999),IQ(999),Q(999)
+       EQUIVALENCE (IQ(1),Q(1),LQ(9)),(LQ(1),LEV)
+ C

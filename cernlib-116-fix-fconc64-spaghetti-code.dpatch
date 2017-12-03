@@ -1,0 +1,334 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 116-fix-fconc64-spaghetti-code.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Work around FTBFS on ia64 with recent binutils, apparently caused
+## DP: by assignment of goto labels in this file.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/mathlib/gen/c/fconc64.F cernlib-2005.05.09.dfsg/src/mathlib/gen/c/fconc64.F
+--- cernlib-2005.05.09.dfsg~/src/mathlib/gen/c/fconc64.F	1996-04-01 10:02:04.000000000 -0500
++++ cernlib-2005.05.09.dfsg/src/mathlib/gen/c/fconc64.F	2005-12-12 12:58:23.885981128 -0500
+@@ -190,15 +190,167 @@
+       A=HF*((HF-FM)-TI)
+       B=HF*((HF-FM)+TI)
+       C=HF
+-      ASSIGN 1 TO JP
+-      GO TO 20
++   20 IF(LTA) THEN
++       Y=-X1
++       Y2=Y**2
++       Y3=Y*Y2
++       W(1)=A+1
++       W(2)=A+2
++       W(3)=B+1
++       W(4)=B+2
++       W(5)=C+1
++       W(6)=C*W(5)
++       W(7)=A+B
++       W(8)=A*B
++       W(9)=(W(8)/C)*Y
++       W(10)=W(1)*W(3)
++       W(11)=W(2)*W(4)
++       W(12)=1+(W(11)/(W(5)+W(5)))*Y
++       W(13)=W(7)-6
++       W(14)=W(7)+6
++       W(15)=2-W(8)
++       W(16)=W(15)-W(7)-W(7)
++
++       V(0)=1
++       V(1)=1+(W(10)/(C+C))*Y
++       V(2)=W(12)+(W(10)*W(11)/(12*W(6)))*Y2
++       U(0)=1
++       U(1)=V(1)-W(9)
++       U(2)=V(2)-W(9)*W(12)+(W(8)*W(10)/(W(6)+W(6)))*Y2
++
++       R=1
++       DO 21 N = 3,NMAX
++       FN=N
++       RR=R
++       H(1)=FN-1
++       H(2)=FN-2
++       H(3)=FN-3
++       H(4)=FN+FN
++       H(5)=H(4)-3
++       H(6)=H(5)+H(5)
++       H(7)=4*(H(4)-1)*H(5)
++       H(8)=8*H(5)**2*(H(4)-5)
++       H(9)=3*FN**2
++       W(1)=A+H(1)
++       W(2)=A+H(2)
++       W(3)=B+H(1)
++       W(4)=B+H(2)
++       W(5)=C+H(1)
++       W(6)=C+H(2)
++       W(7)=C+H(3)
++       W(8)=H(2)-A
++       W(9)=H(2)-B
++       W(10)=H(1)-C
++       W(11)=W(1)*W(3)
++       W(12)=W(5)*W(6)
++
++       W(17)=1+((H(9)+W(13)*FN+W(16))/(H(6)*W(5)))*Y
++       W(18)=-((W(11)*W(10)/H(6)+(H(9)-W(14)*FN+W(15))*W(11)*Y/H(7))/
++     1          W(12))*Y
++       W(19)=(W(2)*W(11)*W(4)*W(8)*W(9)/(H(8)*W(7)*W(12)))*Y3
++       V(3)=W(17)*V(2)+W(18)*V(1)+W(19)*V(0)
++       U(3)=W(17)*U(2)+W(18)*U(1)+W(19)*U(0)
++       R=U(3)/V(3)
++       IF(ABS(R-RR) .LT. EPS) GO TO 1
++       DO 22 J = 1,3
++       V(J-1)=V(J)
++   22  U(J-1)=U(J)
++   21  CONTINUE
++      ELSE
++       W(1)=X1*A*B/C
++       R=1+W(1)
++       DO 23 N = 1,NMAX
++       FN=N
++       RR=R
++       W(1)=W(1)*X1*(A+FN)*(B+FN)/((C+FN)*(FN+1))
++       R=R+W(1)
++       IF(ABS(R-RR) .LT. EPS) GO TO 1
++   23  CONTINUE
++      END IF
++      GO TO 24
+     1 R1=R
+       R1=R1/ABS(CGM(A+HF))**2
+       A=HF*((TH-FM)-TI)
+       B=HF*((TH-FM)+TI)
+       C=TH
+-      ASSIGN 2 TO JP
+-      GO TO 20
++  120 IF(LTA) THEN
++       Y=-X1
++       Y2=Y**2
++       Y3=Y*Y2
++       W(1)=A+1
++       W(2)=A+2
++       W(3)=B+1
++       W(4)=B+2
++       W(5)=C+1
++       W(6)=C*W(5)
++       W(7)=A+B
++       W(8)=A*B
++       W(9)=(W(8)/C)*Y
++       W(10)=W(1)*W(3)
++       W(11)=W(2)*W(4)
++       W(12)=1+(W(11)/(W(5)+W(5)))*Y
++       W(13)=W(7)-6
++       W(14)=W(7)+6
++       W(15)=2-W(8)
++       W(16)=W(15)-W(7)-W(7)
++
++       V(0)=1
++       V(1)=1+(W(10)/(C+C))*Y
++       V(2)=W(12)+(W(10)*W(11)/(12*W(6)))*Y2
++       U(0)=1
++       U(1)=V(1)-W(9)
++       U(2)=V(2)-W(9)*W(12)+(W(8)*W(10)/(W(6)+W(6)))*Y2
++
++       R=1
++       DO 121 N = 3,NMAX
++       FN=N
++       RR=R
++       H(1)=FN-1
++       H(2)=FN-2
++       H(3)=FN-3
++       H(4)=FN+FN
++       H(5)=H(4)-3
++       H(6)=H(5)+H(5)
++       H(7)=4*(H(4)-1)*H(5)
++       H(8)=8*H(5)**2*(H(4)-5)
++       H(9)=3*FN**2
++       W(1)=A+H(1)
++       W(2)=A+H(2)
++       W(3)=B+H(1)
++       W(4)=B+H(2)
++       W(5)=C+H(1)
++       W(6)=C+H(2)
++       W(7)=C+H(3)
++       W(8)=H(2)-A
++       W(9)=H(2)-B
++       W(10)=H(1)-C
++       W(11)=W(1)*W(3)
++       W(12)=W(5)*W(6)
++
++       W(17)=1+((H(9)+W(13)*FN+W(16))/(H(6)*W(5)))*Y
++       W(18)=-((W(11)*W(10)/H(6)+(H(9)-W(14)*FN+W(15))*W(11)*Y/H(7))/
++     1          W(12))*Y
++       W(19)=(W(2)*W(11)*W(4)*W(8)*W(9)/(H(8)*W(7)*W(12)))*Y3
++       V(3)=W(17)*V(2)+W(18)*V(1)+W(19)*V(0)
++       U(3)=W(17)*U(2)+W(18)*U(1)+W(19)*U(0)
++       R=U(3)/V(3)
++       IF(ABS(R-RR) .LT. EPS) GO TO 2
++       DO 122 J = 1,3
++       V(J-1)=V(J)
++  122  U(J-1)=U(J)
++  121  CONTINUE
++      ELSE
++       W(1)=X1*A*B/C
++       R=1+W(1)
++       DO 123 N = 1,NMAX
++       FN=N
++       RR=R
++       W(1)=W(1)*X1*(A+FN)*(B+FN)/((C+FN)*(FN+1))
++       R=R+W(1)
++       IF(ABS(R-RR) .LT. EPS) GO TO 2
++  123  CONTINUE
++      END IF
++      GO TO 24
+     2 R2=R
+       FC=RPI*(R1-2*X*R2/ABS(CGM(A-HF))**2)
+       IF(LM1) FC=2*FC/SQRT(1-X1)
+@@ -209,8 +361,84 @@
+       A=(HF+FM)-TI
+       B=(HF+FM)+TI
+       C=FM+1
+-      ASSIGN 3 TO JP
+-      GO TO 20
++  220 IF(LTA) THEN
++       Y=-X1
++       Y2=Y**2
++       Y3=Y*Y2
++       W(1)=A+1
++       W(2)=A+2
++       W(3)=B+1
++       W(4)=B+2
++       W(5)=C+1
++       W(6)=C*W(5)
++       W(7)=A+B
++       W(8)=A*B
++       W(9)=(W(8)/C)*Y
++       W(10)=W(1)*W(3)
++       W(11)=W(2)*W(4)
++       W(12)=1+(W(11)/(W(5)+W(5)))*Y
++       W(13)=W(7)-6
++       W(14)=W(7)+6
++       W(15)=2-W(8)
++       W(16)=W(15)-W(7)-W(7)
++
++       V(0)=1
++       V(1)=1+(W(10)/(C+C))*Y
++       V(2)=W(12)+(W(10)*W(11)/(12*W(6)))*Y2
++       U(0)=1
++       U(1)=V(1)-W(9)
++       U(2)=V(2)-W(9)*W(12)+(W(8)*W(10)/(W(6)+W(6)))*Y2
++
++       R=1
++       DO 221 N = 3,NMAX
++       FN=N
++       RR=R
++       H(1)=FN-1
++       H(2)=FN-2
++       H(3)=FN-3
++       H(4)=FN+FN
++       H(5)=H(4)-3
++       H(6)=H(5)+H(5)
++       H(7)=4*(H(4)-1)*H(5)
++       H(8)=8*H(5)**2*(H(4)-5)
++       H(9)=3*FN**2
++       W(1)=A+H(1)
++       W(2)=A+H(2)
++       W(3)=B+H(1)
++       W(4)=B+H(2)
++       W(5)=C+H(1)
++       W(6)=C+H(2)
++       W(7)=C+H(3)
++       W(8)=H(2)-A
++       W(9)=H(2)-B
++       W(10)=H(1)-C
++       W(11)=W(1)*W(3)
++       W(12)=W(5)*W(6)
++
++       W(17)=1+((H(9)+W(13)*FN+W(16))/(H(6)*W(5)))*Y
++       W(18)=-((W(11)*W(10)/H(6)+(H(9)-W(14)*FN+W(15))*W(11)*Y/H(7))/
++     1          W(12))*Y
++       W(19)=(W(2)*W(11)*W(4)*W(8)*W(9)/(H(8)*W(7)*W(12)))*Y3
++       V(3)=W(17)*V(2)+W(18)*V(1)+W(19)*V(0)
++       U(3)=W(17)*U(2)+W(18)*U(1)+W(19)*U(0)
++       R=U(3)/V(3)
++       IF(ABS(R-RR) .LT. EPS) GO TO 3
++       DO 222 J = 1,3
++       V(J-1)=V(J)
++  222  U(J-1)=U(J)
++  221  CONTINUE
++      ELSE
++       W(1)=X1*A*B/C
++       R=1+W(1)
++       DO 223 N = 1,NMAX
++       FN=N
++       RR=R
++       W(1)=W(1)*X1*(A+FN)*(B+FN)/((C+FN)*(FN+1))
++       R=R+W(1)
++       IF(ABS(R-RR) .LT. EPS) GO TO 3
++  223  CONTINUE
++      END IF
++      GO TO 24
+     3 FC=R
+       IF(LM1) FC=SIGN(HF,1-X)*(TAU**2+HF**2)*SQRT(ABS(X**2-1))*FC
+       GO TO 99
+@@ -220,15 +448,7 @@
+       A=HF*((HF-FM)-TI)
+       B=HF*((TH-FM)-TI)
+       C=1-TI
+-      ASSIGN 4 TO JP
+-      GO TO 20
+-    4 R1=EXP((TI-HF)*LOG(X+X)+CLG(1+TI)-CLG((TH-FM)+TI))*
+-     1        R*((HF-FM)+TI)/TI
+-      FC=RPW*R1
+-      IF(LM1) FC=FC/SQRT(1-X1)
+-      GO TO 99
+-
+-   20 IF(LTA) THEN
++  320 IF(LTA) THEN
+        Y=-X1
+        Y2=Y**2
+        Y3=Y*Y2
+@@ -257,7 +477,7 @@
+        U(2)=V(2)-W(9)*W(12)+(W(8)*W(10)/(W(6)+W(6)))*Y2
+ 
+        R=1
+-       DO 21 N = 3,NMAX
++       DO 321 N = 3,NMAX
+        FN=N
+        RR=R
+        H(1)=FN-1
+@@ -289,23 +509,29 @@
+        V(3)=W(17)*V(2)+W(18)*V(1)+W(19)*V(0)
+        U(3)=W(17)*U(2)+W(18)*U(1)+W(19)*U(0)
+        R=U(3)/V(3)
+-       IF(ABS(R-RR) .LT. EPS) GO TO JP, (1,2,3,4)
+-       DO 22 J = 1,3
++       IF(ABS(R-RR) .LT. EPS) GO TO 4
++       DO 322 J = 1,3
+        V(J-1)=V(J)
+-   22  U(J-1)=U(J)
+-   21  CONTINUE
++  322  U(J-1)=U(J)
++  321  CONTINUE
+       ELSE
+        W(1)=X1*A*B/C
+        R=1+W(1)
+-       DO 23 N = 1,NMAX
++       DO 323 N = 1,NMAX
+        FN=N
+        RR=R
+        W(1)=W(1)*X1*(A+FN)*(B+FN)/((C+FN)*(FN+1))
+        R=R+W(1)
+-       IF(ABS(R-RR) .LT. EPS) GO TO JP, (1,2,3,4)
+-   23  CONTINUE
++       IF(ABS(R-RR) .LT. EPS) GO TO 4
++  323  CONTINUE
+       END IF
+-      FC=0
++      GO TO 24
++    4 R1=EXP((TI-HF)*LOG(X+X)+CLG(1+TI)-CLG((TH-FM)+TI))*
++     1        R*((HF-FM)+TI)/TI
++      FC=RPW*R1
++      IF(LM1) FC=FC/SQRT(1-X1)
++      GO TO 99
++   24 FC=0
+       WRITE(ERRTXT,102) X
+       CALL MTLPRT(NAME,'C331.2',ERRTXT)
+ #if defined(CERNLIB_DOUBLE)

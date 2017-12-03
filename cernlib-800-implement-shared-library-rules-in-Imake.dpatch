@@ -1,0 +1,164 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 800-implement-shared-library-rules-in-Imake.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Implement macros for shared libraries on Linux in the Imake cfg files.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/config/Imake.rules cernlib-2006.dfsg.2/src/config/Imake.rules
+--- cernlib-2006.dfsg.2~/src/config/Imake.rules	2007-04-25 23:32:50.000000000 -0400
++++ cernlib-2006.dfsg.2/src/config/Imake.rules	2007-04-25 23:32:52.000000000 -0400
+@@ -904,6 +904,8 @@
+  * InstallSharedLibrary - generate rules to install the indicated sharable 
+  * Library
+  */
++/* Commented out because this appears to be overriding the definition
++ * in lnxLib.rules --Kevin McCarty, 16 May 2002
+ #undef InstallSharedLibrary
+ #ifndef InstallSharedLibrary
+ #define InstallSharedLibrary(libname,rev,dest)				@@\
+@@ -917,7 +919,8 @@
+ 	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS)  $< $@		@@\
+ 	RemoveFile($<)							@@\
+ 	$(LN) $@ $<
+-#endif /* InstallSharedLibrary */
++#endif InstallSharedLibrary
++*/
+ 
+ /*
+  * InstallLinkKitLibrary - rule to install Link Kit library.
+@@ -1967,6 +1970,15 @@
+ #endif /* InstallSubdirs */
+ 
+ /*
++ * InstallSharedLibSubdirs - generate rules to recursively install shared
++ * libraries.  Added by Kevin McCarty for Debian, 15 May 2002
++ */
++#ifndef InstallSharedLibSubdirs
++#define InstallSharedLibSubdirs(dirs) \
++NamedTargetSubdirs(install.shlib,dirs,"installing",DESTDIR=$(DESTDIR),install.shlib)
++#endif /* InstallSharedLibSubdirs */
++
++/*
+  * InstallBinSubdirs - generate rules to recursively install programs and
+  *		       scripts
+  */
+@@ -2354,9 +2366,12 @@
+  */
+ #ifndef DefinePackageLibrary
+ #define DefinePackageLibrary(locallib) \
++/* commented out since these will be .so files. -Kevin */		@@\
++/*									@@\
+ ifeq ($(strip $(PACKAGE_LIB)),)						@@\
+ PACKAGE_LIB=$(TOP)$(PACKAGETOP)/LibraryTargetName($(PACKAGE_NAME))	@@\
+ endif									@@\
++*/									@@\
+ ifneq (locallib,)							@@\
+ override PACKAGE_LIB:= LibraryTargetName(locallib) $(PACKAGE_LIB)	@@\
+ 									@@\
+diff -urNad cernlib-2006.dfsg.2~/src/config/biglib.rules cernlib-2006.dfsg.2/src/config/biglib.rules
+--- cernlib-2006.dfsg.2~/src/config/biglib.rules	2000-04-19 06:51:01.000000000 -0400
++++ cernlib-2006.dfsg.2/src/config/biglib.rules	2007-04-25 23:33:16.000000000 -0400
+@@ -227,7 +227,7 @@
+ 	RanLibrary($@)
+ #endif
+ 
+-#if defined(HPArchitecture)
++#if defined(HPArchitecture) && !defined(LinuxArchitecture)
+ 
+ #ifndef SharedLibraryTargetName
+ #define SharedLibraryTargetName(name)Concat(lib,name.sl)
+@@ -264,7 +264,7 @@
+ 	@date
+ #endif
+ 
+-#elif defined(AlphaArchitecture)
++#elif defined(AlphaArchitecture) && !defined(LinuxArchitecture)
+ 
+ #ifndef SharedLibraryTargetName
+ #define SharedLibraryTargetName(name)Concat(lib,name.so)
+@@ -281,6 +281,45 @@
+ 	@date
+ #endif
+ 
++#elif defined(LinuxArchitecture) /* added by Kevin McCarty
++				    for Debian, 15 May 2002 */
++#ifndef SharedLibraryTargetName
++#define SharedLibraryTargetName(name)Concat(lib,name.so.$(LIB_SONAME)$(TOOL_NAME).$(CERN_LEVEL))
++#endif
++
++#ifndef SharedLibrarySonameName
++#define SharedLibrarySonameName(name)Concat(lib,name.so.$(LIB_SONAME)$(TOOL_SONAME))
++#endif
++
++#ifndef SharedLibraryBuild
++#define SharedLibraryBuild(libname,version)				@@\
++SharedLibraryTargetName(libname): version/objects.list			@@\
++	@echo rebuild version library $@ in $(CURRENT_DIR)		@@\
++	@$(RM) $@							@@\
++	@date								@@\
++	@$(FCLINK) -shared -Wl,-soname=SharedLibrarySonameName(libname)\ @@\
++		-o $@ `cat version/objects.list` `cernlib -v "" -dy libname\ @@\
++		| sed s/Concat(-l,libname)//g`				@@\
++	@date
++#endif
++
++#elif defined(DarwinArchitecture) /* added by Kevin McCarty
++				      for fink, 10 May 2003 */
++#ifndef SharedLibraryTargetName
++#define SharedLibraryTargetName(name)Concat(lib,name.$(LIB_SONAME).$(CERN_LEVEL).dylib)
++#endif
++
++#ifndef SharedLibraryBuild
++#define SharedLibraryBuild(libname,version)				@@\
++SharedLibraryTargetName(libname): version/objects.list			@@\
++	@echo rebuild version library $@ in $(CURRENT_DIR)		@@\
++	@$(RM) $@							@@\
++	@/usr/bin/libtool -dynamic -o $@ -compatibility_version $(LIB_SONAME) \ @@\
++		`cat version/objects.list` `cernlib -v "" -dy libname	\ @@\
++		| sed s/Concat(-l,libname)//g`				@@\
++	@date
++#endif
++
+ #elif 1 
+ #ifndef SharedLibraryBuild
+ #define SharedLibraryBuild(libname,version)				@@\
+diff -urNad cernlib-2006.dfsg.2~/src/config/lnxLib.rules cernlib-2006.dfsg.2/src/config/lnxLib.rules
+--- cernlib-2006.dfsg.2~/src/config/lnxLib.rules	1995-12-20 10:26:45.000000000 -0500
++++ cernlib-2006.dfsg.2/src/config/lnxLib.rules	2007-04-25 23:33:16.000000000 -0400
+@@ -43,6 +43,9 @@
+ #ifndef PositionIndependentCplusplusFlags
+ #define PositionIndependentCplusplusFlags -fPIC
+ #endif
++#ifndef PositionIndependentFortranFlags
++#define PositionIndependentFortranFlags -fPIC
++#endif
+ 
+ /*
+  * InstallSharedLibrary - generate rules to install the shared library.
+@@ -50,13 +53,20 @@
+  */
+ #ifndef InstallSharedLibrary
+ #define	InstallSharedLibrary(libname,rev,dest)				@@\
+-install:: Concat(lib,libname.so.rev) 					@@\
++.PHONY: install.shlib shlib/libname					@@\
++shlib/libname:: $(DESTDIR)dest/SharedLibraryTargetName(libname)		@@\
++									@@\
++install.shlib:: $(DESTDIR)dest/SharedLibraryTargetName(libname)		@@\
++									@@\
++$(DESTDIR)dest/SharedLibraryTargetName(libname): SharedLibraryTargetName(libname) @@\
+ 	MakeDir($(DESTDIR)dest)						@@\
+-	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+-	(T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\.[^\.]*$$//'`;\
+-		$(RM) $$T && $(LN) Concat(lib,libname.so.rev) $$T)	@@\
++	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) SharedLibraryTargetName(libname) $(DESTDIR)dest @@\
++	$(RM) SharedLibrarySonameName(libname) \
++		&& $(LN) SharedLibraryTargetName(libname) $(DESTDIR)dest/SharedLibrarySonameName(libname)	@@\
+ 	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+-	$(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)
++	$(LN) SharedLibraryTargetName(libname) Concat($(DESTDIR)dest/lib,libname.so) @@\
++	$(RM) $<                                                        @@\
++	$(LN) $@ $<
+ #endif /* InstallSharedLibrary */
+ 
+ /*

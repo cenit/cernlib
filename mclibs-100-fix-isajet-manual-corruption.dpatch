@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 100-fix-isajet-manual-corruption.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix corruption in LaTeX source to the Isajet manual.
+## DP: (Replacement text obtained from a PS version of the manual on the web.)
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mclibs/isajet/doc/physics.doc /tmp/dpep.tlmeFD/cernlib-2005.05.09/src/mclibs/isajet/doc/physics.doc
+--- cernlib-2005.05.09/src/mclibs/isajet/doc/physics.doc	2001-10-08 10:03:08.000000000 -0400
++++ /tmp/dpep.tlmeFD/cernlib-2005.05.09/src/mclibs/isajet/doc/physics.doc	2005-06-08 16:12:37.814042242 -0400
+@@ -122,7 +122,7 @@
+ $W/Z$ decay. These were calculated using FORM 1.1 by J.~Vermaseren. The
+ process $g + t \to W + b$ is {\it not} included. Both $g + b \to W^- +
+ t$ and $g + \bar t \to W^- + \bar b$ of course give the same $W^- + t
+-+\BARB_FINALSTATEAFTERQCDEVOLUTION
+++\bar b$ final state after QCD evolution.  While the latter process is
+ needed to describe the $m_t = 0$(!) mass singularity for $q_t \gg
+ m_t$, it has a pole in the physical region at low $q_t$ from on-shell
+ $t \to W + b$ decays. There is no obvious way to avoid this without

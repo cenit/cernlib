@@ -1,0 +1,43 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 313-comis-preserves-filename-case.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Have COMIS preserve filename case when interpreting FORTRAN code.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c /tmp/dpep.GROFhd/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c
+--- cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c	2003-02-13 09:25:23.000000000 -0500
++++ /tmp/dpep.GROFhd/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c	2005-06-09 15:24:32.751560586 -0400
+@@ -200,6 +200,14 @@
+   ku_exel( "/KUIP/SET_SHOW/COLUMNS -1" );
+   ku_exel( "/KUIP/SET_SHOW/DOLLAR 'ON'" );
+ 
++#if defined(UNIX) && (defined(WINNT) || !defined(MSDOS))
++/* Correct the default behavior of converting filenames to lower-case
++ * on a case-sensitive operating system... Not that I'm bitter or anything.
++ * --Kevin McCarty, for Debian
++ */
++  ku_exel( "/KUIP/SET_SHOW/FILECASE 'KEEP'" );
++#endif
++
+   host_editor = getenv( "KUIPEDITOR" );
+   if( host_editor == NULL )
+     host_editor = getenv( "EDITOR" );
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf /tmp/dpep.GROFhd/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf
+--- cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf	1997-09-25 10:02:25.000000000 -0400
++++ /tmp/dpep.GROFhd/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf	2005-06-09 15:23:49.276738602 -0400
+@@ -1064,11 +1064,12 @@
+ .
+ This command has only an effect on Unix systems to select whether filenames
+ are kept as entered on the command line.
+-The startup value is 'CONVERT', i.e. filenames are converted to lowercase.
++The startup value is 'KEEP', i.e. filename cases are preserved.  With
++the 'CONVERT' setting, filenames are converted to lowercase.
+ .
+ On other systems filenames are always converted to uppercase.
+ .
+-The 'RESTORE' option set the conversion mode to the value effective
++The 'RESTORE' option sets the conversion mode to the value effective
+ before the last FILECASE KEEP/CONVERT command.
+ E.g. the sequence
+      FILECASE KEEP; EDIT Read.Me; FILECASE RESTORE

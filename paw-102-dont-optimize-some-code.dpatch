@@ -1,0 +1,22 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 102-dont-optimize-some-code.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Don't allow the compiler to optimize several files that cause trouble
+## DP: (either compiler crash or broken code generation).
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/pawlib/comis/code/Imakefile /tmp/dpep.hNz5sX/cernlib-2005.05.09/src/pawlib/comis/code/Imakefile
+--- cernlib-2005.05.09/src/pawlib/comis/code/Imakefile	2001-09-14 09:08:51.000000000 -0400
++++ /tmp/dpep.hNz5sX/cernlib-2005.05.09/src/pawlib/comis/code/Imakefile	2005-06-09 11:19:57.756983183 -0400
+@@ -101,4 +101,10 @@
+ SpecialFortranLibObjectRule(cskide,cskide,-O0,NullParameter)
+ #endif
+ 
++#if defined(CERNLIB_LINUX)
++/* optimizing this file, even at -O1, causes runtime breakage with g77 3.3
++   cf. http://bugs.debian.org/233689 */
++SpecialFortranLibObjectRule(csrfun,csrfun,-O0,NullParameter)
++#endif
++
+ SubdirLibraryTarget(NullParameter,NullParameter)

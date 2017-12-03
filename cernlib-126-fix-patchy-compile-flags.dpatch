@@ -1,0 +1,101 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 126-fix-patchy-compile-flags.dpatch by Patrice Dumas <pertusus@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix various compile flags, etc. in patchy build directory.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/patchy/Imakefile cernlib-2006.dfsg.2/src/patchy/Imakefile
+--- cernlib-2006.dfsg.2~/src/patchy/Imakefile	2008-02-26 13:15:48.000000000 -0800
++++ cernlib-2006.dfsg.2/src/patchy/Imakefile	2008-02-26 13:16:06.000000000 -0800
+@@ -54,19 +54,9 @@
+ 
+ $(P5LIB): $(LDIR)patchy.car $(LDIR)p5lib.cra p5lib.libmake fcasplit Makefile
+ 	ypatchy - p5lib p5lib TTY .go
+-	fcasplit p5lib.f
+-	RemoveFile(p5lib.f)
++	./fcasplit p5lib.f "-c $(FORTRANOPTIONS) $(FDEBUGFLAGS)" "-c $(CDEBUGFLAGS) $(CCOPTIONS) $(ALLDEFINES)" "" "$(FC)" "$(CC)"
+ 	cat p5lib.libmake >> p5lib.mkfca
+-#if defined(CERNLIB_GFORTRAN)	
+-	sed -e 's;f77;gfortran;' -e 's;g77;gfortran;' -e 's;-Nx800;;' \
+-	    -e 's;-Nc200;;' -e 's;+ppu;;' p5lib.mkfca > p5lib.mkfca.mod
+-	sed -e 's;f77;gfortran;' -e 's;g77;gfortran;' -e 's;-Nx800;;' \
+-	    -e 's;-Nc200;;' -e 's;+ppu;;' p5lib.shfca > p5lib.shfca.mod
+-	mv p5lib.mkfca.mod p5lib.mkfca
+-	mv p5lib.shfca.mod p5lib.shfca
+-#endif	
+ 	$(MAKE) -f p5lib.mkfca $@
+-	RemoveFile(p5lib.mkfca)
+ 	RemoveFile(p5lib.shfca)
+ 
+ p5lib.libmake: Makefile
+@@ -78,7 +68,7 @@
+ 	echo "	rm -f \$$(subst .o,.f,\$$(ROUTINES))" >> $@ 
+ 
+ fcasplit: fcasplit.o
+-	$(F77) $< -o $@
++	$(FCLINK) $< -o $@ $(FCLDOPTIONS)
+ 
+ $(LDIR)%.cra: %.cra $(LDIR)yexpand
+ 	PLINAME=$(PLINAME);export PLINAME;$(LDIR)yexpand $< $@
+@@ -87,22 +77,22 @@
+ 	@ ln -s $< $@
+ 
+ %.f:  $(LDIR)%.cra $(LDIR)patchy.car
+-	ypatchy - $@ $< TTY .go
+-	
++	ypatchy - :$@ :$< TTY .go
++
+ .f.o:
+ 	$(FC) -c $(FORTRANOPTIONS) $(FDEBUGFLAGS) $<
+ 
+ $(LDIR)yexpand:	yexpand.script
+-	@cp $< $@
+-	@chmod +x $@
++	cp $< $@
++	chmod +x $@
+ 
+ /*  Links to patchy 4.15 */
+ YMODULES=ycompar yedit yfrceta yindex yindexb ylist ypatchy \
+ 	 ysearch yshift ytobcd ytobin ytoceta
+ 
+-P4LINKS: $(foreach yp,$(YMODULES),$(CERN_BINDIR)$(yp))
++P4LINKS: $(foreach yp,$(YMODULES),$(CERN_BINDIR)/$(yp))
+ 
+-$(foreach yp,$(YMODULES),$(CERN_BINDIR)$(yp)):
++$(foreach yp,$(YMODULES),$(CERN_BINDIR)/$(yp)):
+ 	cd $(dir $@);	\ @@\
+ 	if [ -f ../../patchy/4.15/bin/$(notdir $@) ] ; then \ @@\
+ 		ln -s ../../patchy/4.15/bin/$(notdir $@) $(notdir $@); \ @@\
+diff -urNad cernlib-2006.dfsg.2~/src/patchy/fcasplit.F cernlib-2006.dfsg.2/src/patchy/fcasplit.F
+--- cernlib-2006.dfsg.2~/src/patchy/fcasplit.F	1999-11-30 09:37:25.000000000 -0800
++++ cernlib-2006.dfsg.2/src/patchy/fcasplit.F	2008-02-26 13:16:06.000000000 -0800
+@@ -343,8 +343,8 @@
+       PARAMETER   (CHIDA = ';DECK  I' )
+       PARAMETER   (CHOVER= 'UNKNOWN')
+ 
+-      PARAMETER   (CHPOF = '-c -O -fno-automatic')
+-      PARAMETER   (CHPOC = '-c -O2 -m486')
++      PARAMETER   (CHPOF = '-c -g -O2 -fno-automatic')
++      PARAMETER   (CHPOC = '-c -g -O2')
+       PARAMETER   (CHPOA = ' ')
+ 
+       PARAMETER   (CHEXFOR = '.f')
+@@ -507,7 +507,7 @@
+ #endif
+ 
+       PARAMETER   (MLMKLN=100)
+-      PARAMETER   (MXLENG=128, MXMKLN=64)
++      PARAMETER   (MXLENG=1024, MXMKLN=128)
+       CHARACTER    CHHOLD*(MXLENG)
+       CHARACTER    CHOPT(7)*(MXLENG)
+       DIMENSION    NCHOPT(7)
+@@ -532,7 +532,7 @@
+       DIMENSION    LXCBUF(MXCBUF)
+       CHARACTER*80 CHCBUF(MXCBUF)
+ 
+-      CHARACTER    CHLINE*80, CHNAME*80, CHTEXT*511
++      CHARACTER    CHLINE*80, CHNAME*80, CHTEXT*3000
+       CHARACTER    CHUSE*1
+ 
+       PARAMETER   (NKEYS=11)

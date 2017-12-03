@@ -1,0 +1,17 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 220-compile-isajet-with-isarun.dpatch by Kevin B. McCarty <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Compile isajet library including isaset() function.
+
+@DPATCH@
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/isajet/isajet/pilot.h mclibs-2006.dfsg.2/src/mclibs/isajet/isajet/pilot.h
+--- mclibs-2006.dfsg.2~/src/mclibs/isajet/isajet/pilot.h	2001-10-08 06:16:58.000000000 -0700
++++ mclibs-2006.dfsg.2/src/mclibs/isajet/isajet/pilot.h	2008-02-06 12:52:46.000000000 -0800
+@@ -41,3 +41,6 @@
+ #ifndef CERNLIB_MOVEFTN
+ #define CERNLIB_MOVEFTN
+ #endif
++#ifndef CERNLIB_INTERACT
++#define CERNLIB_INTERACT
++#endif

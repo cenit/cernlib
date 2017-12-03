@@ -1,0 +1,24 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 807-static-link-some-tests-on-64-bit.dpatch by Kevin B. McCarty <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Statically link certain test programs against CERN libraries on
+## DP: 64-bit systems, since CERNLIB's memory management is hopelessly
+## DP: broken there.
+
+@DPATCH@
+diff -urNad mclibs-2006.dfsg.2~/src/mclibs/eurodec/eudtest/Imakefile mclibs-2006.dfsg.2/src/mclibs/eurodec/eudtest/Imakefile
+--- mclibs-2006.dfsg.2~/src/mclibs/eurodec/eudtest/Imakefile	2008-01-08 09:47:10.000000000 -0800
++++ mclibs-2006.dfsg.2/src/mclibs/eurodec/eudtest/Imakefile	2008-01-08 09:48:35.000000000 -0800
+@@ -4,7 +4,11 @@
+ 
+ FORTRANSAVEOPTION = FortranSaveFlags
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(eudtest,$(OBJS),NullParameter,NullParameter,eurodec packlib)
++#else
+ CernlibFortranProgramTarget(eudtest,$(OBJS),NullParameter,NullParameter,eurodec packlib)
++#endif
+ 
+ TestTarget(eudtest,eurodec.dat,eutitle.dat)
+ 

@@ -1,0 +1,99 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 320-support-ifort-and-gfortran.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Support use of ifort, icc and/or gfortran as default compilers.
+
+@DPATCH@
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/code/csinit.F paw-2.14.04.dfsg.2/src/pawlib/comis/code/csinit.F
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/code/csinit.F	2007-12-12 23:52:57.000000000 +0000
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/code/csinit.F	2007-12-12 23:52:59.000000000 +0000
+@@ -217,8 +217,18 @@
+ #endif
+ #if (defined(CERNLIB_LINUX))
+       ITMPLEN=CSTMPD(CHPATH, 256)
++# if (defined(CERNLIB_GFORTRAN))
++      CHF77 ='gfortran -g -c -fPIC'
++# elif (defined(CERNLIB_INTELIFC))
++      CHF77 ='ifort -g -c -fPIC'
++# else
+       CHF77 ='g77 -g -c -fPIC'
++# endif
++# if (defined(CERNLIB_INTELIFC))
++      CHCC  ='icc -g -c -fPIC'
++# else
+       CHCC  ='cc -g -c -fPIC'
++# endif
+ #endif
+ #if (defined(CERNLIB_SGI))&&(defined(CERNLIB_SHL))
+       ITMPLEN=CSTMPD(CHPATH, 256)
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/comis/deccc/Imakefile paw-2.14.04.dfsg.2/src/pawlib/comis/deccc/Imakefile
+--- paw-2.14.04.dfsg.2~/src/pawlib/comis/deccc/Imakefile	2005-04-18 15:41:06.000000000 +0000
++++ paw-2.14.04.dfsg.2/src/pawlib/comis/deccc/Imakefile	2007-12-12 23:55:32.000000000 +0000
+@@ -45,8 +45,12 @@
+ #endif
+ 
+ #if defined(CERNLIB_LINUX)
++#if defined(CERNLIB_GFORTRAN)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -DgFortran
++#else
+ EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
+ #endif
++#endif
+ 
+ #if defined(CERNLIB_SUN) && !defined(CERNLIB_SOLARIS)
+ CCOPTIONS=
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/paw/cpaw/Imakefile paw-2.14.04.dfsg.2/src/pawlib/paw/cpaw/Imakefile
+--- paw-2.14.04.dfsg.2~/src/pawlib/paw/cpaw/Imakefile	1999-06-28 15:28:22.000000000 +0000
++++ paw-2.14.04.dfsg.2/src/pawlib/paw/cpaw/Imakefile	2007-12-12 23:56:19.000000000 +0000
+@@ -15,8 +15,12 @@
+ #endif
+ 
+ #if defined(CERNLIB_LINUX)
++#if defined(CERNLIB_GFORTRAN)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -DgFortran
++#else
+ EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
+ #endif
++#endif
+ 
+ #if defined(CERNLIB_BUGREPORT)
+ SRCS_C := $(SRCS_C) bugrep.c
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/paw/mlpfit/Imakefile paw-2.14.04.dfsg.2/src/pawlib/paw/mlpfit/Imakefile
+--- paw-2.14.04.dfsg.2~/src/pawlib/paw/mlpfit/Imakefile	2000-04-28 14:12:13.000000000 +0000
++++ paw-2.14.04.dfsg.2/src/pawlib/paw/mlpfit/Imakefile	2007-12-12 23:57:04.000000000 +0000
+@@ -9,8 +9,12 @@
+ #endif
+ 
+ #if defined(CERNLIB_LINUX)
++#if defined(CERNLIB_GFORTRAN)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -DgFortran
++#else
+ EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
+ #endif
++#endif
+ 
+ #ifndef CERNLIB_VAXVMS
+ EXTRA_INCLUDES := $(EXTRA_INCLUDES) -I$(VPATH)
+diff -urNad paw-2.14.04.dfsg.2~/src/pawlib/paw/ntuple/Imakefile paw-2.14.04.dfsg.2/src/pawlib/paw/ntuple/Imakefile
+--- paw-2.14.04.dfsg.2~/src/pawlib/paw/ntuple/Imakefile	2007-12-12 23:52:58.000000000 +0000
++++ paw-2.14.04.dfsg.2/src/pawlib/paw/ntuple/Imakefile	2007-12-12 23:52:59.000000000 +0000
+@@ -16,9 +16,17 @@
+ EXTRA_DEFINES := $(EXTRA_DEFINES) -Dextname
+ #endif
+ 
+-#if defined(CERNLIB_LINUX)
++#if defined(CERNLIB_LINUX) && !defined(CERNLIB_QMLXIA64)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
++#endif
++
++#if defined(CERNLIB_QMLXIA64) 
++#if defined(CERNLIB_GFORTRAN)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -DgFortran
++#else
+ EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
+ #endif
++#endif
+ 
+ #if defined(CERNLIB_HPUX)
+ CCOPTIONS += -Wp,-H10000

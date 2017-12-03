@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 109-fix-broken-xsneut95.dat-link.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Link to xsneut95.dat in the correct place.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/geant321/Imakefile cernlib-2005.05.09.dfsg/src/geant321/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/geant321/Imakefile	2005-11-23 15:38:52.663383751 +0000
++++ cernlib-2005.05.09.dfsg/src/geant321/Imakefile	2005-11-23 15:39:00.618680825 +0000
+@@ -41,7 +41,7 @@
+ install.lib:: $(CERN_LIBDIR)/xsneut95.dat
+ 
+ $(CERN_LIBDIR)/xsneut95.dat:
+-	cd $(@D);$(LN) ../share/lib/$(@F) $(@F)
++	cd $(@D) && $(LN) ../src/geant321/data/$(@F) $(@F)
+ 
+ #endif
+ #if defined(CERNLIB_VAXVMS)

@@ -1,0 +1,20 @@
+#! /bin/bash
+
+set -e
+cd .
+
+file=patchy
+script=rceta.sh
+archive=$file.tar.gz
+echo "Unpacking from $archive"
+tar xzf $archive
+echo "patching script"
+sed -i -e 's/fort77/f77/' -e 's:^ rceta : ./rceta :' $file/$script
+pushd $file
+./$script
+popd
+echo "Repacking $archive"
+tar czf $archive $file
+
+exit 0
+

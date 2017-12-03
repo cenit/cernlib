@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 121-fix-mathlib-test-case-c209m.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix off-by-one bug in test case c209m.  Courtesy Harald Vogt.
+
+@DPATCH@
+diff -urNad cernlib-2005.dfsg~/src/mathlib/gen/tests/c209m.F cernlib-2005.dfsg/src/mathlib/gen/tests/c209m.F
+--- cernlib-2005.dfsg~/src/mathlib/gen/tests/c209m.F	1996-04-01 10:01:13.000000000 -0500
++++ cernlib-2005.dfsg/src/mathlib/gen/tests/c209m.F	2006-09-06 19:05:30.359047318 -0400
+@@ -16,7 +16,7 @@
+ #include "gen/defc64.inc"
+      +   TEST(NT,NT),A(0:NT),ROOT(NT),SUM
+ C     R is the estimated radius of a circle centered at a root
+-      DIMENSION    R(NT),RES(NT)
++      DIMENSION    R(NT+1),RES(NT)
+       LOGICAL   INR2(NT,NT)
+       PARAMETER (MAXFUN=50000)
+       PARAMETER (TSTERR=5D-8)

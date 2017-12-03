@@ -1,0 +1,29 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 215-work-around-g77-bug-on-ia64.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Work around what appears to be a g77 compiler bug on ia64 in test suite.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/f004ch.F cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/f004ch.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kernnum/test/numchk3/f004ch.F	1996-02-15 17:48:45.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kernnum/test/numchk3/f004ch.F	2008-01-03 01:55:33.000000000 +0000
+@@ -438,7 +438,7 @@
+      +               MMPY,MRAN,MSCL,MSUB,VDIST,VMAXA,VSET)
+           REAL      A(*), B(*), C(*), T(*), GA(*), GB(*), GC(*)
+           REAL      FMONE(2), ALPHA(2), BETA(2)
+-          LOGICAL   OK, OKA, OKL, OKT
++          LOGICAL   OK, OKA, OKL, OKT, OKTMP
+           REAL      E, R0, RES
+           EXTERNAL  VDIST,    VSET
+ #include "kernnumt/sysdat.inc"
+@@ -523,7 +523,8 @@
+      +          CALL CHECKL(0,0,C,LG,GC,LC,LC12,LC21,OKT,VDIST,VSET)
+              IF(.NOT. OKT)
+      +             WRITE(IOUNIT,1011) ISUB,M,N,K,JCNFG,LC,LC12,LC21
+-             OKL  =  OKL .AND. OKT
++             OKTMP = OKL .AND. OKT
++             OKL  =  OKTMP
+   19         CONTINUE
+           OK  =  OK .AND. OKA .AND. OKL
+   20      CONTINUE

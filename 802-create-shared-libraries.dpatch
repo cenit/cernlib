@@ -1,0 +1,228 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 802-create-shared-libraries.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Actually implement the rules to create shared libraries.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/Imakefile cernlib-2005.05.09.dfsg/src/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/Imakefile	2005-12-01 15:19:24.191267776 +0000
++++ cernlib-2005.05.09.dfsg/src/Imakefile	2005-12-01 15:20:10.310483251 +0000
+@@ -2,7 +2,7 @@
+ #define PassCDebugFlags
+ 
+ 
+-LIBDIRS= kernlib packlib code_motif pawlib paw_motif graflib mathlib geant321 mclibs phtools
++LIBDIRS= kernlib packlib mathlib graflib code_motif mclibs phtools pawlib paw_motif geant321
+ 
+ SUBDIRS= $(LIBDIRS) patchy cfortran
+ 
+@@ -15,6 +15,7 @@
+ #endif
+ 
+ InstallLibSubdirs($(LIBDIRS))
++InstallSharedLibSubdirs($(LIBDIRS))
+ 
+ INCLUDEDIRS= $(LIBDIRS) cfortran
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/code_motif/Imakefile cernlib-2005.05.09.dfsg/src/code_motif/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/code_motif/Imakefile	2005-12-01 15:19:24.062295137 +0000
++++ cernlib-2005.05.09.dfsg/src/code_motif/Imakefile	2005-12-01 15:19:31.186783665 +0000
+@@ -31,3 +31,4 @@
+ SubdirLibraryTarget(packlib-lesstif,NullParameter) 
+ 
+ InstallLibrary(packlib-lesstif,$(CERN_LIBDIR))
++InstallSharedLibrary(packlib-lesstif,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+diff -urNad cernlib-2005.05.09.dfsg~/src/geant321/Imakefile cernlib-2005.05.09.dfsg/src/geant321/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/geant321/Imakefile	2005-12-01 15:19:23.018516575 +0000
++++ cernlib-2005.05.09.dfsg/src/geant321/Imakefile	2005-12-01 15:19:31.186783665 +0000
+@@ -26,6 +26,7 @@
+ 
+ InstallLibrary(geant321,$(CERN_LIBDIR))
+ InstallLibraryAlias(geant321,geant,$(CERN_LIBDIR))
++InstallSharedLibrary(geant321,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ /* FLUKA removed from Debian source package for copyright reasons. */
+ /*
+diff -urNad cernlib-2005.05.09.dfsg~/src/geant321/gparal/Imakefile cernlib-2005.05.09.dfsg/src/geant321/gparal/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/geant321/gparal/Imakefile	1996-12-19 14:19:18.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/geant321/gparal/Imakefile	2005-12-01 15:19:31.186783665 +0000
+@@ -10,6 +10,7 @@
+ SubdirLibraryTarget(geant321_parallel,NullParameter)
+ 
+ InstallLibrary(geant321_parallel,$(CERN_LIBDIR))
++InstallSharedLibrary(geant321_parallel,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ CopyFile(../gbase/grun.F,grun.F)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/graflib/Imakefile cernlib-2005.05.09.dfsg/src/graflib/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/graflib/Imakefile	2001-12-11 15:06:28.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/graflib/Imakefile	2005-12-01 15:19:31.186783665 +0000
+@@ -11,9 +11,12 @@
+ 
+ SubdirLibraryTarget(graflib,$(LIBDIRS))
+ 
+-InstallLibrary(graflib,$(CERN_LIBDIR))
+-
+ InstallLibSubdirs(higz)
++InstallSharedLibSubdirs(higz)
++
++/* these lines follow the above because graflib depends on grafX11 */
++InstallLibrary(graflib,$(CERN_LIBDIR))
++InstallSharedLibrary(graflib,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs(higz)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/graflib/higz/Imakefile cernlib-2005.05.09.dfsg/src/graflib/higz/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/graflib/higz/Imakefile	1997-09-02 13:34:47.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/graflib/higz/Imakefile	2005-12-01 15:19:31.186783665 +0000
+@@ -13,6 +13,7 @@
+ SubdirLibraryTarget(grafX11,$(LIBDIRS))
+ 
+ InstallLibrary(grafX11,$(CERN_LIBDIR))
++InstallSharedLibrary(grafX11,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs(examples)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/kernlib/Imakefile cernlib-2005.05.09.dfsg/src/kernlib/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/kernlib/Imakefile	2002-04-26 14:37:20.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/kernlib/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -14,6 +14,7 @@
+ 
+ InstallLibrary(kernlib,$(CERN_LIBDIR))
+ InstallLibraryAlias(kernlib,kernlib-shift,$(CERN_LIBDIR))
++InstallSharedLibrary(kernlib,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ test::	LibraryTargetName(kernlib)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mathlib/Imakefile cernlib-2005.05.09.dfsg/src/mathlib/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mathlib/Imakefile	2005-12-01 15:19:24.005307227 +0000
++++ cernlib-2005.05.09.dfsg/src/mathlib/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -19,6 +19,7 @@
+ SubdirLibraryTarget(mathlib,$(LIBDIRS))
+ 
+ InstallLibrary(mathlib,$(CERN_LIBDIR))
++InstallSharedLibrary(mathlib,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ InstallIncludeSubdirs($(LIBDIRS))
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/Imakefile	2005-12-01 15:19:22.512623901 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -13,6 +13,7 @@
+ TestSubdirs($(LIBDIRS))
+ 
+ InstallLibSubdirs($(LIBDIRS))
++InstallSharedLibSubdirs($(LIBDIRS))
+ 
+ /* Again, purge Pythia, Jetset and dependents. */
+ INCLUDEDIRS= cojets eurodec herwig isajet pdf
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/cojets/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/cojets/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/cojets/Imakefile	1996-05-06 20:06:50.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/cojets/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -12,6 +12,7 @@
+ SubdirLibraryTarget(cojets,$(LIBDIRS))
+ 
+ InstallLibrary(cojets,$(CERN_LIBDIR))
++InstallSharedLibrary(cojets,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ SubdirDataFile($(LIBRARY),cojets.dat,data)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/eurodec/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/eurodec/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/eurodec/Imakefile	1996-05-06 20:06:55.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/eurodec/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -12,6 +12,7 @@
+ SubdirLibraryTarget(eurodec,$(LIBDIRS))
+ 
+ InstallLibrary(eurodec,$(CERN_LIBDIR))
++InstallSharedLibrary(eurodec,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ SubdirDataFile($(LIBRARY),eurodec.dat,data)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/herwig/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/herwig/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/herwig/Imakefile	1997-01-06 17:06:41.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/herwig/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -10,6 +10,7 @@
+ 
+ InstallLibrary(herwig59,$(CERN_LIBDIR))
+ InstallLibraryAlias(herwig59,herwig,$(CERN_LIBDIR))
++InstallSharedLibrary(herwig59,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs(test)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/isajet/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/isajet/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/isajet/Imakefile	2001-10-08 14:03:02.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/isajet/Imakefile	2005-12-01 15:19:31.187783453 +0000
+@@ -12,6 +12,7 @@
+ SubdirLibraryTarget(isajet758,$(LIBDIRS))
+ 
+ InstallLibrary(isajet758,$(CERN_LIBDIR))
++InstallSharedLibrary(isajet758,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ SubdirDataFile($(LIBRARY),isajet.dat,data)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/pdf/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/pdf/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/pdf/Imakefile	2000-05-29 14:49:59.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/pdf/Imakefile	2005-12-01 15:19:31.188783241 +0000
+@@ -15,6 +15,7 @@
+ SubdirLibraryTarget(pdflib804,spdf npdf)
+ 
+ InstallLibrary(pdflib804,$(CERN_LIBDIR))
++InstallSharedLibrary(pdflib804,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs(tpdf)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/photos/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/photos/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/photos/Imakefile	1999-03-26 10:52:23.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/mclibs/photos/Imakefile	2005-12-01 15:19:31.188783241 +0000
+@@ -15,6 +15,7 @@
+ SubdirLibraryTarget(photos202,code)
+ 
+ InstallLibrary(photos202,$(CERN_LIBDIR))
++InstallSharedLibrary(photos202,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs(test)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/packlib/Imakefile cernlib-2005.05.09.dfsg/src/packlib/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/packlib/Imakefile	2005-12-01 15:19:23.885332680 +0000
++++ cernlib-2005.05.09.dfsg/src/packlib/Imakefile	2005-12-01 15:19:31.188783241 +0000
+@@ -14,6 +14,7 @@
+ 
+ InstallLibrary(packlib,$(CERN_LIBDIR))
+ InstallLibraryAlias(packlib,packlib-shift,$(CERN_LIBDIR))
++InstallSharedLibrary(packlib,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs($(LIBDIRS))
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/paw_motif/Imakefile cernlib-2005.05.09.dfsg/src/paw_motif/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/paw_motif/Imakefile	2005-12-01 15:19:24.192267563 +0000
++++ cernlib-2005.05.09.dfsg/src/paw_motif/Imakefile	2005-12-01 15:19:31.188783241 +0000
+@@ -30,4 +30,5 @@
+ SubdirLibraryTarget(pawlib-lesstif,$(LIBDIRS))
+ 
+ InstallLibrary(pawlib-lesstif,$(CERN_LIBDIR))
++InstallSharedLibrary(pawlib-lesstif,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/pawlib/Imakefile cernlib-2005.05.09.dfsg/src/pawlib/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/pawlib/Imakefile	1996-10-01 14:12:23.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/pawlib/Imakefile	2005-12-01 15:19:31.188783241 +0000
+@@ -11,6 +11,7 @@
+ SubdirLibraryTarget(pawlib,$(LIBDIRS))
+ 
+ InstallLibrary(pawlib,$(CERN_LIBDIR))
++InstallSharedLibrary(pawlib,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ InstallIncludeSubdirs($(LIBDIRS))
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/phtools/Imakefile cernlib-2005.05.09.dfsg/src/phtools/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/phtools/Imakefile	1996-11-14 16:44:33.000000000 +0000
++++ cernlib-2005.05.09.dfsg/src/phtools/Imakefile	2005-12-01 15:19:31.189783029 +0000
+@@ -11,7 +11,7 @@
+ SubdirLibraryTarget(phtools,$(LIBDIRS))
+ 
+ InstallLibrary(phtools,$(CERN_LIBDIR))
+-InstallSharedLibrary(phtools,$(CERN_LEVEL),$(CERN_SHLIBDIR))
++InstallSharedLibrary(phtools,$(LIB_SONAME).$(CERN_LEVEL),$(CERN_SHLIBDIR))
+ 
+ TestSubdirs(wicoexam)
+ 

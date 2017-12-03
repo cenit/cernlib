@@ -1,0 +1,36 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 801-non-optimized-rule-uses-fPIC-g.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Ensure that special rules for creating non-optimized object files
+## DP: use -fPIC for files that go into shared libs, and -g for all files.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/paw_motif/fmotif/Imakefile /tmp/dpep.gResDB/cernlib-2005.05.09/src/paw_motif/fmotif/Imakefile
+--- cernlib-2005.05.09/src/paw_motif/fmotif/Imakefile	1996-09-23 10:20:46.000000000 -0400
++++ /tmp/dpep.gResDB/cernlib-2005.05.09/src/paw_motif/fmotif/Imakefile	2005-06-09 10:37:55.631538119 -0400
+@@ -3,7 +3,7 @@
+ 	plotisto.F pmhist.F pminit.F show_chain.F
+ 
+ #if defined(CERNLIB_LINUX) && !defined(CERNLIB_GFORTRAN)
+-FORTRANOPTIONS = -fno-backslash  $(FORTRANSAVEOPTION) -fno-second-underscore
++FORTRANOPTIONS = -g -fno-backslash  $(FORTRANSAVEOPTION) -fno-second-underscore
+ #endif
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile /tmp/dpep.gResDB/cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile
+--- cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile	1999-09-14 05:20:08.000000000 -0400
++++ /tmp/dpep.gResDB/cernlib-2005.05.09/src/pawlib/paw/ntuple/Imakefile	2005-06-09 10:40:47.421285771 -0400
+@@ -46,8 +46,8 @@
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+ 
+-#if defined(CERNLIB_LINUX) && defined(CERNLIB_POWERPC)
+-SpecialObjectRule(archive/qp_execute.o,qp_execute.c archive/qp_execute.d,-O0 -o $@)
+-SpecialObjectRule(debug/qp_execute.o,qp_execute.c debug/qp_execute.d,-O0 -o $@)
+-SpecialObjectRule(shared/qp_execute.o,qp_execute.c shared/qp_execute.d,-O0 -o $@)
++#if defined(CERNLIB_LINUX)
++SpecialObjectRule(archive/qp_execute.o,qp_execute.c archive/qp_execute.d,-O0 -g -o $@)
++SpecialObjectRule(debug/qp_execute.o,qp_execute.c debug/qp_execute.d,-O0 -g -o $@)
++SpecialObjectRule(shared/qp_execute.o,qp_execute.c shared/qp_execute.d,-O0 -g -fPIC -o $@)
+ #endif

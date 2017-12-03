@@ -1,0 +1,16 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 118-rename-mathlib-common-blocks.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Rename badly named common blocks to work around #374978.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09.dfsg~/src/mathlib/gen/d/d510si.inc cernlib-2005.05.09.dfsg/src/mathlib/gen/d/d510si.inc
+--- cernlib-2005.05.09.dfsg~/src/mathlib/gen/d/d510si.inc	1996-04-01 10:02:21.000000000 -0500
++++ cernlib-2005.05.09.dfsg/src/mathlib/gen/d/d510si.inc	2006-06-28 10:15:11.526165542 -0400
+@@ -10,4 +10,4 @@
+ * d510si.inc
+ *
+       COMMON/D510SI/Z(2485),G(100),DA(100),ENDFLG,NA,INDFLG(5)
+-      COMMON/DF/DF(100),/X/X(10)
++      COMMON/D510DF/DF(100),/D510X/X(10)

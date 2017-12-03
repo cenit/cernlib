@@ -1,0 +1,26 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 120-fix-gets-usage-in-kuipc.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix usage of gets() in kuipc.  Thanks to Harald Vogt, 2006-07-20.
+
+@DPATCH@
+diff -urNad cernlib-2005.dfsg~/src/packlib/kuip/programs/kuipc/kuipcc.c cernlib-2005.dfsg/src/packlib/kuip/programs/kuipc/kuipcc.c
+--- cernlib-2005.dfsg~/src/packlib/kuip/programs/kuipc/kuipcc.c	2000-03-27 09:13:17.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kuip/programs/kuipc/kuipcc.c	2006-09-06 18:57:58.483212039 -0400
+@@ -354,10 +354,13 @@
+     }
+   }
+   else {
++    /* avoid the usage of gets - possible buffer overrun */
+     fprintf( stderr, "Enter CDF input file name: " );
+-    gets( ifile );
++    fgets( ifile, sizeof ifile, stdin );
++    strcpy( strstr( ifile, "\n"), "\0");
+     fprintf( stderr, "Enter definition output file name: " );
+-    gets( ofile );
++    fgets( ofile, sizeof ofile, stdin );
++    strcpy( strstr( ofile, "\n"), "\0");
+   }
+ 
+   if( !explicit ) {

@@ -1,0 +1,130 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 702-patch-Imakefiles-for-packlib-mathlib.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Hacks to Imakefiles to go along with the 702 shellscript for moving
+## DP: files around.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mathlib/gen/d/Imakefile /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/gen/d/Imakefile
+--- cernlib-2005.05.09/src/mathlib/gen/d/Imakefile	2005-06-10 22:19:15.720962444 -0400
++++ /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/gen/d/Imakefile	2005-06-10 22:24:26.783925145 -0400
+@@ -1,6 +1,8 @@
+ DoIncludePackage(gen)
+ #include "pilot.h"
+ 
++/* rgmlt*.F have been moved into packlib/hbook to remove circular dependencies.
++   --Kevin McCarty, for Debian. */
+ SRCS_F=	arithm.F c128.F c256.F c512.F c64.F cauchy64.F cft.F cfstft.F \ @@\
+ 	rfstft.F cgauss.F d107d1.F d107r1.F d501l1.F d501l2.F d501n1.F \ @@\
+         d501n2.F d501p1.F d501p2.F d501sf.F d700su.F d701bd.F \ @@\
+@@ -10,14 +12,14 @@
+         epditr.F epdje.F epdloc.F epdsrt.F epdtab.F errorf.F esolve.F \ @@\
+ 	fcn1.F fftrc.F fumili.F gauss.F i128.F i32.F i64.F linsq.F \ @@\
+ 	mconv.F mft.F minfc.F minsq.F monito.F newro.F old506.F radapt.F \ @@\
+-	radmul.F rca.F rfrdh164.F rfrdh264.F rft.F rgmlt64.F rgquad.F \ @@\
++	radmul.F rca.F rfrdh164.F rfrdh264.F rft.F           rgquad.F \ @@\
+ 	rgs56p.F rgset.F riwiad.F riwibd.F rknys64.F rknysd.F rkstp.F \ @@\
+ 	rpa.F rps.F rrkstp.F rsa.F rtriint.F s128.F s256.F s512.F \ @@\
+ 	s64.F scal.F sgz.F simps.F synt.F traper.F triint.F vd01a.F
+ 
+ #if defined(CERNLIB_DOUBLE)
+ SRCS_F:= $(SRCS_F) cgauss64.F dgquad.F dgset.F gauss64.F minfc64.F \ @@\
+-	rcauch.F rdeqbs.F rdeqmr.F rderiv.F rfrdh1.F rgmlt.F rkstp64.F \ @@\
++	rcauch.F rdeqbs.F rdeqmr.F rderiv.F rfrdh1.F         rkstp64.F \ @@\
+ 	simps64.F triint64.F 
+ #if defined(CERNLIB_LINUX)
+ /* -O3 optimization breaks in g77 3.2 */
+@@ -26,7 +28,7 @@
+ #endif
+ #else
+ SRCS_F:= $(SRCS_F) cgauss128.F cauchy.F cauchy128.F deqbs128.F deqmr128.F \ @@\
+-	deriv128.F minfc128.F rfrdh128.F rgmlt128.F rkstp128.F simps128.F \ @@\
++	deriv128.F minfc128.F rfrdh128.F            rkstp128.F simps128.F \ @@\
+ 	triint128.F 
+ #endif
+ 
+diff -urNad cernlib-2005.05.09/src/mathlib/gen/Imakefile /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/gen/Imakefile
+--- cernlib-2005.05.09/src/mathlib/gen/Imakefile	1996-10-02 12:09:45.000000000 -0400
++++ /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/gen/Imakefile	2005-06-10 22:20:55.683416711 -0400
+@@ -8,7 +8,8 @@
+ IMAKE_DEFINES=-DFortranDoesCpp=NO
+ #endif
+ 
+-LIBDIRS= a b c d divon e f g h j m n s u v x
++/* "n" subdir moved to packlib/hbook/  --Kevin McCarty, for Debian */
++LIBDIRS= a b c d divon e f g h j m   s u v x
+ 
+ SUBDIRS= $(LIBDIRS) gen tests
+ 
+diff -urNad cernlib-2005.05.09/src/mathlib/hbook/Imakefile /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/hbook/Imakefile
+--- cernlib-2005.05.09/src/mathlib/hbook/Imakefile	1969-12-31 19:00:00.000000000 -0500
++++ /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/hbook/Imakefile	2004-06-30 21:54:11.000000000 -0400
+@@ -0,0 +1,12 @@
++/* this Imakefile used to get hdiff to compile within the mathlib tree */
++
++#define IHaveSubdirs
++#define PassCDebugFlags
++
++LIBDIRS= hdiff
++SUBDIRS= $(LIBDIRS) hbook
++
++TopOfPackage(hbook)
++SubdirLibraryTarget(hbook,$(LIBDIRS))
++DoIncludePackage(hbook)
++InstallIncludeSubdirs(hbook)
+diff -urNad cernlib-2005.05.09/src/mathlib/Imakefile /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/Imakefile
+--- cernlib-2005.05.09/src/mathlib/Imakefile	2005-06-10 22:19:15.834937877 -0400
++++ /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/mathlib/Imakefile	2005-06-10 22:20:05.279280394 -0400
+@@ -3,7 +3,7 @@
+ #define PassCDebugFlags 
+ 
+ 
+-LIBDIRS= gen bvsl
++LIBDIRS= gen bvsl hbook /* hdiff stuff moved from packlib */
+ 
+ /* Lapack is independent of Cernlib and should be installed as one of
+    the build dependencies.
+diff -urNad cernlib-2005.05.09/src/packlib/hbook/d/Imakefile /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/packlib/hbook/d/Imakefile
+--- cernlib-2005.05.09/src/packlib/hbook/d/Imakefile	1969-12-31 19:00:00.000000000 -0500
++++ /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/packlib/hbook/d/Imakefile	2004-06-30 21:54:11.000000000 -0400
+@@ -0,0 +1,25 @@
++/* this Imakefile is used to get some things from mathlib/gen/d to compile
++   within the packlib/hbook tree */
++
++DoIncludePackage(gen)
++#include "pilot.h"
++
++SRCS_F=	rgmlt64.F
++
++#if defined(CERNLIB_DOUBLE)
++SRCS_F:= $(SRCS_F) rgmlt.F
++#else
++SRCS_F:= $(SRCS_F) rgmlt128.F
++#endif
++
++#ifdef CERNLIB_HPUX
++FORTRANOPTIONS += -WF,-P
++#endif
++
++#if defined(CERNLIB_SGI)
++IMAKE_DEFINES=-DFortranDoesCpp=NO
++#endif
++
++FORTRANSAVEOPTION = FortranSaveFlags
++
++SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2005.05.09/src/packlib/hbook/Imakefile /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/packlib/hbook/Imakefile
+--- cernlib-2005.05.09/src/packlib/hbook/Imakefile	1997-04-28 04:21:23.000000000 -0400
++++ /tmp/dpep.aVAPwe/cernlib-2005.05.09/src/packlib/hbook/Imakefile	2005-06-10 22:26:27.063010420 -0400
+@@ -2,7 +2,9 @@
+ #define IHaveSubdirs
+ #define PassCDebugFlags
+ 
+-LIBDIRS= hdiff hmerge hquad chbook fpclassc \ @@\
++/* hdiff moved to mathlib to avoid circular DLL dependencies; "d" and "n"
++   moved here from mathlib for the same reasons */
++LIBDIRS= d n   hmerge hquad chbook fpclassc \ @@\
+ 	 hrz code hmcstat hntup
+ 
+ #ifdef CERNLIB_VAX

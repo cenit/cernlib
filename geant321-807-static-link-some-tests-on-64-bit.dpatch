@@ -1,0 +1,84 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 807-static-link-some-tests-on-64-bit.dpatch by Kevin B. McCarty <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Statically link certain test programs against CERN libraries on
+## DP: 64-bit systems, since CERNLIB's memory management is hopelessly
+## DP: broken there.
+
+@DPATCH@
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam1/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam1/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam1/Imakefile	2008-01-04 17:05:50.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam1/Imakefile	2008-01-04 17:10:09.000000000 -0800
+@@ -3,7 +3,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(exam1,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#else
+ CernlibFortranProgramTarget(exam1,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#endif
+ 
+ TestTarget(exam1,gexam1.dat,gexam1.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam2/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam2/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam2/Imakefile	2008-01-04 17:05:51.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam2/Imakefile	2008-01-04 17:10:55.000000000 -0800
+@@ -13,7 +13,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(exam2,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#else
+ CernlibFortranProgramTarget(exam2,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#endif
+ 
+ TestTarget(exam2,gexam2.dat,gexam2.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam3/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam3/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam3/Imakefile	2008-01-04 17:05:51.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam3/Imakefile	2008-01-04 17:11:26.000000000 -0800
+@@ -3,7 +3,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(exam3,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#else
+ CernlibFortranProgramTarget(exam3,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#endif
+ 
+ TestTarget(exam3,gexam3.dat,gexam3.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam4/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam4/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam4/Imakefile	2008-01-04 17:05:51.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam4/Imakefile	2008-01-04 17:11:57.000000000 -0800
+@@ -14,7 +14,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(exam4,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#else
+ CernlibFortranProgramTarget(exam4,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#endif
+ 
+ TestTarget(exam4,gexam4.dat,gexam4.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam5/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam5/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam5/Imakefile	2008-01-04 17:05:51.000000000 -0800
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam5/Imakefile	2008-01-04 17:12:26.000000000 -0800
+@@ -3,7 +3,11 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_QMLXIA64)
++CernlibFortranStaticTarget(exam5,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#else
+ CernlibFortranProgramTarget(exam5,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
++#endif
+ 
+ TestTarget(exam5,gexam5.dat,gexam5.input)
+ 

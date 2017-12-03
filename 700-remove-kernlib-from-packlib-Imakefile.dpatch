@@ -1,0 +1,55 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 700-remove-kernlib-from-packlib-Imakefile.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch packlib Imakefile after moving kernlib out of tree.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/Imakefile /tmp/dpep.VNPUUt/cernlib-2005.05.09/src/Imakefile
+--- cernlib-2005.05.09/src/Imakefile	2005-06-10 16:46:36.495568752 -0400
++++ /tmp/dpep.VNPUUt/cernlib-2005.05.09/src/Imakefile	2005-06-10 16:50:33.508709032 -0400
+@@ -2,7 +2,7 @@
+ #define PassCDebugFlags
+ 
+ 
+-LIBDIRS= packlib pawlib graflib mathlib geant321 mclibs phtools
++LIBDIRS= kernlib packlib pawlib graflib mathlib geant321 mclibs phtools
+ 
+ SUBDIRS= $(LIBDIRS) patchy cfortran
+ 
+@@ -23,5 +23,5 @@
+ DelegateTarget(bin/kuipc,packlib)
+ 
+ DelegateTarget(lib/packlib,packlib)
+-DelegateTarget(lib/kernlib,packlib)
++DelegateTarget(lib/kernlib,kernlib)
+ 
+diff -urNad cernlib-2005.05.09/src/packlib/Imakefile /tmp/dpep.VNPUUt/cernlib-2005.05.09/src/packlib/Imakefile
+--- cernlib-2005.05.09/src/packlib/Imakefile	1997-10-02 10:09:19.000000000 -0400
++++ /tmp/dpep.VNPUUt/cernlib-2005.05.09/src/packlib/Imakefile	2005-06-10 16:48:25.928085636 -0400
+@@ -4,7 +4,7 @@
+ 
+ 
+ LIBDIRS= cspack epio fatmen ffread hbook hepdb kapack kuip \ @@\
+-	 minuit zbook zebra kernlib
++	 minuit zbook zebra
+ 
+ SUBDIRS= $(LIBDIRS)
+ 
+@@ -17,14 +17,10 @@
+ 
+ TestSubdirs($(LIBDIRS))
+ 
+-#ifndef CERNLIB_VAXVMS
+-
+-InstallLibSubdirs(kernlib)
+-
+-#else
++#ifdef CERNLIB_VAXVMS
+ 
+ SUBDIRS := $(SUBDIRS) vmslibfiles
+-InstallLibSubdirs(kernlib vmslibfiles)
++InstallLibSubdirs(vmslibfiles)
+ 
+ #endif
+ 

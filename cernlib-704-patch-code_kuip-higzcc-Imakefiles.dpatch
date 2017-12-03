@@ -1,0 +1,31 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 704-patch-code_kuip-higzcc-Imakefiles.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch Imakefiles after moving kuwhag.c from packlib to grafX11.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/graflib/higz/higzcc/Imakefile /tmp/dpep.IDWarm/cernlib-2005.05.09/src/graflib/higz/higzcc/Imakefile
+--- cernlib-2005.05.09/src/graflib/higz/higzcc/Imakefile	1998-11-16 04:36:53.000000000 -0500
++++ /tmp/dpep.IDWarm/cernlib-2005.05.09/src/graflib/higz/higzcc/Imakefile	2005-06-13 09:45:37.637201936 -0400
+@@ -1,7 +1,7 @@
+ DoIncludePackage(higz)
+ #include "pilot.h"
+ 
+-SRCS_C=	igvers.c
++SRCS_C=	igvers.c kuwhag.c /* <-- moved here from packlib/kuip/code_kuip */
+ 
+ #if defined(CERNLIB_FALCO) && !defined(CERNLIB_VAX)
+ SRCS_C := $(SRCS_C) falint.c 
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile /tmp/dpep.IDWarm/cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile
+--- cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile	2005-06-13 09:44:00.536042728 -0400
++++ /tmp/dpep.IDWarm/cernlib-2005.05.09/src/packlib/kuip/code_kuip/Imakefile	2005-06-13 09:44:41.448261682 -0400
+@@ -2,7 +2,7 @@
+ 
+ SRCS_C=	getline.c kalias.c kbrow.c kedit.c kexec.c khash.c kicon.c \ @@\
+ 	kienbr.c kipiaf.c kkern.c kmacro.c kmath.c kmenu.c kmisc.c \ @@\
+-	kmodel.c kmterm.c kuinit.c kutrue.c kuvers.c kuwhag.c	   \ @@\
++	kmodel.c kmterm.c kuinit.c kutrue.c kuvers.c         	   \ @@\
+ 	kuwhat.c kvect.c \ @@\
+ 	kmutil.c
+ 	/* ^^ moved here from code_motif.  --Kevin McCarty */

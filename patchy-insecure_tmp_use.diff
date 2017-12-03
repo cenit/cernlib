@@ -1,0 +1,44 @@
+diff -u patchy-orig/yindex patchy/yindex
+--- patchy-orig/yindex	2006-04-11 10:33:39.000000000 +0200
++++ patchy/yindex	2006-04-11 10:44:10.000000000 +0200
+@@ -11,7 +11,7 @@
+    [ -z "$PATCHY_VERSION" ] && PATCHY_VERSION="4.15"
+    PATCHY=$CERN/patchy/$PATCHY_VERSION/bin
+  
+-ftmp=/tmp/`echo $0 | awk -F/ '{ print $NF }'`$$
++#ftmp=/tmp/`echo $0 | awk -F/ '{ print $NF }'`$$
+  
+ if [ $# -eq 0 ] ; then
+    cat << EoI
+@@ -45,6 +45,8 @@
+       exit 1
+ fi
+  
++exttmp=`echo $0 | awk -F/ '{ print $NF }'`$$
++ftmp="$file-$exttmp"
+ if [ "$ext" != "pam" ] ; then
+    echo " Preparing temporary binary PAM file, ...wait"
+    ${PATCHY}/ytobin $pam $ftmp.pam - - ${ftmp}.lis .GO  > /dev/null
+Seulement dans patchy: yindex-orig
+diff -u patchy-orig/ylist patchy/ylist
+--- patchy-orig/ylist	2006-04-11 10:33:48.000000000 +0200
++++ patchy/ylist	2006-04-11 10:40:17.000000000 +0200
+@@ -11,7 +11,7 @@
+    [ -z "$PATCHY_VERSION" ] && PATCHY_VERSION="4.15"
+    PATCHY=$CERN/patchy/$PATCHY_VERSION/bin
+  
+-ftmp=/tmp/`echo $0 | awk -F/ '{ print $NF }'`$$
++#ftmp=/tmp/`echo $0 | awk -F/ '{ print $NF }'`$$
+  
+ if [ $# -eq 0 ] ; then
+    cat << EoI
+@@ -45,6 +45,8 @@
+       exit 1
+ fi
+  
++exttmp=`echo $0 | awk -F/ '{ print $NF }'`$$
++ftmp="$file-$exttmp"
+ if [ "$ext" != "pam" ] ; then
+    echo " Preparing temporary binary PAM file, ...wait"
+    ${PATCHY}/ytobin $pam $ftmp.pam - - ${ftmp}.lis .GO  > /dev/null
+Seulement dans patchy: ylist-orig

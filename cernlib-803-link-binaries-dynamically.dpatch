@@ -1,0 +1,76 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 803-link-binaries-dynamically.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Link binaries dynamically against CERN libraries.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/config/fortran.rules cernlib-2006.dfsg.2/src/config/fortran.rules
+--- cernlib-2006.dfsg.2~/src/config/fortran.rules	2007-12-14 01:25:54.000000000 +0000
++++ cernlib-2006.dfsg.2/src/config/fortran.rules	2007-12-14 01:34:31.000000000 +0000
+@@ -189,7 +189,7 @@
+  */
+ #ifndef CernlibDependLibrary
+ #define CernlibDependLibrary(cernlibs)\
+-$(filter-out +%,$(filter-out -%,$(shell cernlib cernlibs)))
++$(filter-out +%,$(filter-out -%,$(shell cernlib -dy cernlibs)))
+ #endif
+ 
+ /* Helper to use cernlib command
+@@ -202,17 +202,22 @@
+  *   cernlib utility to find give all required libraries ( ie. no extra
+  *   syslibs needed.
+  */
+-#ifndef CernlibFortranProgramTarget
+-#define CernlibFortranProgramTarget(program,objects,deplibs,locallibs,cernlibs)\
++#ifndef CernlibFortranStaticTarget
++#define CernlibFortranStaticTarget(program,objects,deplibs,locallibs,cernlibs)\
+ ProgramTargetName(program): SetWin32ObjSuffix(objects) deplibs CernlibDependLibrary(cernlibs)	@@\
+ 	RemoveTargetProgram($@)						@@\
+ 	@echo "Linking with cern libraries"				@@\
+-	@cernlib cernlibs						@@\
++	@CernlibCmd(cernlibs)						@@\
+ 	CernlibFortranLinkRule($@,$(FCLDOPTIONS),objects,locallibs $(LDLIBS),CernlibCmd(cernlibs)) @@\
+ 									@@\
+ clean::									@@\
+ 	RemoveFile(ProgramTargetName(program))				@@\
+ 
++#endif /*CernlibFortranStaticTarget */
++
++#ifndef CernlibFortranProgramTarget
++#define CernlibFortranProgramTarget(program,objects,deplibs,locallibs,cernlibs)\
++CernlibFortranStaticTarget(program,objects,deplibs,locallibs,-dy cernlibs)
+ #endif /*CernlibFortranProgramTarget */
+ 
+ /*
+@@ -233,8 +238,8 @@
+ ProgramTargetName(program): objects deplibs CernlibDependLibrary(cernlibs) @@\
+ 	RemoveTargetProgram($@)						@@\
+ 	@echo "Linking with cern libraries"				@@\
+-	@cernlib cernlibs						@@\
+-	CernlibLinkRule($@,$(LDOPTIONS),objects,locallibs $(LDLIBS),cernlib cernlibs) @@\
++	@cernlib -dy cernlibs						@@\
++	CernlibLinkRule($@,$(LDOPTIONS),objects,locallibs $(LDLIBS),cernlib -dy cernlibs) @@\
+ 									@@\
+ clean::									@@\
+ 	RemoveFile(ProgramTargetName(program))				@@\
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/Imakefile cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/programs/kxterm/Imakefile	2007-12-14 01:25:53.000000000 +0000
++++ cernlib-2006.dfsg.2/src/packlib/kuip/programs/kxterm/Imakefile	2007-12-14 01:25:57.000000000 +0000
+@@ -13,14 +13,14 @@
+ DefinePackageLibrary(kxtlib)
+ 
+ #if defined(CERNLIB_UNIX)
+-CLIBS= -G Motif kernlib
++CLIBS= -G Motif -u Xm
+ # if defined(CERNLIB_INTELIFC)
+ CLIBS= $(CLIBS) -nofor_main
+ # endif
+ #endif
+ 
+ #if defined(CERNLIB_VAXVMS)
+-CLIBS= graflib/motif packlib kernlib
++CLIBS= -G Motif Xm
+ #endif
+ 
+ 

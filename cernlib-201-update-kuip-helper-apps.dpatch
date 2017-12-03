@@ -1,0 +1,41 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 201-update-kuip-helper-apps.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Instead of "ghostview" and "lp", call the more modern helper apps
+## DP: "gv" and "lpr" from KUIP.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c /tmp/dpep.WCaWVF/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c
+--- cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c	2003-02-13 09:25:23.000000000 -0500
++++ /tmp/dpep.WCaWVF/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuinit.c	2005-06-09 12:34:49.057760462 -0400
+@@ -249,7 +249,7 @@
+     host_psviewer = getenv( "PSVIEWER" );
+   if( host_psviewer == NULL ) {
+ #ifdef UNIX
+-    host_psviewer = "ghostview";
++    host_psviewer = "gv";
+ #endif
+ #ifdef vms
+     host_psviewer = "VIEW/FORM=PS/INTERFACE=DECWINDOWS";
+@@ -277,7 +277,7 @@
+ # if defined(MSDOS) || defined(CERNLIB_WINNT)
+   ku_exel( "/KUIP/SET_SHOW/HOST_PRINTER 'print $*'" );
+ # else
+-  ku_exel( "/KUIP/SET_SHOW/HOST_PRINTER 'lp $*'" );
++  ku_exel( "/KUIP/SET_SHOW/HOST_PRINTER 'lpr $*'" );
+ # endif
+ #else
+   ku_exel( "/KUIP/SET_SHOW/HOST_PRINTER 'XPRINT $*'" );
+diff -urNad cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf /tmp/dpep.WCaWVF/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf
+--- cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf	1997-09-25 10:02:25.000000000 -0400
++++ /tmp/dpep.WCaWVF/cernlib-2005.05.09/src/packlib/kuip/code_kuip/kuipcdf.cdf	2005-06-09 12:35:59.499480148 -0400
+@@ -925,7 +925,7 @@
+ The startup value can be defined by the environment variables
+ 'KUIPPSVIEWER' or 'PSVIEWER'.
+ .
+-On Unix workstations it is by default set to 'ghostview'.
++On Unix workstations it is by default set to 'gv'.
+ On VAX/VMS the default commands is 'VIEW/FORM=PS/INTERFACE=DECWINDOWS'.
+ 
+ >Action kxhostpsviewer%C

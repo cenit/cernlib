@@ -1,0 +1,25 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 312-skip-duplicate-gamma.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Don't compile in redundant gamma function in isajet; use the mathlib one
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile /tmp/dpep.IX54UM/cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile
+--- cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile	2005-06-09 14:29:18.976494518 -0400
++++ /tmp/dpep.IX54UM/cernlib-2005.05.09/src/mclibs/isajet/code/Imakefile	2005-06-09 14:30:21.913126207 -0400
+@@ -1,12 +1,13 @@
+ DoIncludePackage(isajet)
+ #include "pilot.h"
+ 
++/* gamma.F removed; use the one defined in mathlib/gen/c/gamma.F */
+ SRCS_F= \ @@\
+ 	 amass.F charge.F cteq5l.F ctxc2i.F ctxi2c.F ctxin.F ctxout.F \ @@\
+ 	 dblpcm.F dblvec.F dboost.F decay.F decjet.F \ @@\
+ 	 domssm.F drllyn.F eebeg.F eemax.F elctrn.F epf.F evol01.F evol02.F \ @@\
+ 	 evol03.F evol05.F evol06.F evol07.F evolms.F evolve.F flavor.F \ @@\
+-	 fortop.F frgjet.F frgmnt.F gamma.F getpt.F gettot.F heavyx.F \ @@\
++	 fortop.F frgjet.F frgmnt.F         getpt.F gettot.F heavyx.F \ @@\
+ 	 hevolv.F higgs.F idanti.F idgen.F iframs.F inisap.F ipartns.F \ @@\
+ 	 ipjset.F iprtns.F irmov0.F isabeg.F isaend.F isaevt.F isaini.F \ @@\
+ 	 isajet.F isasrt.F ispjet.F istrad.F iswdky.F jetgen.F \ @@\

@@ -1,0 +1,192 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 321-support-gfortran.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Support compilation with gfortran.  Patch thanks to Harald Vogt, plus:
+## DP: - Extra hack to IOSTAT EOF return value to support gfortran-4.3.
+## DP: - Fix to patchy.car to change default fortran compiler in nyshell
+## DP:   in gfortran case.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/c/rteq464.F cernlib-2006.dfsg.2/src/mathlib/gen/c/rteq464.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/c/rteq464.F	1996-04-01 07:01:53.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/c/rteq464.F	2008-03-13 09:40:04.000000000 -0700
+@@ -45,7 +45,16 @@
+          MT=3
+          Z(1)=SQRT(SQRT(-D))
+          Z(2)=-Z(1)
++#if !defined(CERNLIB_GFORTRAN)
+          Z(3)=SQRT(-Z(1)**2)
++#else
++*        Using gfortran the following sqrt yields an inconsistent result
++*        if the imaginary part is a "negative zero"
++*        gfortran is conform with the Fortran ISO 2003 standard (1.6.1)
++*        Therefore if the imaginary part is a "negative zero" 
++*        it must be replaced by a "positive zero" to be consistent
++         if (imag(-z(1)**2) .eq. 0) z(3)=SQRT(real(-z(1)**2)+i*0)
++#endif
+          Z(4)=-Z(3)
+         ENDIF
+         DC=(-R12*D)**3
+@@ -94,9 +103,21 @@
+        W1=SQRT(U(K1)+I*0)
+        W2=SQRT(U(K2)+I*0)
+       ELSE
++#if !defined(CERNLIB_GFORTRAN)
+        MT=3
+        W1=SQRT(U(2)+I*U(3))
+        W2=SQRT(U(2)-I*U(3))
++#else
++*      For gfortran see above
++       MT=3
++       IF (U(3) .NE. 0.)  THEN
++         W1=SQRT(U(2)+I*U(3))
++         W2=SQRT(U(2)-I*U(3))
++       ELSE
++         W1=SQRT(U(2)+I*0)
++         W2=W1
++       ENDIF
++#endif
+       ENDIF
+       W3=0
+       IF(W1*W2 .NE. 0) W3=-Q/(8*W1*W2)
+diff -urNad cernlib-2006.dfsg.2~/src/mathlib/gen/v/nranf.F cernlib-2006.dfsg.2/src/mathlib/gen/v/nranf.F
+--- cernlib-2006.dfsg.2~/src/mathlib/gen/v/nranf.F	1996-04-01 07:02:54.000000000 -0800
++++ cernlib-2006.dfsg.2/src/mathlib/gen/v/nranf.F	2008-03-13 09:40:04.000000000 -0700
+@@ -14,10 +14,12 @@
+       VECTOR(I) = RNDM(I)
+   100 CONTINUE
+       RETURN
+-      ENTRY NRANIN (V)
++      END
++      SUBROUTINE NRANIN (V)
+       CALL RDMIN(V)
+       RETURN
+-      ENTRY NRANUT (V)
++      END
++      SUBROUTINE NRANUT (V)
+       CALL RDMOUT(V)
+       RETURN
+       END
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/hbook/chbook/Imakefile cernlib-2006.dfsg.2/src/packlib/hbook/chbook/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/hbook/chbook/Imakefile	1999-11-15 05:25:58.000000000 -0800
++++ cernlib-2006.dfsg.2/src/packlib/hbook/chbook/Imakefile	2008-03-13 09:40:04.000000000 -0700
+@@ -13,7 +13,19 @@
+ #endif
+ 
+ #if defined(CERNLIB_LINUX)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -D_SVID_SOURCE
++#endif
++
++#if defined(CERNLIB_LINUX) && !defined(CERNLIB_QMLXIA64)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
++#endif
++
++#if defined(CERNLIB_QMLXIA64) 
++#if defined(CERNLIB_GFORTRAN)
++EXTRA_DEFINES := $(EXTRA_DEFINES) -DgFortran
++#else
+ EXTRA_DEFINES := $(EXTRA_DEFINES) -Df2cFortran
+ #endif
++#endif
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/unix/gfortgs/Imakefile cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/unix/gfortgs/Imakefile
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/unix/gfortgs/Imakefile	2006-09-04 05:32:59.000000000 -0700
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/unix/gfortgs/Imakefile	2008-03-13 09:40:04.000000000 -0700
+@@ -1,6 +1,6 @@
+ 
+-SRCS_F= irndm.F qnext.F rdmin.F
++SRCS_F= irndm.F qnext.F rdmin.F kernlibgetarg.F
+ 
+-SRCS_C= lshift.c ishftr.c getarg.c
++SRCS_C= lshift.c ishftr.c /* getarg.c */
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/unix/gfortgs/kernlibgetarg.F cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/unix/gfortgs/kernlibgetarg.F
+--- cernlib-2006.dfsg.2~/src/packlib/kernlib/kerngen/unix/gfortgs/kernlibgetarg.F	1969-12-31 16:00:00.000000000 -0800
++++ cernlib-2006.dfsg.2/src/packlib/kernlib/kerngen/unix/gfortgs/kernlibgetarg.F	2008-03-13 09:40:04.000000000 -0700
+@@ -0,0 +1,19 @@
++*     Wrapper GETARG routine for gfortran,
++*     originally written by Harald Vogt <hvogt@ifh.de>
++*
++*     SUBROUTINE GETARG (JARG, CHARG)
++*     The following stuff is required to use gfortrans inline routine GETARG
++*     It is required to avoid the calling GETARG here which conflicts
++*     to the Fortran rules
++*     CHARACTER    CHARG*(*)
++*     CALL MYGETARG (JARG, CHARG)
++*     END
++
++      SUBROUTINE KERNLIBGETARG (JARG, CHARG)
++      CHARACTER    CHARG*(*)
++*     gfortran translates the following line to a call
++*     to its library routine _gfortran_getarg_i4
++*     therefore it will not clash in the linking step
++      CALL GETARG (JARG, CHARG)
++      END
++ 
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/kuip/kuip/kfor.h cernlib-2006.dfsg.2/src/packlib/kuip/kuip/kfor.h
+--- cernlib-2006.dfsg.2~/src/packlib/kuip/kuip/kfor.h	2006-09-15 02:35:30.000000000 -0700
++++ cernlib-2006.dfsg.2/src/packlib/kuip/kuip/kfor.h	2008-03-13 09:40:05.000000000 -0700
+@@ -1031,7 +1031,7 @@
+ #if !defined(CERNLIB_GFORTRAN)
+ #define  Getarg           F77_NAME(getarg,GETARG)
+ #else
+-#define  Getarg           _gfortran_getarg_i4
++#define  Getarg           F77_NAME(kernlibgetarg,KERNLIBGETARG)
+ #endif
+                  extern SUBROUTINE Getarg;
+ #define  Goparm           F77_NAME(goparm,GOPARM)
+diff -urNad cernlib-2006.dfsg.2~/src/packlib/zebra/fq/fzdaeof.inc cernlib-2006.dfsg.2/src/packlib/zebra/fq/fzdaeof.inc
+--- cernlib-2006.dfsg.2~/src/packlib/zebra/fq/fzdaeof.inc	2006-09-15 02:35:31.000000000 -0700
++++ cernlib-2006.dfsg.2/src/packlib/zebra/fq/fzdaeof.inc	2008-03-13 09:40:05.000000000 -0700
+@@ -46,8 +46,12 @@
+ #elif defined(CERNLIB_WINDOWS)
+ *    only valid for dec fortran (e.g. not f2c + microsoft c)
+       PARAMETER    (IOSEOF = 36)
+-#elif defined(CERNLIB_GFORTRAN)
++#elif defined(CERNLIB_GFORTRAN) && defined(__GNUC__) && defined(__GNUC_MINOR__)
++# if (__GNUC__ > 4 || __GNUC_MINOR__ >= 3)
++      PARAMETER    (IOSEOF = 5002)
++# else
+       PARAMETER    (IOSEOF = 3)
++# endif
+ #elif 1
+       PARAMETER    (IOSEOF = -1)
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/patchy/fcasplit.F cernlib-2006.dfsg.2/src/patchy/fcasplit.F
+--- cernlib-2006.dfsg.2~/src/patchy/fcasplit.F	2008-03-13 09:39:39.000000000 -0700
++++ cernlib-2006.dfsg.2/src/patchy/fcasplit.F	2008-03-13 09:40:05.000000000 -0700
+@@ -352,7 +352,11 @@
+       PARAMETER   (CHEXAS  = '.s')
+       PARAMETER   (CHEXOBJ = '.o')
+ 
++#if defined(CERNLIB_GFORTRAN)
++      PARAMETER   (CHWHF = 'gfortran  ')
++#else
+       PARAMETER   (CHWHF = 'g77  ')
++#endif
+       PARAMETER   (CHWHC = 'gcc  ')
+       PARAMETER   (CHWHA = 'as  ')
+ #endif
+diff -urNad cernlib-2006.dfsg.2~/src/patchy/patchy.car cernlib-2006.dfsg.2/src/patchy/patchy.car
+--- cernlib-2006.dfsg.2~/src/patchy/patchy.car	2006-09-04 05:33:00.000000000 -0700
++++ cernlib-2006.dfsg.2/src/patchy/patchy.car	2008-03-13 09:41:01.000000000 -0700
+@@ -25968,10 +25968,14 @@
+ +SELF, IF=QMLNX.
+       CALL SMCIL (-1, 'fo:1'  , '-O2')
+       CALL SMCIL (-1, 'fo:2'  , '-O0')
+-      CALL SMCIL (-1, 'fopt'  , '-c -Nx800 -Nc200')
++      CALL SMCIL (-1, 'fopt'  , '-c -g')
+       CALL SMCIL (-1, 'co:1'  , '-O2')
+       CALL SMCIL (-1, 'co:2'  , '-O0')
+-      CALL SMCIL (-1, 'copt'  , '-c -posix')
++      CALL SMCIL (-1, 'copt'  , '-c -g')
++
+++SELF, IF=GFORTRAN.
++      CALL SMCIL (-1, 'fc'    , 'gfortran')
++
+ +SELF, IF=QMNXT.
+ +SELF, IF=QMSGI.
+ +SELF, IF=QMSUN.

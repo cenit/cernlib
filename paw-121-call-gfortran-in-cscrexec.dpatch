@@ -1,0 +1,38 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 121-call-gfortran-in-cscrexec.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Build temporary shared libs with gfortran when it is the default
+## DP: Fortran compiler on Linux and OS X.
+
+@DPATCH@
+diff -urNad paw-2.14.04.dfsg~/src/pawlib/comis/code/cscrexec.F paw-2.14.04.dfsg/src/pawlib/comis/code/cscrexec.F
+--- paw-2.14.04.dfsg~/src/pawlib/comis/code/cscrexec.F	2007-03-06 15:05:30.173089849 -0500
++++ paw-2.14.04.dfsg/src/pawlib/comis/code/cscrexec.F	2007-03-06 15:08:05.919014086 -0500
+@@ -179,14 +179,25 @@
+       ENDIF
+ #endif
+ #if defined(CERNLIB_LINUX) && !defined(CERNLIB_MACOSX)
+-      CHLINE=                   'ld -shared -o '
++#if defined (CERNLIB_GFORTRAN)
++      CHLINE=                   'gfortran -shared -o '
+      +                    // NAME(:LN) //'.sl '// NAME(:LN) //'.o'
++#else
++      CHLINE=                   'g77 -shared -o '
++     +                    // NAME(:LN) //'.sl '// NAME(:LN) //'.o'
++#endif
+ #endif
+ #if defined(CERNLIB_MACOSX)
++#if defined (CERNLIB_GFORTRAN)
++      CHLINE= 'gfortran -bundle -bundle_loader `/usr/bin/which pawX11`'
++     +                    // ' -bind_at_load -o '
++     +                    // NAME(:LN) //'.sl '// NAME(:LN) //'.o'
++#else
+       CHLINE= 'g77 -bundle -bundle_loader `/usr/bin/which pawX11` '
+      +                    // ' -bind_at_load -o '
+      +                    // NAME(:LN) //'.sl '// NAME(:LN) //'.o'
+ #endif
++#endif
+ #if defined(CERNLIB_ALPHA_OSF)
+         CHLINE=                   'ld -shared -o '
+      +                    // NAME(:LN) //'.sl '// NAME(:LN) //'.o \\'

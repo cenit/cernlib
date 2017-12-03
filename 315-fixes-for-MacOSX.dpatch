@@ -1,0 +1,230 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 315-fixes-for-MacOSX.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch set (mostly due to Keisuke Fujii) to allow CERNLIB to compile
+## DP: and run on OS X.
+
+@DPATCH@
+diff -urNad cernlib-2006.dfsg~/src/Imakefile cernlib-2006.dfsg/src/Imakefile
+--- cernlib-2006.dfsg~/src/Imakefile	2007-01-09 19:27:31.059892042 -0500
++++ cernlib-2006.dfsg/src/Imakefile	2007-01-09 19:27:33.049467233 -0500
+@@ -7,8 +7,12 @@
+ SUBDIRS= $(LIBDIRS) patchy cfortran
+ 
+ #ifdef CERNLIB_UNIX
++#ifdef CERNLIB_MACOSX
++SUBDIRS:= $(SUBDIRS) p5boot scripts
++#else
+ SUBDIRS:= $(SUBDIRS) p5boot scripts mgr
+ #endif
++#endif
+ 
+ InstallLibSubdirs($(LIBDIRS))
+ 
+diff -urNad cernlib-2006.dfsg~/src/config/Imake.rules cernlib-2006.dfsg/src/config/Imake.rules
+--- cernlib-2006.dfsg~/src/config/Imake.rules	2005-04-18 11:39:25.000000000 -0400
++++ cernlib-2006.dfsg/src/config/Imake.rules	2007-01-09 19:27:33.050467019 -0500
+@@ -2171,7 +2171,7 @@
+ #define CppScriptTarget(dst,src,defs,deplist)				@@\
+ dst::  src deplist							@@\
+ 	RemoveFile($@)							@@\
+-	$(CPP) defs <src | CppSedMagic >$@				@@\
++	$(CPP) defs src | CppSedMagic >$@				@@\
+ 	chmod a+x $@							@@\
+ 									@@\
+ clean::									@@\
+@@ -2203,7 +2203,7 @@
+ #define CppFileTarget(dst,src,defs,deplist)				@@\
+ dst::  src deplist							@@\
+ 	RemoveFile($@)							@@\
+-	$(CPP) defs <src | CppSedMagic >$@				@@\
++	$(CPP) defs src | CppSedMagic >$@				@@\
+ 									@@\
+ clean::									@@\
+ 	RemoveFiles(dst)
+diff -urNad cernlib-2006.dfsg~/src/config/MacOSX.cf cernlib-2006.dfsg/src/config/MacOSX.cf
+--- cernlib-2006.dfsg~/src/config/MacOSX.cf	2006-11-23 09:25:33.000000000 -0500
++++ cernlib-2006.dfsg/src/config/MacOSX.cf	2007-01-09 19:41:23.844091722 -0500
+@@ -73,8 +73,12 @@
+ #define	BuildDPMSExt	NO
+ 
+ # define BuildXvExt     NO
+-#define OptimizedCDebugFlags -O0 -g -pipe
+-#define ExtraLoadFlags -L/usr/X11R6/lib
++
++#ifndef OptimizationLevel
++# define OptimizationLevel -O
++#endif
++#define OptimizedCDebugFlags OptimizationLevel -g -pipe
++#define ExtraLoadFlags -L/usr/X11R6/lib -L/sw/lib
+ 
+ #define BuildExamples YES
+ 
+@@ -87,9 +91,11 @@
+ #define HasVoidSignalReturn YES
+ 
+ #ifndef DependFlags
+-#define DependFlags -I/usr/include/ansi -I/usr/include/bsd
++#define DependFlags -I/usr/include/ansi -I/usr/include/bsd -I/sw/include
+ #endif
+ 
++#define StandardIncludes -I/sw/include
++
+ #define InstallCmd	install	/* unlink old */
+ 
+ /* #define ArCmd libtool -a -o */
+@@ -103,7 +109,7 @@
+ 
+ #define PrimaryScreenResolution 95	/* for 17 inch screen */
+ 
+-#define ServerCDebugFlags -O0 -g -pipe
++#define ServerCDebugFlags OptimizationLevel -g -pipe
+ 
+ /* #define HasGcc YES */
+ #ifndef HasGcc
+@@ -122,7 +128,7 @@
+ #endif
+ #endif
+ #ifndef CcCmd
+-#define CcCmd cc
++#define CcCmd cc -g
+ #endif
+ 
+ #define CppCmd        /usr/bin/cpp
+@@ -133,25 +139,35 @@
+ /* #define GLX_DIRECT_RENDERING */
+ 
+ #define f2cFortran              YES
+-#define FortranCmd              gfortran
++#define FortranCmd              gfortran -g
+ #define XargsCmd                xargs
+ #define FortranSaveFlags        /* -fno-automatic */ /* Everything static !? */
+-#define OptimisedFortranFlags	-O0 -g -funroll-loops -fomit-frame-pointer \
++#define OptimisedFortranFlags	OptimizationLevel -g -funroll-loops \
+ 				-ftree-vectorize
+-#define DefaultFCOptions        -fno-second-underscore
+-/*#define CernlibSystem           -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX \
+-				-DCERNLIB_PPC -DCERNLIB_QMGLIBC \
+-				-DCERNLIB_MACOSX -DCERNLIB_GFORTRAN */
++#define DefaultFCOptions        -fno-second-underscore OptimizationLevel
+ 
++#ifndef CernlibLocalDefines
++# define CernlibLocalDefines
++#endif
++#ifdef PpcDarwinArchitecture
++#define CernlibSystem           -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX \
++				-DCERNLIB_PPC -DCERNLIB_QMGLIBC \
++				-DCERNLIB_MACOSX -DCERNLIB_GFORTRAN \
++				CernlibLocalDefines
++#else
+ #define CernlibSystem           -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX \
+ 				-DCERNLIB_QMGLIBC \
+-				-DCERNLIB_MACOSX -DCERNLIB_GFORTRAN 
++				-DCERNLIB_MACOSX -DCERNLIB_GFORTRAN \
++				CernlibLocalDefines
++#endif
+ 
+ /* #define CERNLIB_SHIFT NO */
+ #define CERNLIB_LINUX
+ #define CERNLIB_UNIX
+ #define CERNLIB_LNX
+-/*#define CERNLIB_PPC*/
++#ifdef PpcDarwinArchitecture
++# define CERNLIB_PPC
++#endif
+ #define CERNLIB_QMGLIBC
+ #define CERNLIB_MACOSX
+ #define CERNLIB_GFORTRAN
+diff -urNad cernlib-2006.dfsg~/src/config/MacOSX.rules cernlib-2006.dfsg/src/config/MacOSX.rules
+--- cernlib-2006.dfsg~/src/config/MacOSX.rules	2006-09-04 08:32:56.000000000 -0400
++++ cernlib-2006.dfsg/src/config/MacOSX.rules	2007-01-09 15:47:15.542676000 -0500
+@@ -28,18 +28,24 @@
+ #endif
+ 
+ 
+-
+-
+ /*
+  * InstallSharedLibrary - generate rules to install the shared library.
++ * Edited 2003-05-09 by Kevin McCarty to add an install.shlib target.
+  */
+ #ifndef InstallSharedLibrary
+ #define InstallSharedLibrary(libname,rev,dest)				@@\
+-install:: Concat(lib,libname.dylib)					@@\
++.PHONY: install.shlib shlib/libname					@@\
++shlib/libname:: $(DESTDIR)dest/SharedLibraryTargetName(libname)		@@\
++									@@\
++install.shlib:: $(DESTDIR)dest/SharedLibraryTargetName(libname)		@@\
++									@@\
++$(DESTDIR)dest/SharedLibraryTargetName(libname): SharedLibraryTargetName(libname) @@\
+ 	MakeDir($(DESTDIR)dest)						@@\
+-	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.dylib) $(DESTDIR)dest
+-@@\
+-
++	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.rev.dylib) $(DESTDIR)dest @@\
++	(T=`echo Concat($(DESTDIR)dest/lib,libname.rev.dylib) | sed 's/\.[^\.d]*\.dylib/\.dylib/'`;\ @@\
++		$(RM) $$T && $(LN) Concat(lib,libname.rev.dylib) $$T)	@@\
++	$(RM) Concat($(DESTDIR)dest/lib,libname.dylib)			@@\
++	$(LN) Concat(lib,libname.rev.dylib) Concat($(DESTDIR)dest/lib,libname.dylib)
+ #endif /* InstallSharedLibrary */
+ 
+ /*
+diff -urNad cernlib-2006.dfsg~/src/config/site.def cernlib-2006.dfsg/src/config/site.def
+--- cernlib-2006.dfsg~/src/config/site.def	2002-04-26 10:46:04.000000000 -0400
++++ cernlib-2006.dfsg/src/config/site.def	2007-01-09 19:27:33.051466806 -0500
+@@ -99,9 +99,7 @@
+ /*   if it is already defined and false, undef it! */
+ /* do not use shift by default
+ #if defined(CERNLIB_UNIX) && !defined(CERNLIB_WINNT)
+-#if ! defined(CERNLIB_SHIFT)
+-#define CERNLIB_SHIFT
+-#elif  ! CERNLIB_SHIFT
++#if defined(CERNLIB_SHIFT) && !CERNLIB_SHIFT
+ #undef CERNLIB_SHIFT
+ #endif
+ #endif
+diff -urNad cernlib-2005.05.09.dfsg~/src/geant321/gxint/Imakefile cernlib-2005.05.09.dfsg/src/geant321/gxint/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/geant321/gxint/Imakefile	1997-01-29 11:37:40.000000000 -0500
++++ cernlib-2005.05.09.dfsg/src/geant321/gxint/Imakefile	2005-12-07 14:47:34.140148771 -0500
+@@ -30,7 +30,7 @@
+ 
+ gxint321.f:  gxint.F
+ 	RemoveFile($@)
+-	$(CPP) $(FORTRANALLDEFMDEPEND) < $^ | sed -e '/^$$/d' | CppSedMagic >$@
++	FortranCmd -E $(FORTRANALLDEFMDEPEND) $^ | sed -e '/^$$/d' | CppSedMagic >$@
+ 
+ install.lib:: $(CERN_LIBDIR)/gxint.f
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/cojets/data/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/cojets/data/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/cojets/data/Imakefile	1996-03-27 04:31:06.000000000 -0500
++++ cernlib-2005.05.09.dfsg/src/mclibs/cojets/data/Imakefile	2005-12-07 14:47:34.141148558 -0500
+@@ -1,11 +1,11 @@
+ 
+ .SUFFIXES:
+ 
+-CopyFile(cojets.cpp,cojets.cin)
++CopyFile(cojets.cpp,cojets.s)
+ CopyFile(decay.cpp,decay.cin)
+ CopyFile(table.cpp,table.cin)
+ 
+-CppFileTarget(cojets.dat,cojets.cin,NullParameter,table.cin decay.cin)
++CppFileTarget(cojets.dat,cojets.s,-E -traditional,table.cin decay.cin)
+ 
+ PackageDirFileTarget(cojets.dat)
+ 
+diff -urNad cernlib-2005.05.09.dfsg~/src/mclibs/isajet/data/Imakefile cernlib-2005.05.09.dfsg/src/mclibs/isajet/data/Imakefile
+--- cernlib-2005.05.09.dfsg~/src/mclibs/isajet/data/Imakefile	1996-03-27 04:33:19.000000000 -0500
++++ cernlib-2005.05.09.dfsg/src/mclibs/isajet/data/Imakefile	2005-12-07 14:47:34.141148558 -0500
+@@ -1,9 +1,9 @@
+ 
+ .SUFFIXES:
+ 
+-CopyFile(decay.cpp,decay.cin)
++CopyFile(decay.cpp,decay.s)
+ 
+-CppFileTarget(isajet.dat,decay.cin,NullParameter,NullParameter)
++CppFileTarget(isajet.dat,decay.s,-E -traditional ,NullParameter)
+ 
+ PackageDirFileTarget(isajet.dat)
+ 

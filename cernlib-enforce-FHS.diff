@@ -1,0 +1,12 @@
+diff -ur ../original-cernlib-source/src/geant321/miface/gmorin.F src/geant321/miface/gmorin.F
+--- ../original-cernlib-source/src/geant321/miface/gmorin.F     Mon Sep 30 10:26:05 1996
++++ src/geant321/miface/gmorin.F     Tue Oct 22 07:27:55 2002
+@@ -112,7 +112,7 @@
+          OPEN(UNIT=MICROS,FILE=XSFILE, STATUS='OLD',READONLY)
+ #endif
+ #if defined(CERNLIB_UNIX)||defined(CERNLIB_CRAY)
+-         XSFILE = 'xsneut95.dat'
++         XSFILE = 'DATADIR/xsneut95.dat'
+          INQUIRE(FILE=XSFILE,EXIST=EXISTS)
+          IF(.NOT.EXISTS) THEN
+             CHROOT=' '

@@ -1,0 +1,190 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 119-fix-compiler-warnings.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix a number of compiler warnings.  Courtesy of Harald Vogt.
+
+@DPATCH@
+diff -urNad paw-2.14.04~/src/pawlib/paw/ntuple/cern_types.h paw-2.14.04/src/pawlib/paw/ntuple/cern_types.h
+--- paw-2.14.04~/src/pawlib/paw/ntuple/cern_types.h	1996-04-23 14:37:54.000000000 -0400
++++ paw-2.14.04/src/pawlib/paw/ntuple/cern_types.h	2006-09-08 14:58:22.811814451 -0400
+@@ -36,26 +36,38 @@
+ 
+ typedef unsigned int		UInt32;
+ 
++#ifndef UINT32_MAX
+ #define	UINT32_MAX	UINT_MAX
++#endif
+ 
+ 
+ /* typedef unsigned long long	UInt64; */
+ typedef unsigned long 		UInt64;
+ 
++#ifndef UINT64_MAX
+ #define	UINT64_MAX	ULONG_MAX
++#endif
+ 
+ 
+ typedef int			Int32;
+ 
++#ifndef INT32_MAX
+ #define	INT32_MAX	INT_MAX
++#endif
++#ifndef INT32_MIN
+ #define	INT32_MIN	INT_MIN
++#endif
+ 
+ 
+ /* typedef long long		Int64; */
+ typedef long			Int64;
+ 
++#ifndef INT64_MAX
+ #define	INT64_MAX	LONG_MAX
++#endif
++#ifndef INT64_MIN
+ #define	INT64_MIN	LONG_MIN
++#endif
+ 
+ 
+ typedef float			Float32;
+diff -urNad paw-2.14.04~/src/pawlib/paw/ntuple/qp_vvec.c paw-2.14.04/src/pawlib/paw/ntuple/qp_vvec.c
+--- paw-2.14.04~/src/pawlib/paw/ntuple/qp_vvec.c	1996-05-12 11:13:56.000000000 -0400
++++ paw-2.14.04/src/pawlib/paw/ntuple/qp_vvec.c	2006-09-08 14:49:56.490766940 -0400
+@@ -19,6 +19,7 @@
+  */
+ 
+ #include	<stdlib.h>
++#include	<string.h>
+ 
+ #include	"qp_report.h"
+ #include	"qp_vvec.h"
+diff -urNad paw-2.14.04~/src/pawlib/paw/xbae/caption.c paw-2.14.04/src/pawlib/paw/xbae/caption.c
+--- paw-2.14.04~/src/pawlib/paw/xbae/caption.c	1996-03-01 06:39:36.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/xbae/caption.c	2006-09-08 15:05:15.658762762 -0400
+@@ -244,7 +244,7 @@
+      * it will use our name as it's label.
+      */
+     (void)
+-        XtVaCreateManagedWidget(XtName(new),
++        XtVaCreateManagedWidget(XtName((Widget)new),
+                                 xmLabelWidgetClass, (Widget)new,
+                                 XmNbackground,  new->core.background_pixel,
+                                 XmNforeground,  new->manager.foreground,
+@@ -613,7 +613,7 @@
+          * to handle gadgets (the Motif function always calls the gadgets
+          * resize method)
+          */
+-#if XmREVISION == 1
++#if (XmREVISION == 1) && (! defined(LESSTIF_VERSION))
+         _XmConfigureObject((RectObj)UserChild(cw),
+ #else
+         _XmConfigureObject((Widget)UserChild(cw),
+diff -urNad paw-2.14.04~/src/pawlib/paw/xbae/clip.c paw-2.14.04/src/pawlib/paw/xbae/clip.c
+--- paw-2.14.04~/src/pawlib/paw/xbae/clip.c	1996-03-01 06:39:36.000000000 -0500
++++ paw-2.14.04/src/pawlib/paw/xbae/clip.c	2006-09-08 14:49:56.491766727 -0400
+@@ -190,8 +190,8 @@
+      * XXX It might be more efficient to fake up an Expose event
+      * and call Redisplay directly
+      */
+-    if (XtIsRealized(cw))
+-        XClearArea(XtDisplay(cw), XtWindow(cw),
++    if (XtIsRealized((Widget)cw))
++        XClearArea(XtDisplay((Widget)cw), XtWindow((Widget)cw),
+                    0, 0,
+                    0 /*Full Width*/, 0 /*Full Height*/,
+                    True);
+diff -urNad paw-2.14.04~/src/pawlib/paw/xbae/matrix.c paw-2.14.04/src/pawlib/paw/xbae/matrix.c
+--- paw-2.14.04~/src/pawlib/paw/xbae/matrix.c	1998-09-02 11:23:57.000000000 -0400
++++ paw-2.14.04/src/pawlib/paw/xbae/matrix.c	2006-09-08 14:49:56.494766087 -0400
+@@ -67,7 +67,10 @@
+ #endif
+ 
+ /* this BSDism is used to often to replace it in the code */
++/* but avoid warning of redefinition for linux OS         */
++#ifndef linux
+ #define bcopy(src,dst,n) memmove(dst,src,n)
++#endif
+ 
+ /*
+  * Translations for Matrix (these will also be used by the Clip child).
+@@ -3467,7 +3470,7 @@
+      */
+     VERT_ORIGIN(mw) = call_data->value;
+ 
+-    if (!XtIsRealized(mw))
++    if (!XtIsRealized((Widget)mw))
+         return;
+ 
+     /*
+@@ -3646,7 +3649,7 @@
+      */
+     HORIZ_ORIGIN(mw) = call_data->value;
+ 
+-    if (!XtIsRealized(mw))
++    if (!XtIsRealized((Widget)mw))
+         return;
+ 
+     /*
+@@ -6162,7 +6165,7 @@
+     (*((XbaeMatrixWidgetClass) XtClass(mw))->matrix_class.cancel_edit)
+         (mw, True);
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Generate expose events on Matrix and Clip to force the
+          * new rows to be drawn.
+@@ -6254,7 +6257,7 @@
+     (*((XbaeMatrixWidgetClass) XtClass(mw))->matrix_class.cancel_edit)
+         (mw, True);
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Generate expose events on Matrix and Clip to force the
+          * rows to be redrawn.
+@@ -6349,7 +6352,7 @@
+     (*((XbaeMatrixWidgetClass) XtClass(mw))->matrix_class.cancel_edit)
+         (mw, True);
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Generate expose events on Matrix and Clip to force the
+          * new columns to be drawn.
+@@ -6446,7 +6449,7 @@
+     (*((XbaeMatrixWidgetClass) XtClass(mw))->matrix_class.cancel_edit)
+         (mw, True);
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Generate expose events on Matrix and Clip to force the
+          * columns to be redrawn.
+@@ -6528,7 +6531,7 @@
+         for (j = 0; j < mw->matrix.columns; j++)
+             mw->matrix.cell_background[i + position][j] = colors[i];
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Redraw all the visible non-fixed cells. We don't need to clear first
+          * since only the color changed.
+@@ -6626,7 +6629,7 @@
+         for (j = 0; j < num_colors; j++)
+             mw->matrix.cell_background[i][j + position] = colors[j];
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Redraw all the visible non-fixed cells. We don't need to clear first
+          * since only the color changed.
+@@ -6716,7 +6719,7 @@
+      */
+     mw->matrix.cell_background[row][column] = color;
+ 
+-    if (XtIsRealized(mw)) {
++    if (XtIsRealized((Widget)mw)) {
+         /*
+          * Redraw the cell if it is visible
+          */

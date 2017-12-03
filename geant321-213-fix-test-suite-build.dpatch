@@ -1,0 +1,67 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 213-fix-test-suite-build.dpatch by Patrice Dumas <pertusus@free.fr>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix build of test-suite for tests during package build.
+
+@DPATCH@
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam1/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam1/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam1/Imakefile	1997-04-10 08:33:14.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam1/Imakefile	2008-01-04 17:03:52.000000000 -0800
+@@ -3,7 +3,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(exam1,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),graflib packlib)
++CernlibFortranProgramTarget(exam1,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
+ 
+ TestTarget(exam1,gexam1.dat,gexam1.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam2/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam2/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam2/Imakefile	1997-04-10 08:33:20.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam2/Imakefile	2008-01-04 17:03:52.000000000 -0800
+@@ -13,7 +13,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(exam2,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),graflib packlib)
++CernlibFortranProgramTarget(exam2,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
+ 
+ TestTarget(exam2,gexam2.dat,gexam2.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam3/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam3/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam3/Imakefile	1997-04-10 08:33:34.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam3/Imakefile	2008-01-04 17:03:52.000000000 -0800
+@@ -3,7 +3,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(exam3,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),graflib packlib)
++CernlibFortranProgramTarget(exam3,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
+ 
+ TestTarget(exam3,gexam3.dat,gexam3.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam4/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam4/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam4/Imakefile	1997-04-10 08:33:37.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam4/Imakefile	2008-01-04 17:03:52.000000000 -0800
+@@ -14,7 +14,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(exam4,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),graflib packlib)
++CernlibFortranProgramTarget(exam4,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
+ 
+ TestTarget(exam4,gexam4.dat,gexam4.input)
+ 
+diff -urNad geant321-3.21.14.dfsg~/src/geant321/examples/gexam5/Imakefile geant321-3.21.14.dfsg/src/geant321/examples/gexam5/Imakefile
+--- geant321-3.21.14.dfsg~/src/geant321/examples/gexam5/Imakefile	1997-04-10 08:33:38.000000000 -0700
++++ geant321-3.21.14.dfsg/src/geant321/examples/gexam5/Imakefile	2008-01-04 17:03:52.000000000 -0800
+@@ -3,7 +3,7 @@
+ 
+ DefinePackageLibrary(NullParameter)
+ 
+-CernlibFortranProgramTarget(exam5,$(OBJS),$(PACKAGE_LIB),$(PACKAGE_LIB),graflib packlib)
++CernlibFortranProgramTarget(exam5,$(OBJS),NullParameter,NullParameter,graflib packlib geant321)
+ 
+ TestTarget(exam5,gexam5.dat,gexam5.input)
+ 

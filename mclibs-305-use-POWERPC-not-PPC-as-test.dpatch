@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 305-use-POWERPC-not-PPC-as-test.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Since patch 304 changed the meaning of CERNLIB_PPC to a mere endianness
+## DP: test, we now use CERNLIB_POWERPC to mean actually checking for a PowerPC
+## DP: processor; fix the three occurences of this in Imakefiles.
+
+@DPATCH@
+diff -urNad cernlib-2005.05.09/src/mclibs/herwig/code/Imakefile /tmp/dpep.fQy2EP/cernlib-2005.05.09/src/mclibs/herwig/code/Imakefile
+--- cernlib-2005.05.09/src/mclibs/herwig/code/Imakefile	1998-09-25 11:34:28.000000000 -0400
++++ /tmp/dpep.fQy2EP/cernlib-2005.05.09/src/mclibs/herwig/code/Imakefile	2005-06-09 10:51:45.913019086 -0400
+@@ -43,7 +43,7 @@
+ 
+ SubdirLibraryTarget(NullParameter,NullParameter)
+ 
+-#if defined(CERNLIB_LINUX) && defined(CERNLIB_PPC)
++#if defined(CERNLIB_LINUX) && defined(CERNLIB_POWERPC)
+ SpecialFortranLibObjectRule(hwuci2,hwuci2,-O0,NullParameter)
+ #endif
+ 

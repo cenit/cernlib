@@ -1,0 +1,20 @@
+--- src/scripts/gxint-old	2005-11-23 23:11:08.000000000 +0100
++++ src/scripts/gxint	2005-11-29 11:42:30.000000000 +0100
+@@ -103,15 +103,8 @@
+    echo "gxint_Warning: no user program specified"
+ fi
+  
+- 
+- 
+-if [ -z "$CERN" ] ; then
+-  if [ ! -d /cern ]; then
+-   echo "gxint_Error: shell variable CERN must be set or /cern must exist"
+-   exit 1
+-  fi
+-  CERN="/cern" ; export CERN
+-fi
++# not used after the sed one liner in the spec file 
++if [ -z "$CERN" ] ; then CERN="/usr"; fi
+  
+ if [ "$drv" = "/GKS" ] ; then
+   if [ -z "$GKSR" ] ; then

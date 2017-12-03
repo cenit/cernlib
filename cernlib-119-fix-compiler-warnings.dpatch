@@ -1,0 +1,595 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 119-fix-compiler-warnings.dpatch by  <kmccarty@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fix numerous minor compiler warnings.  Patch from Harald Vogt,
+## DP: 2006-07-20.
+
+@DPATCH@
+diff -urNad cernlib-2005.dfsg~/src/graflib/dzdoc/dzdkern/dzdcod.F cernlib-2005.dfsg/src/graflib/dzdoc/dzdkern/dzdcod.F
+--- cernlib-2005.dfsg~/src/graflib/dzdoc/dzdkern/dzdcod.F	1996-03-04 11:12:56.000000000 -0500
++++ cernlib-2005.dfsg/src/graflib/dzdoc/dzdkern/dzdcod.F	2006-09-06 19:53:39.375157506 -0400
+@@ -90,7 +90,9 @@
+               CALL DZDPLN(LUN,' ',99)
+           ELSE
+ *            do MZBOOKS
+-              CALL DZDCO1(CHBANK,3,CHOINT,' ',LUN)
++*            bad Fotran convention, add dummy IFI,ILI arguments in this case
++ccc              CALL DZDCO1(CHBANK,3,CHOINT,' ',LUN)
++              CALL DZDCO1(CHBANK,3,CHOINT,' ',LUN,IFI,ILI)
+ *             finish line with bookings
+               CALL DZDPLN(LUN,' ',99)
+           ENDIF
+diff -urNad cernlib-2005.dfsg~/src/graflib/higz/higzcc/gifencode.c cernlib-2005.dfsg/src/graflib/higz/higzcc/gifencode.c
+--- cernlib-2005.dfsg~/src/graflib/higz/higzcc/gifencode.c	1996-02-14 08:10:25.000000000 -0500
++++ cernlib-2005.dfsg/src/graflib/higz/higzcc/gifencode.c	2006-09-06 19:53:39.376157293 -0400
+@@ -12,6 +12,7 @@
+ /*-- Author :    E.Chernyaev   19/01/94*/
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ 
+ #ifdef __STDC__
+ #define ARGS(alist) alist
+diff -urNad cernlib-2005.dfsg~/src/graflib/higz/higzcc/imgpickpalette.c cernlib-2005.dfsg/src/graflib/higz/higzcc/imgpickpalette.c
+--- cernlib-2005.dfsg~/src/graflib/higz/higzcc/imgpickpalette.c	1998-11-13 08:19:53.000000000 -0500
++++ cernlib-2005.dfsg/src/graflib/higz/higzcc/imgpickpalette.c	2006-09-06 19:53:39.376157293 -0400
+@@ -30,6 +30,7 @@
+ #if defined(CERNLIB_GIF)
+ #include <X11/Xlib.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ 
+ void CollectImageColors(unsigned long, unsigned long **, int *, int *);
+ int FindColor(unsigned long, unsigned long *, int);
+diff -urNad cernlib-2005.dfsg~/src/graflib/higz/higzcc/rotated.c cernlib-2005.dfsg/src/graflib/higz/higzcc/rotated.c
+--- cernlib-2005.dfsg~/src/graflib/higz/higzcc/rotated.c	1998-01-30 10:22:04.000000000 -0500
++++ cernlib-2005.dfsg/src/graflib/higz/higzcc/rotated.c	2006-09-06 19:53:39.377157080 -0400
+@@ -35,7 +35,9 @@
+ #include <X11/Xutil.h>
+ #include <X11/Xatom.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <math.h>
++#include <string.h>
+ 
+ /* ************************************************************************ *
+  *
+@@ -482,10 +484,10 @@
+ 
+     /* get a rotated bitmap */
+     item=XRotRetrieveFromCache(dpy, font, angle, text, align);
+-    if(item==NULL) return (int)NULL;
++    if(item==NULL) return 0;
+ 
+     /* this gc has similar properties to the user's gc */
+-    my_gc=XCreateGC(dpy, drawable, NULL, 0);
++    my_gc=XCreateGC(dpy, drawable, 0, NULL);
+     XCopyGC(dpy, gc, GCForeground|GCBackground|GCFunction|GCPlaneMask,
+             my_gc);
+ 
+@@ -549,7 +551,7 @@
+ 
+         empty_stipple=XCreatePixmap(dpy, drawable, 1, 1, 1);
+ 
+-        depth_one_gc=XCreateGC(dpy, empty_stipple, NULL, 0);
++        depth_one_gc=XCreateGC(dpy, empty_stipple, 0, NULL);
+         XSetForeground(dpy, depth_one_gc, 0);
+         XFillRectangle(dpy, empty_stipple, depth_one_gc, 0, 0, 2, 2);
+ 
+@@ -605,7 +607,7 @@
+                    item->cols_out, item->rows_out, 1);
+ 
+                 /* create a GC */
+-                depth_one_gc=XCreateGC(dpy, new_bitmap, NULL, 0);
++                depth_one_gc=XCreateGC(dpy, new_bitmap, 0, NULL);
+                 XSetForeground(dpy, depth_one_gc, 1);
+                 XSetBackground(dpy, depth_one_gc, 0);
+ 
+@@ -705,7 +707,7 @@
+     DEBUG_PRINT1("**\nHorizontal text.\n");
+ 
+     /* this gc has similar properties to the user's gc (including stipple) */
+-    my_gc=XCreateGC(dpy, drawable, NULL, 0);
++    my_gc=XCreateGC(dpy, drawable, 0, NULL);
+     XCopyGC(dpy, gc,
+           GCForeground|GCBackground|GCFunction|GCStipple|GCFillStyle|
+           GCTileStipXOrigin|GCTileStipYOrigin|GCPlaneMask, my_gc);
+@@ -918,7 +920,7 @@
+                   item->cols_out, item->rows_out, 1);
+ 
+       /* depth one gc */
+-      depth_one_gc=XCreateGC(dpy, item->bitmap, NULL, 0);
++      depth_one_gc=XCreateGC(dpy, item->bitmap, 0, NULL);
+       XSetBackground(dpy, depth_one_gc, 0);
+       XSetForeground(dpy, depth_one_gc, 1);
+ 
+@@ -1032,7 +1034,7 @@
+              item->cols_in, item->rows_in, 1);
+ 
+     /* create a GC for the bitmap */
+-    font_gc=XCreateGC(dpy, canvas, NULL, 0);
++    font_gc=XCreateGC(dpy, canvas, 0, NULL);
+     XSetBackground(dpy, font_gc, 0);
+     XSetFont(dpy, font_gc, font->fid);
+ 
+diff -urNad cernlib-2005.dfsg~/src/graflib/higz/higzcc/x11int.c cernlib-2005.dfsg/src/graflib/higz/higzcc/x11int.c
+--- cernlib-2005.dfsg~/src/graflib/higz/higzcc/x11int.c	2000-07-08 02:19:30.000000000 -0400
++++ cernlib-2005.dfsg/src/graflib/higz/higzcc/x11int.c	2006-09-06 19:53:39.378156868 -0400
+@@ -1172,8 +1172,8 @@
+  */
+       cws->drawing        = cws->window;
+       cws->buffer         = (Drawable)NULL;
+-      cws->double_buffer  = (int)NULL;
+-      cws->clip           = (int)NULL;
++      cws->double_buffer  = 0;
++      cws->clip           = 0;
+       cws->width          = wval;
+       cws->height         = hval;
+ 
+@@ -1509,7 +1509,7 @@
+ void
+   ixclsds()
+ {
+-  int Motif = (int)NULL;
++  int Motif = 0;
+   int i;
+ 
+   if (display == NULL) return;
+@@ -1529,12 +1529,12 @@
+   for ( i = 0; i < MAXCOL; i++ ) {
+     if( colors[i].defined == 1 ) {
+       colors[i].defined = 0;
+-      XFreeColors(display, colormap, &colors[i].pixel, 1, (int)NULL);
++      XFreeColors(display, colormap, &colors[i].pixel, 1, 0);
+     }
+   }
+ 
+ #if !defined(CERNLIB_TK_WINDOWS)
+-  if(display != NULL && Motif == (int)NULL) XCloseDisplay( display );
++  if(display != NULL && Motif == 0) XCloseDisplay( display );
+ #endif
+   display = NULL;
+   cws     = NULL;
+@@ -1567,7 +1567,7 @@
+ 
+   XFlush( display );
+ 
+-  cws->open = (int)NULL;
++  cws->open = 0;
+ 
+   for( wid = 0; wid < MAXWN; wid++ )
+     if( windows[wid].open ) {
+@@ -1886,7 +1886,7 @@
+   int i;
+ 
+   tws       = &windows[*wid];
+-  tws->clip = (int)NULL;
++  tws->clip = 0;
+ 
+   for( i = 0; i < MAXGC; i++ )
+     XSetClipMask( display, gclist[i], None );
+@@ -1916,9 +1916,9 @@
+     xcol.flags = DoRed || DoGreen || DoBlue;
+     if( colors[*cindex].defined == 1 ) {
+       colors[*cindex].defined = 0;
+-      XFreeColors(display, colormap, &colors[*cindex].pixel, 1, (int)NULL);
++      XFreeColors(display, colormap, &colors[*cindex].pixel, 1, 0);
+     }
+-    if( XAllocColor( display, colormap, &xcol ) != (Status)NULL ) {
++    if( XAllocColor( display, colormap, &xcol ) != (Status)0 ) {
+       colors[*cindex].defined = 1;
+       colors[*cindex].pixel   = xcol.pixel;
+       colors[*cindex].red     = *r;
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/sysreq/log.c cernlib-2005.dfsg/src/packlib/cspack/sysreq/log.c
+--- cernlib-2005.dfsg~/src/packlib/cspack/sysreq/log.c	2003-09-02 08:47:16.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/cspack/sysreq/log.c	2006-09-06 19:53:39.378156868 -0400
+@@ -28,6 +28,7 @@
+ #include <stdio.h>              /* standard input/output definitions    */
+ #if !defined(vms)
+ #include <fcntl.h>              /* file control                         */
++#include <string.h>             /* string manipulation functions        */
+ #else
+ #include <stdlib.h>             /* general utility definitions          */
+ #include <unixio.h>             /* VMS's unix-emulation I/O             */
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/sysreq/netreq.c cernlib-2005.dfsg/src/packlib/cspack/sysreq/netreq.c
+--- cernlib-2005.dfsg~/src/packlib/cspack/sysreq/netreq.c	1996-03-08 10:44:25.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/cspack/sysreq/netreq.c	2006-09-06 19:53:39.379156655 -0400
+@@ -25,6 +25,7 @@
+ #include <netinet/in.h> /* Internet data types                          */
+ #include <arpa/inet.h>  /* Arpa internet routines                       */
+ #include <stdio.h>      /* Standard Input/Output                        */
++#include <string.h>     /* string manipulation functions                */
+ #if defined(vms)
+ #include <pwd_vms.h>
+ #else
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/sysreq/serror.c cernlib-2005.dfsg/src/packlib/cspack/sysreq/serror.c
+--- cernlib-2005.dfsg~/src/packlib/cspack/sysreq/serror.c	1998-08-25 08:44:52.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/cspack/sysreq/serror.c	2006-09-06 19:53:39.379156655 -0400
+@@ -177,7 +177,7 @@
+         else {
+ #if !defined(vms)
+                 if ((n>0) && (n<sys_nerr)) {
+-                        return(sys_errlist[n]);
++                        return((char*)sys_errlist[n]);
+                 }
+                 else {
+                         (void) sprintf(buf,"%s: %d\n",
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/sysreq/socket.c cernlib-2005.dfsg/src/packlib/cspack/sysreq/socket.c
+--- cernlib-2005.dfsg~/src/packlib/cspack/sysreq/socket.c	1998-08-25 08:44:55.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/cspack/sysreq/socket.c	2006-09-06 19:53:39.379156655 -0400
+@@ -144,7 +144,10 @@
+ #include <errno.h>
+ #include <setjmp.h>
+ #include <signal.h>
++
++#if !defined(linux)
+ extern char* malloc();
++#endif /* linux */
+  
+ #if defined(vms)
+ #if defined(TWG) && (TWG == 1)
+@@ -412,7 +415,7 @@
+ s_errmsg()                              /* return last error message    */
+ {
+ #if !defined(vms)
+-        return(sys_errlist[errno]);
++        return((char*)sys_errlist[errno]);
+ #else /* vms */
+ #if defined(MULTINET) && (MULTINET == 1)
+         return(vms_errno_string());
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/sysreq/sysreq.h cernlib-2005.dfsg/src/packlib/cspack/sysreq/sysreq.h
+--- cernlib-2005.dfsg~/src/packlib/cspack/sysreq/sysreq.h	1996-03-08 10:44:26.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/cspack/sysreq/sysreq.h	2006-09-06 19:53:39.380156442 -0400
+@@ -88,7 +88,7 @@
+  */
+  
+ #ifndef VM
+-extern char     *malloc();              /* Memory allocation            */
++#include <stdlib.h>                     /* standard C library defs      */
+ #endif  /* VM */
+ extern char     *getenv();              /* Get environment info         */
+  
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/sysreq/xdr.c cernlib-2005.dfsg/src/packlib/cspack/sysreq/xdr.c
+--- cernlib-2005.dfsg~/src/packlib/cspack/sysreq/xdr.c	1996-03-08 10:44:26.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/cspack/sysreq/xdr.c	2006-09-06 19:53:39.380156442 -0400
+@@ -52,7 +52,7 @@
+ #endif /* min */
+  
+ #ifndef VM
+-extern char *malloc();
++#include <stdlib.h>             /* standard C library defs              */
+ #endif /* VM */
+  
+ #ifdef VM
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/tcpaw/Imakefile cernlib-2005.dfsg/src/packlib/cspack/tcpaw/Imakefile
+--- cernlib-2005.dfsg~/src/packlib/cspack/tcpaw/Imakefile	1999-01-15 08:59:12.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/cspack/tcpaw/Imakefile	2006-09-06 19:53:39.380156442 -0400
+@@ -49,4 +49,9 @@
+ #endif
+ #endif
+ 
++#if defined(CERNLIB_LINUX) && defined(__GNUC__)
++  /*  This is to avoid warnings in code not used for linux */
++CCOPTIONS+=-trigraphs
++#endif
++
+ SubdirLibraryTarget(NullParameter,NullParameter)
+diff -urNad cernlib-2005.dfsg~/src/packlib/cspack/tcpaw/tcpaw.c cernlib-2005.dfsg/src/packlib/cspack/tcpaw/tcpaw.c
+--- cernlib-2005.dfsg~/src/packlib/cspack/tcpaw/tcpaw.c	2005-04-18 11:39:28.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/cspack/tcpaw/tcpaw.c	2006-09-06 19:53:53.133231056 -0400
+@@ -301,6 +301,7 @@
+ #ifndef IBMRT
+ /*  this is a kludge, one ought to fix the "prototypes" in this file */
+ #include <string.h>
++#include <stdlib.h> /* needed for linux gcc4 */
+ #endif  /* IBMRT */
+ #endif /* WIN32 */
+ #endif /* IBM */
+@@ -478,7 +479,7 @@
+ #endif /* VMS */
+  
+ #ifdef AUTHENT
+-        unsigned char idbuf[100];
++        char idbuf[100];
+         char  usbuf[20], pwbuf[20];
+         char *user = usbuf, *passwd = pwbuf;
+         register int i, len;
+@@ -487,7 +488,7 @@
+ #ifdef SOCKETS
+         struct hostent *hp;             /* host info for remote host */
+         struct sockaddr_in peeraddr_in; /* for peer socket address */
+-        int    peerlen;
++        unsigned    peerlen;
+ #endif /* SOCKETS */
+ 
+ #ifdef WIN32
+@@ -521,7 +522,7 @@
+ #ifdef SOCKETS
+         memset ((char *)&peeraddr_in, 0, sizeof(struct sockaddr_in));
+         peerlen = sizeof(peeraddr_in);
+-        if (getpeername(s, &peeraddr_in, &peerlen) == SOCKET_ERROR) {
++        if (getpeername(s, (struct sockaddr *)&peeraddr_in, &peerlen) == SOCKET_ERROR) {
+ #ifdef LOGFILE
+                 fprintf(logfile, "%s: getpeername failed\n", Prog_Name);
+ #endif /* LOGFILE */
+@@ -658,7 +659,7 @@
+ SOCKET *isock, *osock;
+ {
+ #ifdef AUTHENT
+-        unsigned char idbuf[100];
++        char idbuf[100];
+         char  usbuf[20], pwbuf[20];
+         char *user = usbuf, *passwd = pwbuf;
+         register int i, len;
+@@ -727,7 +728,7 @@
+         unsigned short sport = *port;   /* VM */
+ 
+ #if defined ( _WIN32) && defined (AUTHENT)
+-        unsigned char idbuf[100];
++        char idbuf[100];
+         char  usbuf[20], pwbuf[20];
+         char *user = usbuf, *passwd = pwbuf;
+         register int i, len;
+@@ -800,7 +801,7 @@
+         }
+ #endif
+   /* Bind the listen address to the socket. */
+-        if (bind(ls, &myaddr_in, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
++        if (bind(ls, (struct sockaddr *)&myaddr_in, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
+ #if defined(IBM) || defined(_WIN32)
+             tcperror("server_sock_setup: bind(ls,...)");
+ #else
+@@ -829,7 +830,7 @@
+                 exit(1);
+         }
+         addrlen = sizeof(struct sockaddr_in);
+-        s = accept(ls, &peeraddr_in, &addrlen);
++        s = accept(ls, (struct sockaddr *)&peeraddr_in, (socklen_t *)&addrlen);
+         if ( s == INVALID_SOCKET) {
+                 fprintf(stderr, "%s: accept error\n", "server_sock_setup");
+                 return(-1);
+@@ -984,7 +985,7 @@
+  char *user = NULL, *passwd = NULL;
+  int port;
+ #if defined(AUTHENT) 
+-  unsigned char idbuf[100];
++  char idbuf[100];
+ #endif /* AUTHENT */
+  
+ #ifdef VMS
+@@ -1290,7 +1291,7 @@
+   /* Try to connect to the remote server at the address
+    * which was just built into peeraddr.
+    */
+-        if (connect(s, &peeraddr_in, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
++        if (connect(s, (struct sockaddr *)&peeraddr_in, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
+ #ifndef _WIN32
+             close(s);
+ #else
+@@ -1313,7 +1314,7 @@
+         }
+  
+         addrlen = sizeof(struct sockaddr_in);
+-        if (getsockname(s, &myaddr_in, &addrlen) == SOCKET_ERROR) {
++        if (getsockname(s, (struct sockaddr *)&myaddr_in, (socklen_t *)&addrlen) == SOCKET_ERROR) {
+ #if defined(IBM) || defined(_WIN32)
+             tcperror("client_sock_setup");
+ #else
+@@ -2688,7 +2689,7 @@
+                              ((struct in_addr *)(hp->h_addr))->s_addr;
+ /*              bcopy(hp->h_addr, (caddr_t)&sin.sin_addr, hp->h_length); */
+         }
+-        if (connect(s, &sin, sizeof(struct sockaddr_in)) == SOCKET_ERROR ) {
++        if (connect(s, (struct sockaddr *)&sin, sizeof(struct sockaddr_in)) == SOCKET_ERROR ) {
+ #ifndef _WIN32
+                 if (errno == ECONNREFUSED && timo <= 16) {
+                         (void) close(s);
+@@ -3352,7 +3353,7 @@
+                              ((struct in_addr *)(hp->h_addr))->s_addr;
+ /*              bcopy(hp->h_addr, (caddr_t)&sin.sin_addr, hp->h_length); */
+         }
+-        if (connect(s, &sin, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
++        if (connect(s, (struct sockaddr *)&sin, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
+ #ifndef WIN32
+                 if (errno == ECONNREFUSED && timo <= 16) {
+                         (void) close(s);
+@@ -3486,7 +3487,7 @@
+ }
+  
+ getstr(sock,buf, cnt, errmesg)
+-int     *sock;
++int     sock;
+ char    *buf;
+ int     cnt;              /* sizeof() the char array */
+ char    *errmesg;         /* in case error message required */
+diff -urNad cernlib-2005.dfsg~/src/packlib/fatmen/fmc/faexit.c cernlib-2005.dfsg/src/packlib/fatmen/fmc/faexit.c
+--- cernlib-2005.dfsg~/src/packlib/fatmen/fmc/faexit.c	1997-09-02 08:56:52.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/fatmen/fmc/faexit.c	2006-09-06 19:53:39.381156230 -0400
+@@ -27,6 +27,7 @@
+ void faexit(icode)
+ #endif
+ #if defined(CERNLIB_QX_SC)
++#include <stdlib.h>                     /* standard C library defs      */
+ void faexit_(icode)
+ #endif
+ int *icode;
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/abend.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/abend.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/abend.c	1997-02-04 12:34:12.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/abend.c	2006-09-06 19:53:39.382156017 -0400
+@@ -19,6 +19,7 @@
+   CERN PROGLIB# Z035    ABEND           .VERSION KERNFOR  4.31  911111
+ */
+ #if defined(CERNLIB_QX_SC)
++#include <stdlib.h>
+ void type_of_call abend_()
+ #endif
+ #if defined(CERNLIB_QXNO_SC)
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/ctimef.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/ctimef.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/ctimef.c	1997-02-04 12:34:14.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/ctimef.c	2006-09-06 19:53:39.382156017 -0400
+@@ -24,6 +24,8 @@
+      STIME  decoded time string of length 24 (CHARACTER*24 STIME)
+ */
+ #if defined(CERNLIB_QX_SC)
++#include <stdlib.h>
++#include <string.h>
+ void type_of_call ctimef_(clock, stime)
+ #endif
+ #if defined(CERNLIB_QXNO_SC)
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/exitf.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/exitf.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/exitf.c	1997-02-04 12:34:16.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/exitf.c	2006-09-06 19:53:39.382156017 -0400
+@@ -19,6 +19,7 @@
+   CERN PROGLIB# Z035    EXITF           .VERSION KERNFOR  4.39  940228
+ */
+ #if defined(CERNLIB_QX_SC)
++#include <stdlib.h>
+ void type_of_call exitf_(st)
+ #endif
+ #if defined(CERNLIB_QXNO_SC)
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/getwdi.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/getwdi.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/getwdi.c	1997-09-02 10:26:36.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/getwdi.c	2006-09-06 19:53:39.382156017 -0400
+@@ -29,6 +29,7 @@
+       ISLATE(1) returns its lenth NTEXT
+ */
+ #include <stdio.h>
++#include <stdlib.h>
+ #ifdef WIN32
+ #include <direct.h>
+ # ifndef getcwd
+@@ -58,7 +59,7 @@
+ #endif
+       int  *lgname;
+ {
+-      char *malloc();
++/*    char *malloc();  - see above "#include <stdlib.h>"  */
+       char *ptalc, *pttext;
+       int  fchput();
+       int  nalc;
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/lstati.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/lstati.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/lstati.c	1997-02-04 12:34:35.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/lstati.c	2006-09-06 19:53:39.382156017 -0400
+@@ -26,6 +26,7 @@
+   Fortran interface routine to lstat
+ */
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include "kerngen/fortchar.h"
+@@ -56,7 +57,7 @@
+       ptname = fchtak(fname,*lgname);
+       if (ptname == NULL)          goto out1;
+ 
+-      buf = (struct stat *) malloc(sizeof (struct stat));
++      buf = malloc(sizeof (struct stat));
+       if (buf == NULL)             goto out2;
+ 
+       istat = lstat(ptname, buf);
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/sigprnt.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/sigprnt.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/sigprnt.c	1997-02-04 12:34:42.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/sigprnt.c	2006-09-06 19:53:39.383155804 -0400
+@@ -34,7 +34,7 @@
+ #ifndef CERNLIB_WINNT
+       sigset_t   oldmask;
+ 
+-      sigprocmask (NULL, NULL, &oldmask);
++      sigprocmask ( 0, NULL, &oldmask);
+ 
+       printf (" blocked signals are: %x\n", oldmask);
+ #else
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/stati.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/stati.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/stati.c	1997-09-02 10:26:39.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/stati.c	2006-09-06 19:53:39.383155804 -0400
+@@ -26,6 +26,7 @@
+   Fortran interface routine to stat
+ */
+ #include <stdio.h>
++#include <stdlib.h>
+ #if defined(CERNLIB_QMVAX)||defined(CERNLIB_QMOS9)
+ #include <types.h>
+ #include <stat.h>
+@@ -72,7 +73,7 @@
+       if (ptname == NULL)          goto out1;
+ 
+ #ifndef WIN32
+-      buf = (struct stat *) malloc(sizeof (struct stat));
++      buf = malloc(sizeof (struct stat));
+ #else
+       buf = (struct _stat *) malloc(sizeof (struct _stat));
+ #endif
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/timel.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/timel.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgen/timel.c	1997-02-04 12:34:47.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgen/timel.c	2006-09-06 19:53:39.383155804 -0400
+@@ -30,6 +30,7 @@
+ #include <sys/param.h>
+ #include <sys/time.h>
+ #include <sys/resource.h>
++#include <unistd.h>     /* For ia64... */
+ 
+ #ifndef CLOCKS_PER_SEC
+ #define  CLOCKS_PER_SEC CLK_TCK
+diff -urNad cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgenu/fchtak.c cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgenu/fchtak.c
+--- cernlib-2005.dfsg~/src/packlib/kernlib/kerngen/ccgenu/fchtak.c	1996-02-15 12:49:40.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kernlib/kerngen/ccgenu/fchtak.c	2006-09-06 19:53:39.383155804 -0400
+@@ -16,6 +16,7 @@
+       return the memory pointer
+ */
+ #include <stdio.h>
++#include <stdlib.h>
+ #include "kerngen/fortchar.h"
+ char *fchtak(ftext,lgtext)
+ #if defined(CERNLIB_QMCRY)
+@@ -26,7 +27,7 @@
+ #endif
+       int  lgtext;
+ {
+-      char *malloc();
++      /*    char *malloc();  - see above "#include <stdlib.h>"  */
+       char *ptalc, *ptuse;
+       char *utext;
+       int  nalc;
+diff -urNad cernlib-2005.dfsg~/src/packlib/kuip/code_kuip/getline.c cernlib-2005.dfsg/src/packlib/kuip/code_kuip/getline.c
+--- cernlib-2005.dfsg~/src/packlib/kuip/code_kuip/getline.c	1998-08-25 08:47:32.000000000 -0400
++++ cernlib-2005.dfsg/src/packlib/kuip/code_kuip/getline.c	2006-09-06 19:53:39.384155592 -0400
+@@ -585,7 +585,7 @@
+ 
+ static void
+   gl_puts(buf)
+-char *buf;
++const char *buf;
+ {
+ /*
+     int len = strlen(buf);
+@@ -1351,7 +1351,7 @@
+ 
+ static char *
+   hist_save(p)
+-char *p;
++const char *p;
+ /* makes a copy of the string */
+ {
+     char *s;
+diff -urNad cernlib-2005.dfsg~/src/packlib/kuip/code_motif/iconwidget.c cernlib-2005.dfsg/src/packlib/kuip/code_motif/iconwidget.c
+--- cernlib-2005.dfsg~/src/packlib/kuip/code_motif/iconwidget.c	1996-03-08 10:33:10.000000000 -0500
++++ cernlib-2005.dfsg/src/packlib/kuip/code_motif/iconwidget.c	2006-09-06 19:53:39.384155592 -0400
+@@ -284,7 +284,7 @@
+     Boolean      in = (iw->icon.armed && really) ||
+                       iw->icon.shadow_type == XmSHADOW_IN;
+ 
+-    if ((iw->primitive.shadow_thickness) > 0 && XtIsRealized (iw)) {
++    if ((iw->primitive.shadow_thickness) > 0 && XtIsRealized ((Widget)iw)) {
+         _XmDrawShadow (XtDisplay (iw), XtWindow (iw),
+                        in ? iw->primitive.bottom_shadow_GC :
+                             iw->primitive.top_shadow_GC,
+@@ -372,7 +372,7 @@
+ #endif
+ 
+     if (iw->icon.armed)
+-       DrawShadow ((Widget) iw, True);
++       DrawShadow (iw, True);
+ }
+ 
+ /************************************************************************
